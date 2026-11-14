@@ -12,7 +12,7 @@
 
     <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
         
-        <!-- Tab Navigation (Berfungsi Serta-Merta) -->
+        <!-- Tab Navigation -->
         <div class="flex border-b mb-6 overflow-x-auto">
             <button type="button" id="tabOperator" onclick="window.switchAppTab('operator')" class="flex-1 py-3 px-4 text-center font-bold text-blue-600 border-b-2 border-blue-600 cursor-pointer whitespace-nowrap">
                 Borang Operator
@@ -113,26 +113,38 @@
                 </div>
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <p class="text-xs text-slate-500 uppercase font-bold">Purata Parameter</p>
-                    <p id="statAvgParams" class="text-sm font-semibold text-slate-700 mt-1">-</p>
+                    <p id="statAvgParams" class="text-xs font-semibold text-slate-700 mt-1 leading-relaxed">-</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Graf 1: Trend Parameter (Sehingga 5 Parameter) -->
                 <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm lg:col-span-2">
-                    <h3 class="text-sm font-bold text-slate-800 mb-3">1. Trend Parameter Mengikut Masa Kejadian NG</h3>
+                    <h3 class="text-sm font-bold text-slate-800 mb-3">1. Trend Kesemua Parameter Mengikut Masa Kejadian NG</h3>
                     <div class="h-72">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
 
+                <!-- Graf 2: Scatter Plot Relationship (Boleh Pilih Paksi X & Y) -->
                 <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                    <h3 class="text-sm font-bold text-slate-800 mb-1">2. Hubungan Parameter 1 vs Parameter 2 (Mengikut Mod NG)</h3>
-                    <p class="text-xs text-slate-400 mb-3">Lihat kelompok (cluster) nilai parameter bagi setiap jenis NG.</p>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">2. Hubungan Antara Parameter (Mengikut Mod NG)</h3>
+                            <p class="text-xs text-slate-400">Pilih parameter untuk melihat korelasi Paksi-X dan Paksi-Y.</p>
+                        </div>
+                        <div class="flex items-center gap-1 text-xs">
+                            <select id="scatterXSelect" class="border border-slate-300 rounded p-1 bg-slate-50 font-medium"></select>
+                            <span class="text-slate-400 font-bold">vs</span>
+                            <select id="scatterYSelect" class="border border-slate-300 rounded p-1 bg-slate-50 font-medium"></select>
+                        </div>
+                    </div>
                     <div class="h-64">
                         <canvas id="scatterChart"></canvas>
                     </div>
                 </div>
 
+                <!-- Graf 3: Kekerapan Mod NG -->
                 <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                     <h3 class="text-sm font-bold text-slate-800 mb-1">3. Taburan Kekerapan Mod NG (Pareto)</h3>
                     <p class="text-xs text-slate-400 mb-3">Jumlah bilangan kes mengikut jenis kecacatan.</p>
@@ -169,7 +181,7 @@
         <div id="sectionAdmin" class="hidden max-w-xl mx-auto">
             <div class="pb-4 mb-4 border-b">
                 <h1 class="text-xl font-bold text-slate-900">Daftar Projek / Mesin Baru</h1>
-                <p class="text-sm text-slate-500">Tetapkan tajuk projek, mod NG, dan label parameter nombor.</p>
+                <p class="text-sm text-slate-500">Tetapkan tajuk projek, mod NG, dan sehingga 5 label parameter nombor.</p>
             </div>
 
             <div id="adminLoginBox" class="space-y-4">
@@ -193,14 +205,31 @@
                     <input type="text" id="adminNgModes" required placeholder="Cth: solder ball, solder not rise up, solder overflow" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Label Parameter 1 <span class="text-red-500">*</span></label>
-                        <input type="text" id="adminParam1" value="Motion 1" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Label Parameter 2 <span class="text-red-500">*</span></label>
-                        <input type="text" id="adminParam2" value="Motion 2" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                <div class="pt-2 border-t border-slate-100">
+                    <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">Tetapan Parameter (Sehingga 5 Pilihan)</p>
+                    <p class="text-xs text-slate-500 mb-3">Biarkan kosong pada parameter yang tidak diperlukan. Borang operator hanya akan memaparkan ruangan yang diisi sahaja.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Label Parameter 1 <span class="text-red-500">*</span></label>
+                            <input type="text" id="adminParam1" value="Motion 1" required placeholder="Wajib diisi (Cth: Motion 1)" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Label Parameter 2 <span class="text-slate-400 font-normal text-xs">(Opsyenal)</span></label>
+                            <input type="text" id="adminParam2" value="Motion 2" placeholder="Kosongkan jika tiada" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Label Parameter 3 <span class="text-slate-400 font-normal text-xs">(Opsyenal)</span></label>
+                            <input type="text" id="adminParam3" placeholder="Kosongkan jika tiada" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Label Parameter 4 <span class="text-slate-400 font-normal text-xs">(Opsyenal)</span></label>
+                            <input type="text" id="adminParam4" placeholder="Kosongkan jika tiada" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-semibold mb-1">Label Parameter 5 <span class="text-slate-400 font-normal text-xs">(Opsyenal)</span></label>
+                            <input type="text" id="adminParam5" placeholder="Kosongkan jika tiada" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
                     </div>
                 </div>
 
@@ -212,7 +241,7 @@
 
     </div>
 
-    <!-- SKRIP 1: FUNGSI ASAS UI & TAB (Tidak Bergantung Pada Supabase/Chart.js) -->
+    <!-- SKRIP 1: FUNGSI ASAS UI & TAB -->
     <script>
         window.showAlert = function(message, type) {
             var alertBox = document.getElementById('alertBox');
@@ -278,7 +307,6 @@
     <!-- SKRIP 2: INTEGRASI SUPABASE & CHART.JS -->
     <script>
         (function() {
-            // Sila pastikan SUPABASE_ANON_KEY menggunakan Publishable Key (sb_publishable_...) atau Legacy Anon Key yang sah
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
             var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
 
@@ -286,6 +314,7 @@
             var projectsData = [];
             var currentDashboardRecords = [];
             var currentDashboardProject = null;
+            var currentModeCounts = {};
 
             var trendChartInstance = null;
             var scatterChartInstance = null;
@@ -351,6 +380,7 @@
                 }
             };
 
+            // JANA RUANGAN PARAMETER MENGIKUT JUMLAH YANG DIISI OLEH ADMIN SAHAJA
             document.getElementById('projectSelect').addEventListener('change', function() {
                 var selectedId = this.value;
                 var ngModeSelect = document.getElementById('ngModeSelect');
@@ -379,7 +409,11 @@
                     ngModeSelect.appendChild(opt);
                 });
 
-                var labels = project.parameter_labels || [];
+                // Tapis hanya label yang tidak kosong
+                var labels = (project.parameter_labels || []).filter(function(l) {
+                    return l && String(l).trim().length > 0;
+                });
+
                 if (labels.length > 0) {
                     paramsContainer.classList.remove('hidden');
                     labels.forEach(function(label) {
@@ -393,6 +427,7 @@
                 }
             });
 
+            // SIMPAN PROJEK BARU (SEHINGGA 5 PARAMETER)
             document.getElementById('adminForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -401,9 +436,18 @@
                 var modesRaw = document.getElementById('adminNgModes').value;
                 var ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
 
-                var p1 = document.getElementById('adminParam1').value.trim();
-                var p2 = document.getElementById('adminParam2').value.trim();
-                var parameterLabels = [p1, p2].filter(function(p) { return p.length > 0; });
+                // Kumpul Parameter 1 hingga 5, buang yang dibiarkan kosong oleh admin
+                var rawParams = [
+                    document.getElementById('adminParam1').value,
+                    document.getElementById('adminParam2').value,
+                    document.getElementById('adminParam3').value,
+                    document.getElementById('adminParam4').value,
+                    document.getElementById('adminParam5').value
+                ];
+
+                var parameterLabels = rawParams
+                    .map(function(p) { return p ? p.trim() : ''; })
+                    .filter(function(p) { return p.length > 0; });
 
                 var res = await supabaseClient
                     .from('ng_projects')
@@ -420,6 +464,9 @@
                     window.showAlert('Projek baru berjaya didaftarkan!', 'success');
                     document.getElementById('adminProjectTitle').value = '';
                     document.getElementById('adminNgModes').value = '';
+                    document.getElementById('adminParam3').value = '';
+                    document.getElementById('adminParam4').value = '';
+                    document.getElementById('adminParam5').value = '';
                     window.switchAppTab('operator');
                 }
             });
@@ -466,6 +513,13 @@
                 if (val) loadDashboardData(val);
             });
 
+            document.getElementById('scatterXSelect').addEventListener('change', function() {
+                renderScatterChart();
+            });
+            document.getElementById('scatterYSelect').addEventListener('change', function() {
+                renderScatterChart();
+            });
+
             async function loadDashboardData(projectId) {
                 if (!supabaseClient) return;
                 currentDashboardProject = projectsData.find(function(p) { return p.id === projectId; });
@@ -488,35 +542,63 @@
             }
 
             function updateDashboardUI(project, records) {
-                var labels = project.parameter_labels || [];
-                var p1Label = labels[0] || 'Parameter 1';
-                var p2Label = labels[1] || 'Parameter 2';
+                var labels = (project.parameter_labels || []).filter(function(l) {
+                    return l && String(l).trim().length > 0;
+                });
+
+                // Sediakan pilihan dropdown Paksi-X dan Paksi-Y untuk Scatter Plot
+                var xSel = document.getElementById('scatterXSelect');
+                var ySel = document.getElementById('scatterYSelect');
+                xSel.innerHTML = '';
+                ySel.innerHTML = '';
+
+                labels.forEach(function(lbl) {
+                    var optX = document.createElement('option');
+                    optX.value = lbl;
+                    optX.textContent = lbl;
+                    xSel.appendChild(optX);
+
+                    var optY = document.createElement('option');
+                    optY.value = lbl;
+                    optY.textContent = lbl;
+                    ySel.appendChild(optY);
+                });
+
+                if (labels.length > 0) xSel.value = labels[0];
+                if (labels.length > 1) {
+                    ySel.value = labels[1];
+                } else if (labels.length === 1) {
+                    ySel.value = labels[0];
+                }
 
                 document.getElementById('statTotalNg').textContent = records.length;
 
                 if (records.length === 0) {
                     document.getElementById('statTopMode').textContent = '-';
                     document.getElementById('statAvgParams').textContent = '-';
-                    renderCharts(p1Label, p2Label, [], {});
+                    currentModeCounts = {};
+                    renderCharts(labels, [], {});
                     renderTable(labels, []);
                     return;
                 }
 
                 var modeCounts = {};
-                var sumP1 = 0, countP1 = 0, sumP2 = 0, countP2 = 0;
+                var sums = {};
+                var counts = {};
+                labels.forEach(function(l) { sums[l] = 0; counts[l] = 0; });
 
                 records.forEach(function(r) {
                     modeCounts[r.ng_mode] = (modeCounts[r.ng_mode] || 0) + 1;
                     var vals = r.parameter_values || {};
-                    if (vals[p1Label] !== undefined && !isNaN(vals[p1Label])) {
-                        sumP1 += Number(vals[p1Label]);
-                        countP1++;
-                    }
-                    if (vals[p2Label] !== undefined && !isNaN(vals[p2Label])) {
-                        sumP2 += Number(vals[p2Label]);
-                        countP2++;
-                    }
+                    labels.forEach(function(l) {
+                        if (vals[l] !== undefined && vals[l] !== null && !isNaN(vals[l])) {
+                            sums[l] += Number(vals[l]);
+                            counts[l]++;
+                        }
+                    });
                 });
+
+                currentModeCounts = modeCounts;
 
                 var topMode = '-';
                 var maxCount = 0;
@@ -528,27 +610,40 @@
                 });
 
                 document.getElementById('statTopMode').textContent = topMode;
-                var avg1 = countP1 > 0 ? (sumP1 / countP1).toFixed(2) : '-';
-                var avg2 = countP2 > 0 ? (sumP2 / countP2).toFixed(2) : '-';
-                document.getElementById('statAvgParams').textContent = p1Label + ': ' + avg1 + ' | ' + p2Label + ': ' + avg2;
 
-                renderCharts(p1Label, p2Label, records, modeCounts);
+                var avgParts = labels.map(function(l) {
+                    var avg = counts[l] > 0 ? (sums[l] / counts[l]).toFixed(2) : '-';
+                    return l + ': ' + avg;
+                });
+                document.getElementById('statAvgParams').textContent = avgParts.length > 0 ? avgParts.join(' | ') : '-';
+
+                renderCharts(labels, records, modeCounts);
                 renderTable(labels, records);
             }
 
-            function renderCharts(p1Label, p2Label, records, modeCounts) {
+            function renderCharts(labels, records, modeCounts) {
                 if (typeof Chart === 'undefined') return;
 
                 var timeLabels = records.map(function(r) {
                     return r.recorded_date.slice(5) + ' ' + r.recorded_time.slice(0, 5);
                 });
-                var p1Data = records.map(function(r) {
-                    var v = (r.parameter_values || {})[p1Label];
-                    return v !== undefined ? v : null;
-                });
-                var p2Data = records.map(function(r) {
-                    var v = (r.parameter_values || {})[p2Label];
-                    return v !== undefined ? v : null;
+
+                var lineColors = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea'];
+                var trendDatasets = labels.map(function(lbl, idx) {
+                    var color = lineColors[idx % lineColors.length];
+                    var dataArr = records.map(function(r) {
+                        var v = (r.parameter_values || {})[lbl];
+                        return v !== undefined ? v : null;
+                    });
+                    return {
+                        label: lbl,
+                        data: dataArr,
+                        borderColor: color,
+                        backgroundColor: color,
+                        tension: 0.2,
+                        pointRadius: 4,
+                        fill: false
+                    };
                 });
 
                 if (trendChartInstance) trendChartInstance.destroy();
@@ -557,41 +652,16 @@
                     type: 'line',
                     data: {
                         labels: timeLabels,
-                        datasets: [
-                            { label: p1Label, data: p1Data, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', tension: 0.2, pointRadius: 4 },
-                            { label: p2Label, data: p2Data, borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.1)', tension: 0.2, pointRadius: 4 }
-                        ]
+                        datasets: trendDatasets
                     },
-                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false } }
-                });
-
-                if (scatterChartInstance) scatterChartInstance.destroy();
-                var palette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea', '#0891b2'];
-                var uniqueModes = Object.keys(modeCounts);
-                var scatterDatasets = uniqueModes.map(function(mode, idx) {
-                    var color = palette[idx % palette.length];
-                    var points = records
-                        .filter(function(r) { return r.ng_mode === mode; })
-                        .map(function(r) {
-                            var vals = r.parameter_values || {};
-                            return { x: Number(vals[p1Label] || 0), y: Number(vals[p2Label] || 0) };
-                        });
-                    return { label: mode, data: points, backgroundColor: color, pointRadius: 6 };
-                });
-
-                var ctxScatter = document.getElementById('scatterChart').getContext('2d');
-                scatterChartInstance = new Chart(ctxScatter, {
-                    type: 'scatter',
-                    data: { datasets: scatterDatasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
-                            x: { title: { display: true, text: p1Label } },
-                            y: { title: { display: true, text: p2Label } }
-                        }
+                        interaction: { mode: 'index', intersect: false }
                     }
                 });
+
+                renderScatterChart();
 
                 if (modeBarChartInstance) modeBarChartInstance.destroy();
                 var sortedModes = Object.keys(modeCounts).sort(function(a, b) { return modeCounts[b] - modeCounts[a]; });
@@ -608,6 +678,41 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+
+            function renderScatterChart() {
+                if (typeof Chart === 'undefined') return;
+                if (scatterChartInstance) scatterChartInstance.destroy();
+
+                var xLabel = document.getElementById('scatterXSelect').value || 'Parameter 1';
+                var yLabel = document.getElementById('scatterYSelect').value || 'Parameter 2';
+
+                var palette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea', '#0891b2'];
+                var uniqueModes = Object.keys(currentModeCounts);
+                var scatterDatasets = uniqueModes.map(function(mode, idx) {
+                    var color = palette[idx % palette.length];
+                    var points = currentDashboardRecords
+                        .filter(function(r) { return r.ng_mode === mode; })
+                        .map(function(r) {
+                            var vals = r.parameter_values || {};
+                            return { x: Number(vals[xLabel] || 0), y: Number(vals[yLabel] || 0) };
+                        });
+                    return { label: mode, data: points, backgroundColor: color, pointRadius: 6 };
+                });
+
+                var ctxScatter = document.getElementById('scatterChart').getContext('2d');
+                scatterChartInstance = new Chart(ctxScatter, {
+                    type: 'scatter',
+                    data: { datasets: scatterDatasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: xLabel } },
+                            y: { title: { display: true, text: yLabel } }
+                        }
                     }
                 });
             }
@@ -643,7 +748,9 @@
                     return;
                 }
 
-                var labels = currentDashboardProject.parameter_labels || [];
+                var labels = (currentDashboardProject.parameter_labels || []).filter(function(l) {
+                    return l && String(l).trim().length > 0;
+                });
                 var headers = ['Tarikh', 'Masa', 'Operator', 'Mod_NG'].concat(labels).concat(['Catatan']);
                 var rows = [headers.join(',')];
 
