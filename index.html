@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NG & SPC Machine Intelligence</title>
+    <title>NG & Machine Parameter Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,19 +14,19 @@
 </head>
 <body class="bg-zinc-50 min-h-screen text-zinc-900 antialiased">
 
-    <!-- Top Navigation Bar -->
+    <!-- Top Navigation -->
     <header class="bg-white border-b border-zinc-200 sticky top-0 z-30">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-2">
                 <div class="w-2.5 h-2.5 rounded-full bg-blue-600"></div>
-                <span class="font-bold tracking-tight text-sm sm:text-base">NG & SPC Intelligence</span>
+                <span class="font-bold tracking-tight text-sm sm:text-base">NG Tracker</span>
             </div>
             <nav class="flex space-x-1">
                 <button type="button" id="tabOperator" onclick="window.switchAppTab('operator')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-zinc-900 text-white transition">
-                    Input Operator
+                    Operator Input
                 </button>
                 <button type="button" id="tabDashboard" onclick="window.switchAppTab('dashboard')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-zinc-500 hover:text-zinc-900 transition">
-                    Analytics & SPC
+                    Dashboard
                 </button>
                 <button type="button" id="tabAdmin" onclick="window.switchAppTab('admin')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-zinc-500 hover:text-zinc-900 transition">
                     Admin
@@ -36,148 +36,148 @@
     </header>
 
     <main class="max-w-6xl mx-auto p-4 sm:p-6">
-        <!-- Global Alert -->
+        <!-- Alert Box -->
         <div id="alertBox" class="hidden mb-4 p-3 rounded-lg text-sm font-medium"></div>
 
         <!-- ================= SECTION 1: OPERATOR INPUT ================= -->
         <div id="sectionOperator" class="max-w-lg mx-auto bg-white border border-zinc-200 rounded-xl shadow-sm p-6 mt-2">
             <div class="mb-5">
-                <h1 class="text-lg font-bold text-zinc-900">Rekod NG & Parameter Mesin</h1>
-                <p class="text-xs text-zinc-500 mt-0.5">Masukkan bacaan parameter mesin semasa kejadian NG berlaku.</p>
+                <h1 class="text-lg font-bold text-zinc-900">Log NG & Machine Parameters</h1>
+                <p class="text-xs text-zinc-500 mt-0.5">Select a machine and enter parameter values when an NG happens.</p>
             </div>
 
             <form id="ngForm" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Projek / Mesin <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Machine / Project <span class="text-red-500">*</span></label>
                     <select id="projectSelect" required class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-zinc-900 outline-none">
-                        <option value="">Memuatkan senarai projek...</option>
+                        <option value="">Loading projects...</option>
                     </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Tarikh</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Date</label>
                         <input type="date" id="recordedDate" required class="w-full border border-zinc-300 rounded-lg p-2 text-sm bg-zinc-50">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Masa</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Time</label>
                         <input type="time" id="recordedTime" step="1" required class="w-full border border-zinc-300 rounded-lg p-2 text-sm bg-zinc-50">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">ID / Nama Operator <span class="text-red-500">*</span></label>
-                        <input type="text" id="operatorName" required placeholder="Cth: OP-102" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Operator ID / Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="operatorName" required placeholder="e.g. OP-102" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Mod NG <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">NG Mode (Defect) <span class="text-red-500">*</span></label>
                         <select id="ngModeSelect" required disabled class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm bg-zinc-100 disabled:cursor-not-allowed">
-                            <option value="">Pilih Projek Dahulu</option>
+                            <option value="">Select Project First</option>
                         </select>
                     </div>
                 </div>
 
                 <div id="dynamicParamsContainer" class="space-y-3 pt-3 border-t border-zinc-100 hidden">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Bacaan Parameter Mesin</span>
-                        <span class="text-[11px] text-zinc-400">Nombor Sahaja</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Machine Parameters</span>
+                        <span class="text-[11px] text-zinc-400">Numbers Only</span>
                     </div>
                     <div id="dynamicFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Catatan / Tindakan Awal</label>
-                    <textarea id="remarks" rows="2" placeholder="Cth: Laras semula kelajuan, cuci nozzle..." class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none"></textarea>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Remarks (Optional)</label>
+                    <textarea id="remarks" rows="2" placeholder="Action taken or notes..." class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none"></textarea>
                 </div>
 
                 <button type="submit" id="submitBtn" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition">
-                    Simpan Rekod NG
+                    Save NG Record
                 </button>
             </form>
         </div>
 
-        <!-- ================= SECTION 2: ANALYTICS & SPC DASHBOARD ================= -->
+        <!-- ================= SECTION 2: DASHBOARD ================= -->
         <div id="sectionDashboard" class="hidden space-y-5">
             
-            <!-- Filter Bar -->
+            <!-- Top Filter Bar -->
             <div class="bg-white border border-zinc-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
                 <div class="flex flex-wrap items-center gap-2">
                     <select id="dashboardProjectSelect" class="border border-zinc-300 rounded-lg px-3 py-2 bg-white font-semibold text-sm focus:ring-2 focus:ring-zinc-900 outline-none">
-                        <option value="">-- Pilih Projek --</option>
+                        <option value="">-- Select Project --</option>
                     </select>
                     <select id="dashboardDateFilter" class="border border-zinc-300 rounded-lg px-3 py-2 bg-zinc-50 text-xs font-medium outline-none">
-                        <option value="all">Semua Tarikh</option>
-                        <option value="today">Hari Ini</option>
-                        <option value="7days">7 Hari Terakhir</option>
-                        <option value="30days">30 Hari Terakhir</option>
+                        <option value="all">All Dates</option>
+                        <option value="today">Today</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
                     </select>
                     <select id="dashboardModeFilter" class="border border-zinc-300 rounded-lg px-3 py-2 bg-zinc-50 text-xs font-medium outline-none">
-                        <option value="all">Semua Mod NG</option>
+                        <option value="all">All NG Modes</option>
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" id="btnRefreshDashboard" class="border border-zinc-300 hover:bg-zinc-100 text-zinc-700 px-3 py-2 rounded-lg text-xs font-semibold transition">
-                        Muat Semula
+                        Refresh
                     </button>
                     <button type="button" id="btnExportCsv" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition">
-                        Eksport CSV
+                        Export CSV
                     </button>
                 </div>
             </div>
 
-            <!-- Automated Engineering Insights & Prescriptive Suggestions -->
-            <div class="bg-gradient-to-r from-blue-950 to-zinc-900 text-white rounded-xl p-5 shadow-sm">
-                <div class="flex items-center gap-2 mb-2.5">
-                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded">Smart Diagnostics</span>
-                    <h2 class="text-sm font-bold tracking-wide">Analisis Automatik & Cadangan Kejuruteraan</h2>
+            <!-- Smart Suggestions Box -->
+            <div class="bg-zinc-900 text-white rounded-xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded">Auto Analysis</span>
+                    <h2 class="text-sm font-bold">Key Findings & Suggestions</h2>
                 </div>
                 <ul id="insightList" class="space-y-1.5 text-xs sm:text-sm text-zinc-200 list-disc list-inside">
-                    <li>Pilih projek dengan rekod data untuk menjana cadangan kejuruteraan automatik.</li>
+                    <li>Select a project with data to see automatic suggestions.</li>
                 </ul>
             </div>
 
-            <!-- Minimalist KPI Row -->
+            <!-- Summary Cards -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Jumlah Sampel NG</p>
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Total NG Records</p>
                     <p id="statTotalNg" class="text-2xl font-bold text-zinc-900 mt-1">0</p>
                     <p id="statDateSpan" class="text-[11px] text-zinc-500 mt-0.5">-</p>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Penyumbang Utama (Pareto)</p>
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Top NG Mode</p>
                     <p id="statTopMode" class="text-lg font-bold text-red-600 mt-1 truncate">-</p>
-                    <p id="statTopModePct" class="text-[11px] text-zinc-500 mt-0.5">0% daripada keseluruhan NG</p>
+                    <p id="statTopModePct" class="text-[11px] text-zinc-500 mt-0.5">0% of total NGs</p>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Korelasi Parameter (r)</p>
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Correlation (r)</p>
                     <p id="statCorrelation" class="text-lg font-bold text-zinc-900 mt-1">-</p>
-                    <p id="statCorrelationDesc" class="text-[11px] text-zinc-500 mt-0.5">Pilih Paksi X & Y di bawah</p>
+                    <p id="statCorrelationDesc" class="text-[11px] text-zinc-500 mt-0.5">Select X & Y below</p>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Kestabilan Parameter</p>
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Process Stability</p>
                     <p id="statStability" class="text-sm font-bold text-zinc-800 mt-1 truncate">-</p>
-                    <p id="statOutSpecCount" class="text-[11px] text-zinc-500 mt-0.5">Tiada had spesifikasi ditetapkan</p>
+                    <p id="statOutSpecCount" class="text-[11px] text-zinc-500 mt-0.5">-</p>
                 </div>
             </div>
 
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 
-                <!-- Chart 1: SPC Trend & Moving Average + Spec Limits -->
+                <!-- Chart 1: Trend Chart -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
-                            <h3 class="text-sm font-bold text-zinc-900">1. SPC Trend, Moving Average & Spec Limit Simulator</h3>
-                            <p class="text-xs text-zinc-500">Pilih satu parameter untuk melihat garisan Purata (Mean), 3-Pt Moving Average, dan simulasi LSL/USL.</p>
+                            <h3 class="text-sm font-bold text-zinc-900">1. Parameter Trend Over Time</h3>
+                            <p class="text-xs text-zinc-500">Pick one parameter to see the Average line, Trend line, and test Min/Max limits.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <select id="trendParamSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
-                                <option value="__ALL__">Semua Parameter (Serentak)</option>
+                                <option value="__ALL__">Show All Parameters</option>
                             </select>
                             <div id="specLimitInputs" class="flex items-center gap-1.5">
-                                <input type="number" step="any" id="inputLSL" placeholder="LSL (Min)" class="w-20 border border-zinc-300 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500">
-                                <input type="number" step="any" id="inputUSL" placeholder="USL (Max)" class="w-20 border border-zinc-300 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500">
+                                <input type="number" step="any" id="inputLSL" placeholder="Min (LSL)" class="w-20 border border-zinc-300 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500">
+                                <input type="number" step="any" id="inputUSL" placeholder="Max (USL)" class="w-20 border border-zinc-300 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500">
                             </div>
                         </div>
                     </div>
@@ -186,12 +186,12 @@
                     </div>
                 </div>
 
-                <!-- Chart 2: Scatter Plot Correlation -->
+                <!-- Chart 2: Scatter Plot -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-zinc-100">
                         <div>
-                            <h3 class="text-sm font-bold text-zinc-900">2. Peta Kelompok & Korelasi Parameter</h3>
-                            <p class="text-xs text-zinc-500">Kenal pasti zon nilai parameter yang mencetuskan Mod NG tertentu.</p>
+                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Relationship (X vs Y)</h3>
+                            <p class="text-xs text-zinc-500">See how two parameters interact for each NG Mode.</p>
                         </div>
                         <div class="flex items-center gap-1 text-xs">
                             <select id="scatterXSelect" class="border border-zinc-300 rounded px-2 py-1 bg-zinc-50 font-medium"></select>
@@ -204,11 +204,11 @@
                     </div>
                 </div>
 
-                <!-- Chart 3: 80/20 Pareto Chart -->
+                <!-- Chart 3: Pareto Chart -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm">
                     <div class="mb-4 pb-2 border-b border-zinc-100">
-                        <h3 class="text-sm font-bold text-zinc-900">3. Analisis Pareto Mod NG (Prinsip 80/20)</h3>
-                        <p class="text-xs text-zinc-500">Bar menunjukkan jumlah kes; garisan merah menunjukkan peratusan terkumpul (%).</p>
+                        <h3 class="text-sm font-bold text-zinc-900">3. NG Mode Breakdown (Pareto 80/20)</h3>
+                        <p class="text-xs text-zinc-500">Bars show NG count; red line shows total percentage (%).</p>
                     </div>
                     <div class="h-64">
                         <canvas id="modeBarChart"></canvas>
@@ -216,48 +216,46 @@
                 </div>
             </div>
 
-            <!-- Defect-Parameter Fingerprint Matrix -->
+            <!-- Matrix Table: Average Parameter per NG Mode -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-zinc-200 flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-bold text-zinc-900">4. Matriks Perbandingan Purata Parameter Mengikut Mod NG</h3>
-                        <p class="text-xs text-zinc-500">Nilai berwarna merah menandakan bacaan parameter yang menyimpang paling jauh daripada purata normal.</p>
-                    </div>
+                <div class="p-4 border-b border-zinc-200">
+                    <h3 class="text-sm font-bold text-zinc-900">4. Average Parameter Value by NG Mode</h3>
+                    <p class="text-xs text-zinc-500">Red badges show parameters that shifted 5% or more away from the overall average.</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs sm:text-sm">
                         <thead>
                             <tr id="matrixHeaderRow" class="bg-zinc-50 text-zinc-600 border-b border-zinc-200 font-semibold">
-                                <th class="p-3">Mod NG</th>
-                                <th class="p-3">Bil. Kes</th>
+                                <th class="p-3">NG Mode</th>
+                                <th class="p-3">Count</th>
                             </tr>
                         </thead>
                         <tbody id="matrixTableBody" class="divide-y divide-zinc-200">
-                            <tr><td colspan="2" class="p-4 text-center text-zinc-400">Tiada data.</td></tr>
+                            <tr><td colspan="2" class="p-4 text-center text-zinc-400">No data.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Raw Records Table -->
+            <!-- Raw Data Log -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-zinc-900">Log Rekod Terperinci</h3>
-                    <span class="text-xs text-zinc-500">Menunjukkan rekod terkini di atas</span>
+                    <h3 class="text-sm font-bold text-zinc-900">Recent NG Logs</h3>
+                    <span class="text-xs text-zinc-500">Newest records on top</span>
                 </div>
                 <div class="overflow-x-auto max-h-80">
                     <table class="w-full text-left border-collapse text-xs sm:text-sm">
                         <thead>
                             <tr class="bg-white text-zinc-500 border-b border-zinc-200">
-                                <th class="p-3">Tarikh & Masa</th>
+                                <th class="p-3">Date & Time</th>
                                 <th class="p-3">Operator</th>
-                                <th class="p-3">Mod NG</th>
-                                <th class="p-3">Bacaan Parameter</th>
-                                <th class="p-3">Catatan</th>
+                                <th class="p-3">NG Mode</th>
+                                <th class="p-3">Parameters</th>
+                                <th class="p-3">Remarks</th>
                             </tr>
                         </thead>
                         <tbody id="recordsTableBody" class="divide-y divide-zinc-100">
-                            <tr><td colspan="5" class="p-4 text-center text-zinc-400">Pilih projek untuk memaparkan rekod.</td></tr>
+                            <tr><td colspan="5" class="p-4 text-center text-zinc-400">Select a project to view records.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -268,35 +266,35 @@
         <div id="sectionAdmin" class="hidden max-w-xl mx-auto space-y-6 mt-2">
             <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-6">
                 <div class="pb-4 mb-4 border-b border-zinc-100">
-                    <h1 class="text-lg font-bold text-zinc-900"> Pengurusan Projek & Parameter (Admin)</h1>
-                    <p class="text-xs text-zinc-500">Daftar mesin baru atau urus senarai projek sedia ada.</p>
+                    <h1 class="text-lg font-bold text-zinc-900">Register New Machine / Project</h1>
+                    <p class="text-xs text-zinc-500">Set up project name, NG modes, and up to 5 number parameters.</p>
                 </div>
 
                 <div id="adminLoginBox" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Kata Laluan Admin</label>
-                        <input type="password" id="adminPassword" placeholder="Masukkan password (admin123)" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Admin Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter password (admin123)" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
                     </div>
                     <button type="button" onclick="window.verifyAdminPass()" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-2.5 rounded-lg text-sm">
-                        Buka Kunci Admin
+                        Unlock Admin
                     </button>
                 </div>
 
                 <div id="adminContentWrap" class="hidden space-y-6">
                     <form id="adminForm" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1">Tajuk Projek / Mesin <span class="text-red-500">*</span></label>
-                            <input type="text" id="adminProjectTitle" required placeholder="Cth: NG Solder" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1">Project / Machine Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="adminProjectTitle" required placeholder="e.g. Solder Machine 1" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1">Senarai Mod NG (Pisahkan dengan koma ,) <span class="text-red-500">*</span></label>
-                            <input type="text" id="adminNgModes" required placeholder="Cth: solder ball, solder not rise up, solder overflow" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1">NG Modes (Separate with commas ,) <span class="text-red-500">*</span></label>
+                            <input type="text" id="adminNgModes" required placeholder="e.g. solder ball, solder not rise up, solder overflow" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
                         </div>
 
                         <div class="pt-2 border-t border-zinc-100">
-                            <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">Konfigurasi Parameter (1 Hingga 5 Pilihan)</p>
-                            <p class="text-xs text-zinc-400 mb-3">Biarkan kosong bagi parameter yang tidak digunakan.</p>
+                            <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">Parameters (1 to 5 Options)</p>
+                            <p class="text-xs text-zinc-400 mb-3">Leave unused parameters blank. Operators will only see the ones you fill in.</p>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
@@ -304,32 +302,32 @@
                                     <input type="text" id="adminParam1" value="Motion 1" required class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold mb-1">Parameter 2 <span class="text-zinc-400 font-normal">(Opsyenal)</span></label>
+                                    <label class="block text-xs font-semibold mb-1">Parameter 2 <span class="text-zinc-400 font-normal">(Optional)</span></label>
                                     <input type="text" id="adminParam2" value="Motion 2" class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold mb-1">Parameter 3 <span class="text-zinc-400 font-normal">(Opsyenal)</span></label>
-                                    <input type="text" id="adminParam3" placeholder="Kosongkan jika tiada" class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
+                                    <label class="block text-xs font-semibold mb-1">Parameter 3 <span class="text-zinc-400 font-normal">(Optional)</span></label>
+                                    <input type="text" id="adminParam3" placeholder="Leave blank if not needed" class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold mb-1">Parameter 4 <span class="text-zinc-400 font-normal">(Opsyenal)</span></label>
-                                    <input type="text" id="adminParam4" placeholder="Kosongkan jika tiada" class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
+                                    <label class="block text-xs font-semibold mb-1">Parameter 4 <span class="text-zinc-400 font-normal">(Optional)</span></label>
+                                    <input type="text" id="adminParam4" placeholder="Leave blank if not needed" class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
                                 </div>
                                 <div class="sm:col-span-2">
-                                    <label class="block text-xs font-semibold mb-1">Parameter 5 <span class="text-zinc-400 font-normal">(Opsyenal)</span></label>
-                                    <input type="text" id="adminParam5" placeholder="Kosongkan jika tiada" class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
+                                    <label class="block text-xs font-semibold mb-1">Parameter 5 <span class="text-zinc-400 font-normal">(Optional)</span></label>
+                                    <input type="text" id="adminParam5" placeholder="Leave blank if not needed" class="w-full border border-zinc-300 rounded-lg p-2 text-sm">
                                 </div>
                             </div>
                         </div>
 
                         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition">
-                            Daftar Projek Baru
+                            Save Project
                         </button>
                     </form>
 
-                    <!-- Senarai Projek Sedia Ada -->
+                    <!-- Registered Projects List -->
                     <div class="pt-5 border-t border-zinc-200">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Senarai Projek Aktif</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Active Projects</h3>
                         <div id="adminProjectList" class="space-y-2 text-sm"></div>
                     </div>
                 </div>
@@ -337,7 +335,7 @@
         </div>
     </main>
 
-    <!-- SKRIP 1: NAVIGASI TAB & UI ASAS -->
+    <!-- SCRIPT 1: TAB NAVIGATION & BASIC UI -->
     <script>
         window.showAlert = function(message, type) {
             var alertBox = document.getElementById('alertBox');
@@ -379,9 +377,9 @@
             if (pass === 'admin123') {
                 document.getElementById('adminLoginBox').classList.add('hidden');
                 document.getElementById('adminContentWrap').classList.remove('hidden');
-                window.showAlert('Akses Admin dibuka.', 'success');
+                window.showAlert('Admin unlocked.', 'success');
             } else {
-                window.showAlert('Kata laluan salah!', 'error');
+                window.showAlert('Wrong password!', 'error');
             }
         };
 
@@ -398,7 +396,7 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SKRIP 2: SUPABASE & ANALISIS SPC PINTAR -->
+    <!-- SCRIPT 2: SUPABASE & DASHBOARD ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -431,7 +429,7 @@
                     .order('created_at', { ascending: false });
 
                 if (res.error) {
-                    window.showAlert('Ralat Supabase: ' + res.error.message, 'error');
+                    window.showAlert('Database error: ' + res.error.message, 'error');
                     return;
                 }
 
@@ -439,8 +437,8 @@
                 var prevOpVal = projectSelect.value;
                 var prevDashVal = dashSelect.value;
 
-                projectSelect.innerHTML = '<option value="">-- Pilih Projek / Mesin --</option>';
-                dashSelect.innerHTML = '<option value="">-- Pilih Projek --</option>';
+                projectSelect.innerHTML = '<option value="">-- Select Machine / Project --</option>';
+                dashSelect.innerHTML = '<option value="">-- Select Project --</option>';
 
                 projectsData.forEach(function(proj) {
                     var opt1 = document.createElement('option');
@@ -472,7 +470,7 @@
                 var container = document.getElementById('adminProjectList');
                 if (!container) return;
                 if (projectsData.length === 0) {
-                    container.innerHTML = '<p class="text-xs text-zinc-400">Tiada projek aktif.</p>';
+                    container.innerHTML = '<p class="text-xs text-zinc-400">No active projects found.</p>';
                     return;
                 }
                 container.innerHTML = '';
@@ -481,12 +479,12 @@
                     var row = document.createElement('div');
                     row.className = 'flex items-center justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-200';
                     row.innerHTML = '<div><p class="font-semibold text-zinc-800">' + p.project_title + '</p>' +
-                        '<p class="text-xs text-zinc-500">Parameter: ' + params + '</p></div>';
+                        '<p class="text-xs text-zinc-500">Parameters: ' + params + '</p></div>';
                     container.appendChild(row);
                 });
             }
 
-            // BORANG OPERATOR DINAMIK
+            // DYNAMIC OPERATOR FORM
             document.getElementById('projectSelect').addEventListener('change', function() {
                 var selectedId = this.value;
                 var ngModeSelect = document.getElementById('ngModeSelect');
@@ -495,7 +493,7 @@
 
                 dynamicFields.innerHTML = '';
                 if (!selectedId) {
-                    ngModeSelect.innerHTML = '<option value="">Pilih Projek Dahulu</option>';
+                    ngModeSelect.innerHTML = '<option value="">Select Project First</option>';
                     ngModeSelect.disabled = true;
                     paramsContainer.classList.add('hidden');
                     return;
@@ -505,7 +503,7 @@
                 if (!project) return;
 
                 ngModeSelect.disabled = false;
-                ngModeSelect.innerHTML = '<option value="">-- Pilih Mod NG --</option>';
+                ngModeSelect.innerHTML = '<option value="">-- Select NG Mode --</option>';
                 (project.ng_modes || []).forEach(function(mode) {
                     var opt = document.createElement('option');
                     opt.value = mode;
@@ -519,7 +517,7 @@
                     labels.forEach(function(label) {
                         var wrapper = document.createElement('div');
                         wrapper.innerHTML = '<label class="block text-xs font-semibold text-zinc-700 mb-1">' + label + ' <span class="text-red-500">*</span></label>' +
-                            '<input type="number" step="any" data-param-label="' + label + '" required placeholder="Nilai ' + label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
+                            '<input type="number" step="any" data-param-label="' + label + '" required placeholder="Enter ' + label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
                         dynamicFields.appendChild(wrapper);
                     });
                 } else {
@@ -527,7 +525,7 @@
                 }
             });
 
-            // SIMPAN PROJEK BARU
+            // SAVE NEW PROJECT (ADMIN)
             document.getElementById('adminForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -553,9 +551,9 @@
                 }]);
 
                 if (res.error) {
-                    window.showAlert('Gagal simpan projek: ' + res.error.message, 'error');
+                    window.showAlert('Failed to save project: ' + res.error.message, 'error');
                 } else {
-                    window.showAlert('Projek baru berjaya didaftarkan!', 'success');
+                    window.showAlert('New project saved!', 'success');
                     document.getElementById('adminProjectTitle').value = '';
                     document.getElementById('adminNgModes').value = '';
                     document.getElementById('adminParam3').value = '';
@@ -565,7 +563,7 @@
                 }
             });
 
-            // SIMPAN REKOD NG OPERATOR
+            // SAVE NG RECORD (OPERATOR)
             document.getElementById('ngForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -589,9 +587,9 @@
                 var res = await supabaseClient.from('ng_records').insert([payload]);
 
                 if (res.error) {
-                    window.showAlert('Ralat simpan data: ' + res.error.message, 'error');
+                    window.showAlert('Error saving record: ' + res.error.message, 'error');
                 } else {
-                    window.showAlert('Rekod NG berjaya disimpan!', 'success');
+                    window.showAlert('NG record saved!', 'success');
                     document.getElementById('ngModeSelect').value = '';
                     document.getElementById('remarks').value = '';
                     document.querySelectorAll('.dynamic-param-input').forEach(function(input) { input.value = ''; });
@@ -599,7 +597,7 @@
                 }
             });
 
-            // EVENT LISTENERS DASHBOARD
+            // DASHBOARD CONTROLS
             document.getElementById('dashboardProjectSelect').addEventListener('change', function() {
                 if (this.value) loadDashboardData(this.value);
             });
@@ -609,9 +607,7 @@
             });
             document.getElementById('dashboardDateFilter').addEventListener('change', applyFiltersAndRender);
             document.getElementById('dashboardModeFilter').addEventListener('change', applyFiltersAndRender);
-            document.getElementById('trendParamSelect').addEventListener('change', function() {
-                renderTrendChart();
-            });
+            document.getElementById('trendParamSelect').addEventListener('change', renderTrendChart);
             document.getElementById('inputLSL').addEventListener('input', renderTrendChart);
             document.getElementById('inputUSL').addEventListener('input', renderTrendChart);
             document.getElementById('scatterXSelect').addEventListener('change', renderScatterChart);
@@ -622,9 +618,8 @@
                 currentProject = projectsData.find(function(p) { return p.id === projectId; });
                 if (!currentProject) return;
 
-                // Populate Mode Filter & Parameter Selectors
                 var modeFilter = document.getElementById('dashboardModeFilter');
-                modeFilter.innerHTML = '<option value="all">Semua Mod NG</option>';
+                modeFilter.innerHTML = '<option value="all">All NG Modes</option>';
                 (currentProject.ng_modes || []).forEach(function(m) {
                     var opt = document.createElement('option');
                     opt.value = m;
@@ -637,14 +632,14 @@
                 var xSel = document.getElementById('scatterXSelect');
                 var ySel = document.getElementById('scatterYSelect');
 
-                trendSel.innerHTML = '<option value="__ALL__">Semua Parameter (Serentak)</option>';
+                trendSel.innerHTML = '<option value="__ALL__">Show All Parameters</option>';
                 xSel.innerHTML = '';
                 ySel.innerHTML = '';
 
-                labels.forEach(function(lbl, idx) {
+                labels.forEach(function(lbl) {
                     var oT = document.createElement('option');
                     oT.value = lbl;
-                    oT.textContent = 'SPC Fokus: ' + lbl;
+                    oT.textContent = 'Focus: ' + lbl;
                     trendSel.appendChild(oT);
 
                     var oX = document.createElement('option');
@@ -672,7 +667,7 @@
                     .order('recorded_time', { ascending: true });
 
                 if (res.error) {
-                    window.showAlert('Gagal memuatkan rekod: ' + res.error.message, 'error');
+                    window.showAlert('Failed to load records: ' + res.error.message, 'error');
                     return;
                 }
 
@@ -703,7 +698,7 @@
                 updateDashboardAnalytics();
             }
 
-            // FUNGSI MATEMATIK STATISTIK
+            // BASIC MATH HELPERS
             function calcStats(arr) {
                 var valid = arr.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); }).map(Number);
                 var n = valid.length;
@@ -744,12 +739,12 @@
                 document.getElementById('statTotalNg').textContent = records.length;
 
                 if (records.length === 0) {
-                    document.getElementById('statDateSpan').textContent = 'Tiada rekod dalam julat ini';
+                    document.getElementById('statDateSpan').textContent = 'No records in this range';
                     document.getElementById('statTopMode').textContent = '-';
                     document.getElementById('statTopModePct').textContent = '-';
                     document.getElementById('statCorrelation').textContent = '-';
                     document.getElementById('statStability').textContent = '-';
-                    document.getElementById('insightList').innerHTML = '<li>Tiada rekod NG untuk dianalisis.</li>';
+                    document.getElementById('insightList').innerHTML = '<li>No NG records found for this filter.</li>';
                     currentModeCounts = {};
                     renderTrendChart();
                     renderScatterChart();
@@ -759,7 +754,7 @@
                     return;
                 }
 
-                document.getElementById('statDateSpan').textContent = records[0].recorded_date + ' hingga ' + records[records.length - 1].recorded_date;
+                document.getElementById('statDateSpan').textContent = records[0].recorded_date + ' to ' + records[records.length - 1].recorded_date;
 
                 var modeCounts = {};
                 records.forEach(function(r) {
@@ -773,7 +768,7 @@
                 var topPct = ((topCount / records.length) * 100).toFixed(1);
 
                 document.getElementById('statTopMode').textContent = topMode + ' (' + topCount + ')';
-                document.getElementById('statTopModePct').textContent = topPct + '% daripada jumlah NG';
+                document.getElementById('statTopModePct').textContent = topPct + '% of total NGs';
 
                 generateSmartInsights(labels, records, sortedModes, modeCounts);
                 renderTrendChart();
@@ -783,16 +778,16 @@
                 renderRecordsTable(labels, records);
             }
 
-            // JANA CADANGAN KEJURUTERAAN AUTOMATIK
+            // GENERATE SIMPLE ENGLISH SUGGESTIONS
             function generateSmartInsights(labels, records, sortedModes, modeCounts) {
                 var insights = [];
                 var topMode = sortedModes[0];
                 var topPct = ((modeCounts[topMode] / records.length) * 100).toFixed(0);
 
-                // 1. Cadangan Fokus Pareto
-                insights.push('<b>Fokus Utama (80/20):</b> Kecacatan <b>' + topMode + '</b> menyumbang <b>' + topPct + '%</b> daripada keseluruhan masalah. Selesaikan mod ini dahulu untuk impak tertinggi.');
+                // 1. Top Priority
+                insights.push('<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects. Focus on fixing this mode first.');
 
-                // 2. Analisis Anomali Parameter Semasa Mod NG Tertinggi
+                // 2. Parameter Shift Detection
                 var overallStats = {};
                 labels.forEach(function(l) {
                     overallStats[l] = calcStats(records.map(function(r) { return (r.parameter_values || {})[l]; }));
@@ -812,31 +807,31 @@
                         if (Math.abs(diffPct) > Math.abs(maxShiftPct)) {
                             maxShiftPct = diffPct;
                             maxShiftParam = l;
-                            shiftDirection = diffPct > 0 ? 'lebih tinggi' : 'lebih rendah';
+                            shiftDirection = diffPct > 0 ? 'higher' : 'lower';
                             topModeMeanVal = st.mean;
                         }
                     }
                 });
 
                 if (maxShiftParam && Math.abs(maxShiftPct) >= 3) {
-                    insights.push('<b>Punca Parameter Dikesan:</b> Semasa <b>' + topMode + '</b> berlaku, bacaan purata <b>' + maxShiftParam + '</b> adalah <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' daripada purata keseluruhan ' + overallStats[maxShiftParam].mean.toFixed(2) + '). Cadangan: Semak dan ketatkan julat <b>' + maxShiftParam + '</b>.');
+                    insights.push('<b>Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than overall average ' + overallStats[maxShiftParam].mean.toFixed(2) + '). Suggestion: Check and tighten <b>' + maxShiftParam + '</b> settings.');
                 }
 
-                // 3. Pengesanan Drift (3 Rekod Terkini)
+                // 3. Recent Drift (Last 3 Records)
                 if (records.length >= 4 && labels.length > 0) {
                     var p0 = labels[0];
                     var last3 = records.slice(-3).map(function(r) { return Number((r.parameter_values || {})[p0]); });
                     if (last3[0] < last3[1] && last3[1] < last3[2]) {
-                        insights.push('<b>Amaran Trend Semasa:</b> Nilai <b>' + p0 + '</b> menunjukkan peningkatan berterusan dalam 3 rekod terakhir (' + last3.join(' → ') + '). Lakukan pemeriksaan pencegahan segera.');
+                        insights.push('<b>Trend Alert:</b> <b>' + p0 + '</b> went up 3 times in a row (' + last3.join(' → ') + '). Check machine stability.');
                     } else if (last3[0] > last3[1] && last3[1] > last3[2]) {
-                        insights.push('<b>Amaran Trend Semasa:</b> Nilai <b>' + p0 + '</b> menurun secara berterusan dalam 3 rekod terakhir (' + last3.join(' → ') + '). Semak kestabilan komponen mesin.');
+                        insights.push('<b>Trend Alert:</b> <b>' + p0 + '</b> went down 3 times in a row (' + last3.join(' → ') + '). Check machine stability.');
                     }
                 }
 
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
-            // GRAF 1: SPC TREND + MOVING AVERAGE + SPEC LIMITS
+            // CHART 1: TREND + MOVING AVERAGE + SPEC LIMITS
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
@@ -861,8 +856,8 @@
                             pointRadius: 3
                         });
                     });
-                    document.getElementById('statStability').textContent = 'Mod Pelbagai Parameter';
-                    document.getElementById('statOutSpecCount').textContent = 'Pilih 1 parameter untuk analisis SPC';
+                    document.getElementById('statStability').textContent = 'All Parameters View';
+                    document.getElementById('statOutSpecCount').textContent = 'Pick 1 parameter to test limits';
                 } else {
                     document.getElementById('specLimitInputs').classList.remove('hidden');
                     var rawVals = filteredRecords.map(function(r) {
@@ -885,18 +880,17 @@
                     var lslVal = lslInput !== '' ? Number(lslInput) : (st.n > 1 ? st.mean - (2 * st.std) : null);
                     var uslVal = uslInput !== '' ? Number(uslInput) : (st.n > 1 ? st.mean + (2 * st.std) : null);
 
-                    // Kira bilangan luar spesifikasi
                     var outCount = 0;
                     rawVals.forEach(function(v) {
                         if (v === null) return;
                         if ((lslVal !== null && v < lslVal) || (uslVal !== null && v > uslVal)) outCount++;
                     });
 
-                    document.getElementById('statStability').textContent = selectedParam + ' (Mean: ' + st.mean.toFixed(2) + ', SD: ' + st.std.toFixed(2) + ')';
-                    document.getElementById('statOutSpecCount').textContent = outCount + ' titik melebihi had ' + (lslInput !== '' || uslInput !== '' ? 'LSL/USL' : '±2σ');
+                    document.getElementById('statStability').textContent = selectedParam + ' (Avg: ' + st.mean.toFixed(2) + ', SD: ' + st.std.toFixed(2) + ')';
+                    document.getElementById('statOutSpecCount').textContent = outCount + ' points outside ' + (lslInput !== '' || uslInput !== '' ? 'Min/Max' : '±2σ limits');
 
                     datasets.push({
-                        label: selectedParam + ' (Bacaan Sebenar)',
+                        label: selectedParam + ' (Actual)',
                         data: rawVals,
                         borderColor: '#18181b',
                         backgroundColor: '#18181b',
@@ -906,7 +900,7 @@
                     });
 
                     datasets.push({
-                        label: '3-Pt Moving Average (Trend Halus)',
+                        label: '3-Pt Moving Avg (Smooth Trend)',
                         data: maVals,
                         borderColor: '#2563eb',
                         borderWidth: 2,
@@ -916,7 +910,7 @@
 
                     if (st.n > 0) {
                         datasets.push({
-                            label: 'Mean (' + st.mean.toFixed(2) + ')',
+                            label: 'Average (' + st.mean.toFixed(2) + ')',
                             data: rawVals.map(function() { return st.mean; }),
                             borderColor: '#10b981',
                             borderDash: [4, 4],
@@ -927,7 +921,7 @@
 
                     if (uslVal !== null && st.n > 1) {
                         datasets.push({
-                            label: (uslInput !== '' ? 'USL' : '+2σ UCL') + ' (' + uslVal.toFixed(2) + ')',
+                            label: (uslInput !== '' ? 'Max Limit' : '+2σ Upper') + ' (' + uslVal.toFixed(2) + ')',
                             data: rawVals.map(function() { return uslVal; }),
                             borderColor: '#ef4444',
                             borderDash: [6, 4],
@@ -938,7 +932,7 @@
 
                     if (lslVal !== null && st.n > 1) {
                         datasets.push({
-                            label: (lslInput !== '' ? 'LSL' : '-2σ LCL') + ' (' + lslVal.toFixed(2) + ')',
+                            label: (lslInput !== '' ? 'Min Limit' : '-2σ Lower') + ' (' + lslVal.toFixed(2) + ')',
                             data: rawVals.map(function() { return lslVal; }),
                             borderColor: '#f97316',
                             borderDash: [6, 4],
@@ -961,7 +955,7 @@
                 });
             }
 
-            // GRAF 2: SCATTER PLOT + PEARSON CORRELATION
+            // CHART 2: SCATTER PLOT + CORRELATION
             function renderScatterChart() {
                 if (typeof Chart === 'undefined') return;
                 if (scatterChartInstance) scatterChartInstance.destroy();
@@ -975,10 +969,10 @@
 
                 if (rVal === null || isNaN(rVal)) {
                     document.getElementById('statCorrelation').textContent = 'N/A';
-                    document.getElementById('statCorrelationDesc').textContent = 'Perlu sekurang-kurangnya 3 sampel';
+                    document.getElementById('statCorrelationDesc').textContent = 'Need at least 3 records';
                 } else {
                     var absR = Math.abs(rVal);
-                    var strength = absR > 0.7 ? 'Korelasi Kuat' : (absR > 0.4 ? 'Korelasi Sederhana' : 'Korelasi Lemah');
+                    var strength = absR > 0.7 ? 'Strong' : (absR > 0.4 ? 'Moderate' : 'Weak');
                     document.getElementById('statCorrelation').textContent = 'r = ' + rVal.toFixed(2) + ' (' + strength + ')';
                     document.getElementById('statCorrelationDesc').textContent = xLabel + ' vs ' + yLabel;
                 }
@@ -1011,7 +1005,7 @@
                 });
             }
 
-            // GRAF 3: PARETO 80/20 (BAR + CUMULATIVE LINE)
+            // CHART 3: PARETO 80/20
             function renderParetoChart() {
                 if (typeof Chart === 'undefined') return;
                 if (modeBarChartInstance) modeBarChartInstance.destroy();
@@ -1034,7 +1028,7 @@
                         datasets: [
                             {
                                 type: 'line',
-                                label: 'Terkumpul (%)',
+                                label: 'Cumulative (%)',
                                 data: cumPct,
                                 borderColor: '#dc2626',
                                 backgroundColor: '#dc2626',
@@ -1044,7 +1038,7 @@
                             },
                             {
                                 type: 'bar',
-                                label: 'Bilangan Kes',
+                                label: 'NG Count',
                                 data: counts,
                                 backgroundColor: '#18181b',
                                 borderRadius: 4,
@@ -1063,17 +1057,17 @@
                 });
             }
 
-            // MATRIKS FINGERPRINT PARAMETER MENGIKUT MOD NG
+            // MATRIX TABLE: AVERAGE PARAMETER BY NG MODE
             function renderMatrixTable(labels, records, modeCounts) {
                 var thead = document.getElementById('matrixHeaderRow');
                 var tbody = document.getElementById('matrixTableBody');
 
-                thead.innerHTML = '<th class="p-3">Mod NG</th><th class="p-3">Kes</th>' +
-                    labels.map(function(l) { return '<th class="p-3">Purata ' + l + '</th>'; }).join('');
+                thead.innerHTML = '<th class="p-3">NG Mode</th><th class="p-3">Count</th>' +
+                    labels.map(function(l) { return '<th class="p-3">Avg ' + l + '</th>'; }).join('');
 
                 var modes = Object.keys(modeCounts).sort(function(a, b) { return modeCounts[b] - modeCounts[a]; });
                 if (modes.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="' + (labels.length + 2) + '" class="p-4 text-center text-zinc-400">Tiada data.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="' + (labels.length + 2) + '" class="p-4 text-center text-zinc-400">No data.</td></tr>';
                     return;
                 }
 
@@ -1108,7 +1102,7 @@
             function renderRecordsTable(labels, records) {
                 var tbody = document.getElementById('recordsTableBody');
                 if (records.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-zinc-400">Tiada rekod ditemui.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-zinc-400">No records found.</td></tr>';
                     return;
                 }
                 tbody.innerHTML = '';
@@ -1131,11 +1125,11 @@
 
             document.getElementById('btnExportCsv').addEventListener('click', function() {
                 if (!currentProject || filteredRecords.length === 0) {
-                    window.showAlert('Tiada data untuk dieksport!', 'error');
+                    window.showAlert('No data to export!', 'error');
                     return;
                 }
                 var labels = (currentProject.parameter_labels || []).filter(function(l) { return l && String(l).trim().length > 0; });
-                var headers = ['Tarikh', 'Masa', 'Operator', 'Mod_NG'].concat(labels).concat(['Catatan']);
+                var headers = ['Date', 'Time', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
                 var rows = [headers.join(',')];
 
                 filteredRecords.forEach(function(r) {
@@ -1154,7 +1148,7 @@
                 var csvContent = "data:text/csv;charset=utf-8," + rows.join("\n");
                 var link = document.createElement("a");
                 link.setAttribute("href", encodeURI(csvContent));
-                link.setAttribute("download", currentProject.project_title.replace(/\s+/g, '_') + "_SPC_Export.csv");
+                link.setAttribute("download", currentProject.project_title.replace(/\s+/g, '_') + "_NG_Report.csv");
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
