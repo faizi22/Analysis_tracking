@@ -13,14 +13,14 @@
         
         <!-- Tab Navigation -->
         <div class="flex border-b mb-6">
-            <button onclick="switchTab('operator')" id="tabOperator" class="flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600">Borang Operator</button>
-            <button onclick="switchTab('admin')" id="tabAdmin" class="flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent">Admin Panel</button>
+            <button type="button" id="tabOperator" class="flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600 cursor-pointer">Borang Operator</button>
+            <button type="button" id="tabAdmin" class="flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent cursor-pointer">Admin Panel</button>
         </div>
 
         <!-- Status Alert -->
         <div id="alertBox" class="hidden mb-4 p-3 rounded-lg text-sm font-medium"></div>
 
-        <!-- ================= SECTION 1: OPERATOR INPUT ================= -->
+        <!-- SECTION 1: OPERATOR INPUT -->
         <div id="sectionOperator">
             <div class="pb-4 mb-4 border-b">
                 <h1 class="text-xl font-bold text-slate-900">Rekod NG & Parameter Mesin</h1>
@@ -58,7 +58,6 @@
                     </select>
                 </div>
 
-                <!-- Container Parameter Dinamik (Nombor Sahaja) -->
                 <div id="dynamicParamsContainer" class="space-y-3 pt-2 border-t border-slate-100 hidden">
                     <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Parameter Mesin (Nombor Sahaja)</p>
                     <div id="dynamicFields" class="space-y-3"></div>
@@ -75,25 +74,23 @@
             </form>
         </div>
 
-        <!-- ================= SECTION 2: ADMIN PANEL ================= -->
+        <!-- SECTION 2: ADMIN PANEL -->
         <div id="sectionAdmin" class="hidden">
             <div class="pb-4 mb-4 border-b">
                 <h1 class="text-xl font-bold text-slate-900">Daftar Projek / Mesin Baru</h1>
                 <p class="text-sm text-slate-500">Tetapkan tajuk projek, mod NG, dan label parameter nombor.</p>
             </div>
 
-            <!-- Login Admin Ringkas -->
             <div id="adminLoginBox" class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold mb-1">Kata Laluan Admin</label>
-                    <input type="password" id="adminPassword" placeholder="Masukkan password admin" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="password" id="adminPassword" placeholder="Masukkan password admin (admin123)" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
-                <button type="button" onclick="verifyAdmin()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 rounded-lg">
+                <button type="button" id="btnVerifyAdmin" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 rounded-lg">
                     Log Masuk Admin
                 </button>
             </div>
 
-            <!-- Borang Admin (Selepas Login) -->
             <form id="adminForm" class="space-y-4 hidden">
                 <div>
                     <label class="block text-sm font-semibold mb-1">Tajuk Projek / Mesin <span class="text-red-500">*</span></label>
@@ -125,35 +122,213 @@
     </div>
 
     <script>
-        // 1. KONFIGURASI SUPABASE
-        const SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        document.addEventListener('DOMContentLoaded', function() {
+            const SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
+            
+            let supabaseClient = null;
+            let projectsData = [];
 
-        let projectsData = [];
-
-        function switchTab(tab) {
-            const opSec = document.getElementById('sectionOperator');
-            const adSec = document.getElementById('sectionAdmin');
+            // 1. PASANG FUNGSI TUKAR TAB TERLEBIH DAHULU
             const tabOp = document.getElementById('tabOperator');
             const tabAd = document.getElementById('tabAdmin');
+            const opSec = document.getElementById('sectionOperator');
+            const adSec = document.getElementById('sectionAdmin');
 
-            if (tab === 'operator') {
-                opSec.classList.remove('hidden');
-                adSec.classList.add('hidden');
-                tabOp.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
-                tabAd.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
-                fetchProjects();
-            } else {
-                opSec.classList.add('hidden');
-                adSec.classList.remove('hidden');
-                tabAd.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
-                tabOp.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
+            function switchTab(tab) {
+                if (tab === 'operator') {
+                    opSec.classList.remove('hidden');
+                    adSec.classList.add('hidden');
+                    tabOp.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600 cursor-pointer";
+                    tabAd.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent cursor-pointer";
+                    fetchProjects();
+                } else {
+                    opSec.classList.add('hidden');
+                    adSec.classList.remove('hidden');
+                    tabAd.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600 cursor-pointer";
+                    tabOp.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent cursor-pointer";
+                }
             }
-        }
 
-        function verifyAdmin() {
-            const pass = document.getElementById('adminPassword').value;
-            if (pass === 'admin123') {
-                document.getElementById('adminLoginBox').classList.add('hidden');
-                document.getElementById('adminForm').classList.remove('hidden
+            tabOp.addEventListener('click', function() { switchTab('operator'); });
+            tabAd.addEventListener('click', function() { switchTab('admin'); });
+
+            // 2. LOG MASUK ADMIN
+            document.getElementById('btnVerifyAdmin').addEventListener('click', function() {
+                const pass = document.getElementById('adminPassword').value;
+                if (pass === 'admin123') {
+                    document.getElementById('adminLoginBox').classList.add('hidden');
+                    document.getElementById('adminForm').classList.remove('hidden');
+                    showAlert('Log masuk admin berjaya!', 'success');
+                } else {
+                    showAlert('Kata laluan admin salah!', 'error');
+                }
+            });
+
+            // 3. TARIKH & MASA SEMASA
+            function setCurrentDateTime() {
+                const now = new Date();
+                const localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                const localTime = now.toTimeString().slice(0, 8);
+                document.getElementById('recordedDate').value = localDate;
+                document.getElementById('recordedTime').value = localTime;
+            }
+
+            function showAlert(message, type) {
+                const alertBox = document.getElementById('alertBox');
+                alertBox.textContent = message;
+                alertBox.className = 'mb-4 p-3 rounded-lg text-sm font-medium ' + (
+                    type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'
+                );
+                alertBox.classList.remove('hidden');
+                setTimeout(function() { alertBox.classList.add('hidden'); }, 4000);
+            }
+
+            // 4. MULAKAN SUPABASE CLIENT
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (err) {
+                showAlert('Ralat memulakan Supabase: ' + err.message, 'error');
+            }
+
+            // 5. TARIK SENARAI PROJEK
+            async function fetchProjects() {
+                if (!supabaseClient) return;
+                const projectSelect = document.getElementById('projectSelect');
+                const { data, error } = await supabaseClient
+                    .from('ng_projects')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    showAlert('Ralat database: ' + error.message, 'error');
+                    projectSelect.innerHTML = '<option value="">Ralat sambungan database</option>';
+                    return;
+                }
+
+                projectsData = data || [];
+                if (projectsData.length === 0) {
+                    projectSelect.innerHTML = '<option value="">-- Tiada Projek Ditemui --</option>';
+                    return;
+                }
+
+                projectSelect.innerHTML = '<option value="">-- Sila Pilih Projek / Mesin --</option>';
+                projectsData.forEach(function(proj) {
+                    const option = document.createElement('option');
+                    option.value = proj.id;
+                    option.textContent = proj.project_title;
+                    projectSelect.appendChild(option);
+                });
+            }
+
+            // 6. JANA BORANG DINAMIK APABILA PROJEK DIPILIH
+            document.getElementById('projectSelect').addEventListener('change', function() {
+                const selectedId = this.value;
+                const ngModeSelect = document.getElementById('ngModeSelect');
+                const paramsContainer = document.getElementById('dynamicParamsContainer');
+                const dynamicFields = document.getElementById('dynamicFields');
+
+                dynamicFields.innerHTML = '';
+                if (!selectedId) {
+                    ngModeSelect.innerHTML = '<option value="">-- Pilih Projek Dahulu --</option>';
+                    ngModeSelect.disabled = true;
+                    ngModeSelect.classList.add('bg-slate-100');
+                    paramsContainer.classList.add('hidden');
+                    return;
+                }
+
+                const project = projectsData.find(function(p) { return p.id === selectedId; });
+
+                ngModeSelect.disabled = false;
+                ngModeSelect.classList.remove('bg-slate-100');
+                ngModeSelect.innerHTML = '<option value="">-- Pilih Jenis NG --</option>';
+                (project.ng_modes || []).forEach(function(mode) {
+                    const opt = document.createElement('option');
+                    opt.value = mode;
+                    opt.textContent = mode;
+                    ngModeSelect.appendChild(opt);
+                });
+
+                const labels = project.parameter_labels || [];
+                if (labels.length > 0) {
+                    paramsContainer.classList.remove('hidden');
+                    labels.forEach(function(label) {
+                        const wrapper = document.createElement('div');
+                        wrapper.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">' + label + ' <span class="text-red-500">*</span></label>' +
+                            '<input type="number" step="any" data-param-label="' + label + '" required placeholder="Masukkan nilai nombor ' + label + '" class="dynamic-param-input w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">';
+                        dynamicFields.appendChild(wrapper);
+                    });
+                } else {
+                    paramsContainer.classList.add('hidden');
+                }
+            });
+
+            // 7. SIMPAN PROJEK BARU (ADMIN)
+            document.getElementById('adminForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const title = document.getElementById('adminProjectTitle').value.trim();
+                const modesRaw = document.getElementById('adminNgModes').value;
+                const ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
+
+                const p1 = document.getElementById('adminParam1').value.trim();
+                const p2 = document.getElementById('adminParam2').value.trim();
+                const parameterLabels = [p1, p2].filter(function(p) { return p.length > 0; });
+
+                const { error } = await supabaseClient
+                    .from('ng_projects')
+                    .insert([{
+                        project_title: title,
+                        parameter_labels: parameterLabels,
+                        ng_modes: ngModes,
+                        is_active: true
+                    }]);
+
+                if (error) {
+                    showAlert('Gagal simpan projek: ' + error.message, 'error');
+                } else {
+                    showAlert('Projek baru berjaya didaftarkan!', 'success');
+                    document.getElementById('adminProjectTitle').value = '';
+                    document.getElementById('adminNgModes').value = '';
+                    switchTab('operator');
+                }
+            });
+
+            // 8. HANTAR REKOD NG (OPERATOR)
+            document.getElementById('ngForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const parameterValues = {};
+                document.querySelectorAll('.dynamic-param-input').forEach(function(input) {
+                    const label = input.getAttribute('data-param-label');
+                    parameterValues[label] = Number(input.value.trim());
+                });
+
+                const payload = {
+                    project_id: document.getElementById('projectSelect').value,
+                    recorded_date: document.getElementById('recordedDate').value,
+                    recorded_time: document.getElementById('recordedTime').value,
+                    operator_name: document.getElementById('operatorName').value.trim(),
+                    ng_mode: document.getElementById('ngModeSelect').value,
+                    parameter_values: parameterValues,
+                    remarks: document.getElementById('remarks').value.trim() || null
+                };
+
+                const { error } = await supabaseClient.from('ng_records').insert([payload]);
+
+                if (error) {
+                    showAlert('Ralat simpan data: ' + error.message, 'error');
+                } else {
+                    showAlert('Rekod NG berjaya disimpan!', 'success');
+                    document.getElementById('ngModeSelect').value = '';
+                    document.getElementById('remarks').value = '';
+                    document.querySelectorAll('.dynamic-param-input').forEach(function(input) { input.value = ''; });
+                    setCurrentDateTime();
+                }
+            });
+
+            setCurrentDateTime();
+            fetchProjects();
+        });
+    </script>
+</body>
+</html>
