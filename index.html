@@ -3,97 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online NG Tracking System</title>
+    <title>Sistem Tracking NG & Parameter Mesin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-100 min-h-screen p-4 md:p-8 font-sans text-slate-800">
 
-    <div class="max-w-lg mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
-        <div class="border-b pb-4 mb-6">
-            <h1 class="text-xl font-bold text-slate-900">Rekod NG & Parameter Mesin</h1>
-            <p class="text-sm text-slate-500">Pilih projek/mesin untuk memuatkan parameter pantauan.</p>
+    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+        
+        <!-- Tab Navigation -->
+        <div class="flex border-b mb-6">
+            <button onclick="switchTab('operator')" id="tabOperator" class="flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600">Borang Operator</button>
+            <button onclick="switchTab('admin')" id="tabAdmin" class="flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent">Admin Panel</button>
         </div>
 
         <!-- Status Alert -->
         <div id="alertBox" class="hidden mb-4 p-3 rounded-lg text-sm font-medium"></div>
 
-        <form id="ngForm" class="space-y-4">
-            <!-- Pilihan Projek -->
-            <div>
-                <label class="block text-sm font-semibold mb-1">Projek / Mesin <span class="text-red-500">*</span></label>
-                <select id="projectSelect" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option value="">Memuatkan senarai projek...</option>
-                </select>
+        <!-- ================= SECTION 1: OPERATOR INPUT ================= -->
+        <div id="sectionOperator">
+            <div class="pb-4 mb-4 border-b">
+                <h1 class="text-xl font-bold text-slate-900">Rekod NG & Parameter Mesin</h1>
+                <p class="text-sm text-slate-500">Pilih projek untuk mula merekod data.</p>
             </div>
 
-            <!-- Tarikh & Masa (Auto) -->
-            <div class="grid grid-cols-2 gap-3">
+            <form id="ngForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Tarikh</label>
-                    <input type="date" id="recordedDate" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                    <label class="block text-sm font-semibold mb-1">Projek / Mesin <span class="text-red-500">*</span></label>
+                    <select id="projectSelect" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">Memuatkan senarai projek...</option>
+                    </select>
                 </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Tarikh</label>
+                        <input type="date" id="recordedDate" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Masa</label>
+                        <input type="time" id="recordedTime" step="1" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Masa</label>
-                    <input type="time" id="recordedTime" step="1" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                    <label class="block text-sm font-semibold mb-1">Nama / ID Operator <span class="text-red-500">*</span></label>
+                    <input type="text" id="operatorName" required placeholder="Cth: Ali / OP-102" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Mod NG (Jenis Kecacatan) <span class="text-red-500">*</span></label>
+                    <select id="ngModeSelect" required disabled class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-100 disabled:cursor-not-allowed">
+                        <option value="">-- Pilih Projek Dahulu --</option>
+                    </select>
+                </div>
+
+                <!-- Container Parameter Dinamik (Nombor Sahaja) -->
+                <div id="dynamicParamsContainer" class="space-y-3 pt-2 border-t border-slate-100 hidden">
+                    <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Parameter Mesin (Nombor Sahaja)</p>
+                    <div id="dynamicFields" class="space-y-3"></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Catatan Tambahan (Opsyen)</label>
+                    <textarea id="remarks" rows="2" placeholder="Pemerhatian..." class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition duration-150">
+                    Hantar Rekod NG
+                </button>
+            </form>
+        </div>
+
+        <!-- ================= SECTION 2: ADMIN PANEL ================= -->
+        <div id="sectionAdmin" class="hidden">
+            <div class="pb-4 mb-4 border-b">
+                <h1 class="text-xl font-bold text-slate-900">Daftar Projek / Mesin Baru</h1>
+                <p class="text-sm text-slate-500">Tetapkan tajuk projek, mod NG, dan parameter nombor.</p>
             </div>
 
-            <!-- Nama Operator -->
-            <div>
-                <label class="block text-sm font-semibold mb-1">Nama / ID Operator <span class="text-red-500">*</span></label>
-                <input type="text" id="operatorName" required placeholder="Cth: Ali / OP-102" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+            <!-- Login Admin Ringkas -->
+            <div id="adminLoginBox" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Kata Laluan Admin</label>
+                    <input type="password" id="adminPassword" placeholder="Masukkan password admin" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <button type="button" onclick="verifyAdmin()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 rounded-lg">
+                    Log Masuk Admin
+                </button>
             </div>
 
-            <!-- Mod NG (Dinamik) -->
-            <div>
-                <label class="block text-sm font-semibold mb-1">Mod NG (Jenis Kecacatan) <span class="text-red-500">*</span></label>
-                <select id="ngModeSelect" required disabled class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-100 disabled:cursor-not-allowed">
-                    <option value="">-- Pilih Projek Dahulu --</option>
-                </select>
-            </div>
+            <!-- Borang Admin (Selepas Login) -->
+            <form id="adminForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Tajuk Projek / Mesin <span class="text-red-500">*</span></label>
+                    <input type="text" id="adminProjectTitle" required placeholder="Cth: Solder Line 1" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
 
-            <!-- Container Parameter Dinamik -->
-            <div id="dynamicParamsContainer" class="space-y-3 pt-2 border-t border-slate-100 hidden">
-                <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Parameter Mesin Semasa NG</p>
-                <div id="dynamicFields" class="space-y-3"></div>
-            </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Mod NG (Guna tanda koma ,) <span class="text-red-500">*</span></label>
+                    <input type="text" id="adminNgModes" required placeholder="Cth: solder ball, solder not rise up, solder overflow" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <p class="text-xs text-slate-400 mt-1">Pisahkan setiap mod NG menggunakan tanda koma.</p>
+                </div>
 
-            <!-- Catatan -->
-            <div>
-                <label class="block text-sm font-semibold mb-1">Catatan Tambahan (Opsyen)</label>
-                <textarea id="remarks" rows="2" placeholder="Tindakan awal atau pemerhatian..." class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-            </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Label Parameter 1</label>
+                        <input type="text" id="adminParam1" value="Motion 1" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Label Parameter 2</label>
+                        <input type="text" id="adminParam2" value="Motion 2" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50" readonly>
+                    </div>
+                </div>
 
-            <!-- Butang Hantar -->
-            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition duration-150">
-                Hantar Rekod NG
-            </button>
-        </form>
+                <button type="submit" id="saveProjectBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow transition duration-150">
+                    Simpan Projek Baru ke Database
+                </button>
+            </form>
+        </div>
+
     </div>
 
     <script>
-        // 1. KONFIGURASI SUPABASE (Gantikan dengan maklumat projek anda)
+        // 1. KONFIGURASI SUPABASE
         const SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
+        const SUPABASE_ANON_KEY = 'sb_publishable_...'; // Ganti dengan publishable key anda
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let projectsData = [];
 
-        // 2. TETAPKAN TARIKH & MASA SEMASA
+        // Tukar Tab (Operator / Admin)
+        function switchTab(tab) {
+            const opSec = document.getElementById('sectionOperator');
+            const adSec = document.getElementById('sectionAdmin');
+            const tabOp = document.getElementById('tabOperator');
+            const tabAd = document.getElementById('tabAdmin');
+
+            if (tab === 'operator') {
+                opSec.classList.remove('hidden');
+                adSec.classList.add('hidden');
+                tabOp.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
+                tabAd.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
+                fetchProjects();
+            } else {
+                opSec.classList.add('hidden');
+                adSec.classList.remove('hidden');
+                tabAd.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
+                tabOp.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
+            }
+        }
+
+        // Semak Password Admin (Contoh password mudah: "admin123")
+        function verifyAdmin() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === 'admin123') {
+                document.getElementById('adminLoginBox').classList.add('hidden');
+                document.getElementById('adminForm').classList.remove('hidden');
+                showAlert('Log masuk admin berjaya!', 'success');
+            } else {
+                showAlert('Kata laluan admin salah!', 'error');
+            }
+        }
+
+        // Tarikh & Masa Semasa
         function setCurrentDateTime() {
             const now = new Date();
-            // Format YYYY-MM-DD mengikut waktu tempatan
-            const localDate = now.getFullYear() + '-' + 
-                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                              String(now.getDate()).padStart(2, '0');
+            const localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
             const localTime = now.toTimeString().slice(0, 8);
-            
             document.getElementById('recordedDate').value = localDate;
             document.getElementById('recordedTime').value = localTime;
         }
 
-        // 3. TARIK SENARAI PROJEK AKTIF DARI SUPABASE
+        // Tarik Projek
         async function fetchProjects() {
             const projectSelect = document.getElementById('projectSelect');
             const { data, error } = await supabaseClient
@@ -103,14 +185,12 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                showAlert('Gagal memuatkan projek: ' + error.message, 'error');
                 projectSelect.innerHTML = '<option value="">Ralat sambungan database</option>';
                 return;
             }
 
             projectsData = data;
             projectSelect.innerHTML = '<option value="">-- Sila Pilih Projek / Mesin --</option>';
-            
             data.forEach(proj => {
                 const option = document.createElement('option');
                 option.value = proj.id;
@@ -119,7 +199,7 @@
             });
         }
 
-        // 4. JANA BORANG DINAMIK APABILA PROJEK DIPILIH
+        // Papar Borang Dinamik Mengikut Projek (Parameter Nombor Sahaja)
         document.getElementById('projectSelect').addEventListener('change', function() {
             const selectedId = this.value;
             const ngModeSelect = document.getElementById('ngModeSelect');
@@ -127,22 +207,17 @@
             const dynamicFields = document.getElementById('dynamicFields');
 
             dynamicFields.innerHTML = '';
-
             if (!selectedId) {
                 ngModeSelect.innerHTML = '<option value="">-- Pilih Projek Dahulu --</option>';
                 ngModeSelect.disabled = true;
-                ngModeSelect.classList.add('bg-slate-100');
                 paramsContainer.classList.add('hidden');
                 return;
             }
 
             const project = projectsData.find(p => p.id === selectedId);
 
-            // Isi Dropdown Mod NG
             ngModeSelect.disabled = false;
-            ngModeSelect.classList.remove('bg-slate-100');
             ngModeSelect.innerHTML = '<option value="">-- Pilih Jenis NG --</option>';
-            
             (project.ng_modes || []).forEach(mode => {
                 const opt = document.createElement('option');
                 opt.value = mode;
@@ -150,16 +225,15 @@
                 ngModeSelect.appendChild(opt);
             });
 
-            // Jana Input Parameter Dinamik
             const labels = project.parameter_labels || [];
             if (labels.length > 0) {
                 paramsContainer.classList.remove('hidden');
-                labels.forEach((label, index) => {
+                labels.forEach(label => {
                     const wrapper = document.createElement('div');
                     wrapper.innerHTML = `
-                        <label class="block text-sm font-medium text-slate-700 mb-1">${label} <span class="text-red-500">*</span></label>
-                        <input type="text" data-param-label="${label}" required 
-                               placeholder="Masukkan nilai ${label}" 
+                        <label class="block text-sm font-medium text-slate-700 mb-1">${label} (Nombor Sahaja) <span class="text-red-500">*</span></label>
+                        <input type="number" step="any" data-param-label="${label}" required 
+                               placeholder="Masukkan nilai nombor untuk ${label}" 
                                class="dynamic-param-input w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
                     `;
                     dynamicFields.appendChild(wrapper);
@@ -169,14 +243,38 @@
             }
         });
 
-        // 5. HANTAR DATA KE SUPABASE
+        // Simpan Projek Baru dari Admin Panel
+        document.getElementById('adminForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('adminProjectTitle').value.trim();
+            const modesRaw = document.getElementById('adminNgModes').value;
+            const ngModes = modesRaw.split(',').map(m => m.trim()).filter(m => m.length > 0);
+
+            // Tetapan tetap untuk Parameter 1 (Motion 1) dan Parameter 2 (Motion 2)
+            const parameterLabels = ["Motion 1", "Motion 2"];
+
+            const { error } = await supabaseClient
+                .from('ng_projects')
+                .insert([{
+                    project_title: title,
+                    parameter_labels: parameterLabels,
+                    ng_modes: ngModes,
+                    is_active: true
+                }]);
+
+            if (error) {
+                showAlert('Gagal simpan projek: ' + error.message, 'error');
+            } else {
+                showAlert('Projek baru berjaya didaftarkan!', 'success');
+                document.getElementById('adminProjectTitle').value = '';
+                document.getElementById('adminNgModes').value = '';
+                switchTab('operator');
+            }
+        });
+
+        // Hantar Rekod NG oleh Operator
         document.getElementById('ngForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Menghantar...';
-
-            // Kumpul semua nilai parameter dinamik ke dalam objek JSON
             const parameterValues = {};
             document.querySelectorAll('.dynamic-param-input').forEach(input => {
                 const label = input.getAttribute('data-param-label');
@@ -193,18 +291,12 @@
                 remarks: document.getElementById('remarks').value.trim() || null
             };
 
-            const { error } = await supabaseClient
-                .from('ng_records')
-                .insert([payload]);
-
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Hantar Rekod NG';
+            const { error } = await supabaseClient.from('ng_records').insert([payload]);
 
             if (error) {
-                showAlert('Ralat menyimpan data: ' + error.message, 'error');
+                showAlert('Ralat simpan data: ' + error.message, 'error');
             } else {
                 showAlert('Rekod NG berjaya disimpan!', 'success');
-                // Reset input parameter & mod NG sahaja supaya operator mudah key-in rekod seterusnya
                 document.getElementById('ngModeSelect').value = '';
                 document.getElementById('remarks').value = '';
                 document.querySelectorAll('.dynamic-param-input').forEach(input => input.value = '');
@@ -222,7 +314,7 @@
             setTimeout(() => alertBox.classList.add('hidden'), 4000);
         }
 
-        // Mulakan aplikasi
+        // Mulakan
         setCurrentDateTime();
         fetchProjects();
     </script>
