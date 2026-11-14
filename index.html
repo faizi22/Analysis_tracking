@@ -266,7 +266,7 @@
         <div id="sectionAdmin" class="hidden max-w-xl mx-auto space-y-6 mt-2">
             <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-6">
                 <div class="pb-4 mb-4 border-b border-zinc-100">
-                    <h1 class="text-lg font-bold text-zinc-900">Register New Machine / Project</h1>
+                    <h1 class="text-lg font-bold text-zinc-900">Register & Manage Projects</h1>
                     <p class="text-xs text-zinc-500">Set up project name, NG modes, and up to 5 number parameters.</p>
                 </div>
 
@@ -325,9 +325,12 @@
                         </button>
                     </form>
 
-                    <!-- Registered Projects List -->
+                    <!-- Registered Projects List with Delete Button -->
                     <div class="pt-5 border-t border-zinc-200">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Active Projects</h3>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Active Projects</h3>
+                            <span class="text-[11px] text-zinc-400">Deleting a project also removes its NG logs</span>
+                        </div>
                         <div id="adminProjectList" class="space-y-2 text-sm"></div>
                     </div>
                 </div>
@@ -454,8 +457,15 @@
 
                 renderAdminProjectList();
 
-                if (prevOpVal) projectSelect.value = prevOpVal;
-                if (prevDashVal) {
+                if (prevOpVal && projectsData.some(function(p) { return p.id === prevOpVal; })) {
+                    projectSelect.value = prevOpVal;
+                } else {
+                    document.getElementById('dynamicParamsContainer').classList.add('hidden');
+                    document.getElementById('ngModeSelect').innerHTML = '<option value="">Select Project First</option>';
+                    document.getElementById('ngModeSelect').disabled = true;
+                }
+
+                if (prevDashVal && projectsData.some(function(p) { return p.id === prevDashVal; })) {
                     dashSelect.value = prevDashVal;
                 } else if (projectsData.length > 0) {
                     dashSelect.value = projectsData[0].id;
@@ -463,6 +473,25 @@
 
                 if (loadDashboardAfter && dashSelect.value) {
                     loadDashboardData(dashSelect.value);
+                }
+            };
+
+            // DELETE PROJECT FUNCTION
+            window.deleteProjectById = async function(projectId, projectTitle) {
+                if (!supabaseClient) return;
+                var confirmed = window.confirm('Are you sure you want to delete "' + projectTitle + '" and all of its NG records?');
+                if (!confirmed) return;
+
+                var res = await supabaseClient
+                    .from('ng_projects')
+                    .delete()
+                    .eq('id', projectId);
+
+                if (res.error) {
+                    window.showAlert('Failed to delete project: ' + res.error.message, 'error');
+                } else {
+                    window.showAlert('Project "' + projectTitle + '" deleted.', 'success');
+                    window.refreshSupabaseProjects(false);
                 }
             };
 
@@ -476,10 +505,26 @@
                 container.innerHTML = '';
                 projectsData.forEach(function(p) {
                     var params = (p.parameter_labels || []).join(', ');
+                    var modes = (p.ng_modes || []).join(', ');
                     var row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-2.5 bg-zinc-50 rounded-lg border border-zinc-200';
-                    row.innerHTML = '<div><p class="font-semibold text-zinc-800">' + p.project_title + '</p>' +
-                        '<p class="text-xs text-zinc-500">Parameters: ' + params + '</p></div>';
+                    row.className = 'flex items-center justify-between gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200';
+
+                    var infoDiv = document.createElement('div');
+                    infoDiv.className = 'min-w-0 flex-1';
+                    infoDiv.innerHTML = '<p class="font-semibold text-zinc-900 truncate">' + p.project_title + '</p>' +
+                        '<p class="text-xs text-zinc-500 truncate">Params: ' + params + '</p>' +
+                        '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + modes + '</p>';
+
+                    var delBtn = document.createElement('button');
+                    delBtn.type = 'button';
+                    delBtn.className = 'px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition shrink-0';
+                    delBtn.textContent = 'Delete';
+                    delBtn.addEventListener('click', function() {
+                        window.deleteProjectById(p.id, p.project_title);
+                    });
+
+                    row.appendChild(infoDiv);
+                    row.appendChild(delBtn);
                     container.appendChild(row);
                 });
             }
@@ -559,7 +604,7 @@
                     document.getElementById('adminParam3').value = '';
                     document.getElementById('adminParam4').value = '';
                     document.getElementById('adminParam5').value = '';
-                    window.switchAppTab('operator');
+                    window.refreshSupabaseProjects(false);
                 }
             });
 
@@ -698,7 +743,6 @@
                 updateDashboardAnalytics();
             }
 
-            // BASIC MATH HELPERS
             function calcStats(arr) {
                 var valid = arr.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); }).map(Number);
                 var n = valid.length;
@@ -778,16 +822,13 @@
                 renderRecordsTable(labels, records);
             }
 
-            // GENERATE SIMPLE ENGLISH SUGGESTIONS
             function generateSmartInsights(labels, records, sortedModes, modeCounts) {
                 var insights = [];
                 var topMode = sortedModes[0];
                 var topPct = ((modeCounts[topMode] / records.length) * 100).toFixed(0);
 
-                // 1. Top Priority
                 insights.push('<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects. Focus on fixing this mode first.');
 
-                // 2. Parameter Shift Detection
                 var overallStats = {};
                 labels.forEach(function(l) {
                     overallStats[l] = calcStats(records.map(function(r) { return (r.parameter_values || {})[l]; }));
@@ -817,7 +858,6 @@
                     insights.push('<b>Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than overall average ' + overallStats[maxShiftParam].mean.toFixed(2) + '). Suggestion: Check and tighten <b>' + maxShiftParam + '</b> settings.');
                 }
 
-                // 3. Recent Drift (Last 3 Records)
                 if (records.length >= 4 && labels.length > 0) {
                     var p0 = labels[0];
                     var last3 = records.slice(-3).map(function(r) { return Number((r.parameter_values || {})[p0]); });
@@ -831,7 +871,6 @@
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
-            // CHART 1: TREND + MOVING AVERAGE + SPEC LIMITS
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
@@ -867,7 +906,6 @@
 
                     var st = calcStats(rawVals);
 
-                    // 3-Point Moving Average
                     var maVals = rawVals.map(function(v, idx, arr) {
                         if (idx < 2) return null;
                         var slice = [arr[idx - 2], arr[idx - 1], arr[idx]].filter(function(x) { return x !== null; });
@@ -955,7 +993,6 @@
                 });
             }
 
-            // CHART 2: SCATTER PLOT + CORRELATION
             function renderScatterChart() {
                 if (typeof Chart === 'undefined') return;
                 if (scatterChartInstance) scatterChartInstance.destroy();
@@ -1005,7 +1042,6 @@
                 });
             }
 
-            // CHART 3: PARETO 80/20
             function renderParetoChart() {
                 if (typeof Chart === 'undefined') return;
                 if (modeBarChartInstance) modeBarChartInstance.destroy();
@@ -1057,7 +1093,6 @@
                 });
             }
 
-            // MATRIX TABLE: AVERAGE PARAMETER BY NG MODE
             function renderMatrixTable(labels, records, modeCounts) {
                 var thead = document.getElementById('matrixHeaderRow');
                 var tbody = document.getElementById('matrixTableBody');
