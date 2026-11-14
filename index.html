@@ -3,127 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>General NG Tracking System</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
-        .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; }
-        button:hover { background: #0056b3; }
-    </style>
+    <title>Online NG Tracking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen p-4 md:p-8 font-sans text-slate-800">
 
-<div class="container">
-    <h2>Sistem Tracking NG (General & Dinamik)</h2>
-    
-    <div class="form-group">
-        <label for="projectSelect">Pilih Projek / Mesin:</label>
-        <select id="projectSelect" onchange="loadProjectConfig()">
-            <option value="">-- Sila Pilih Projek --</option>
-            <!-- Data ini akan ditarik dari table ng_projects Supabase -->
-            <option value="proj_1" data-p1="Pressure (Bar)" data-p2="Temperature (°C)" data-ng="Short Molding,Flash,Scratch">Projek A: Hydraulic Press Line</option>
-            <option value="proj_2" data-p1="Clamp Force (kN)" data-p2="Cycle Time (s)" data-ng="Dimension Out,Short Shot,Sink Mark">Projek B: Injection Molding 02</option>
-        </select>
+    <div class="max-w-lg mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <div class="border-b pb-4 mb-6">
+            <h1 class="text-xl font-bold text-slate-900">Rekod NG & Parameter Mesin</h1>
+            <p class="text-sm text-slate-500">Pilih projek/mesin untuk memuatkan parameter pantauan.</p>
+        </div>
+
+        <!-- Status Alert -->
+        <div id="alertBox" class="hidden mb-4 p-3 rounded-lg text-sm font-medium"></div>
+
+        <form id="ngForm" class="space-y-4">
+            <!-- Pilihan Projek -->
+            <div>
+                <label class="block text-sm font-semibold mb-1">Projek / Mesin <span class="text-red-500">*</span></label>
+                <select id="projectSelect" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">Memuatkan senarai projek...</option>
+                </select>
+            </div>
+
+            <!-- Tarikh & Masa (Auto) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Tarikh</label>
+                    <input type="date" id="recordedDate" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Masa</label>
+                    <input type="time" id="recordedTime" step="1" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                </div>
+            </div>
+
+            <!-- Nama Operator -->
+            <div>
+                <label class="block text-sm font-semibold mb-1">Nama / ID Operator <span class="text-red-500">*</span></label>
+                <input type="text" id="operatorName" required placeholder="Cth: Ali / OP-102" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <!-- Mod NG (Dinamik) -->
+            <div>
+                <label class="block text-sm font-semibold mb-1">Mod NG (Jenis Kecacatan) <span class="text-red-500">*</span></label>
+                <select id="ngModeSelect" required disabled class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-100 disabled:cursor-not-allowed">
+                    <option value="">-- Pilih Projek Dahulu --</option>
+                </select>
+            </div>
+
+            <!-- Container Parameter Dinamik -->
+            <div id="dynamicParamsContainer" class="space-y-3 pt-2 border-t border-slate-100 hidden">
+                <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Parameter Mesin Semasa NG</p>
+                <div id="dynamicFields" class="space-y-3"></div>
+            </div>
+
+            <!-- Catatan -->
+            <div>
+                <label class="block text-sm font-semibold mb-1">Catatan Tambahan (Opsyen)</label>
+                <textarea id="remarks" rows="2" placeholder="Tindakan awal atau pemerhatian..." class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+            </div>
+
+            <!-- Butang Hantar -->
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition duration-150">
+                Hantar Rekod NG
+            </button>
+        </form>
     </div>
 
-    <form id="ngForm">
-        <div class="form-group">
-            <label>Tarikh & Masa:</label>
-            <input type="text" id="dateTime" readonly>
-        </div>
+    <script>
+        // 1. KONFIGURASI SUPABASE (Gantikan dengan maklumat projek anda)
+        const SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co/rest/v1/';
+        const SUPABASE_ANON_KEY = 'sb_secret_HrrC5pJ0LejAKLfOwSPX4Q_1L4fiS51';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        <div class="form-group">
-            <label for="operatorName">Key-in Oleh (Nama Operator):</label>
-            <input type="text" id="operatorName" required placeholder="Masukkan nama anda">
-        </div>
+        let projectsData = [];
 
-        <div class="form-group">
-            <label for="ngMode">Mod NG:</label>
-            <select id="ngMode" required>
-                <option value="">-- Pilih Jenis NG --</option>
-            </select>
-        </div>
+        // 2. TETAPKAN TARIKH & MASA SEMASA
+        function setCurrentDateTime() {
+            const now = new Date();
+            // Format YYYY-MM-DD mengikut waktu tempatan
+            const localDate = now.getFullYear() + '-' + 
+                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(now.getDate()).padStart(2, '0');
+            const localTime = now.toTimeString().slice(0, 8);
+            
+            document.getElementById('recordedDate').value = localDate;
+            document.getElementById('recordedTime').value = localTime;
+        }
 
-        <!-- Dynamic Parameter Fields -->
-        <div class="form-group" id="param1Group" style="display:none;">
-            <label id="labelParam1">Parameter 1</label>
-            <input type="text" id="valParam1">
-        </div>
+        // 3. TARIK SENARAI PROJEK AKTIF DARI SUPABASE
+        async function fetchProjects() {
+            const projectSelect = document.getElementById('projectSelect');
+            const { data, error } = await supabaseClient
+                .from('ng_projects')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false });
 
-        <div class="form-group" id="param2Group" style="display:none;">
-            <label id="labelParam2">Parameter 2</label>
-            <input type="text" id="valParam2">
-        </div>
+            if (error) {
+                showAlert('Gagal memuatkan projek: ' + error.message, 'error');
+                projectSelect.innerHTML = '<option value="">Ralat sambungan database</option>';
+                return;
+            }
 
-        <div class="form-group">
-            <label for="remarks">Catatan Tambahan (Opsyen):</label>
-            <textarea id="remarks" rows="2"></textarea>
-        </div>
+            projectsData = data;
+            projectSelect.innerHTML = '<option value="">-- Sila Pilih Projek / Mesin --</option>';
+            
+            data.forEach(proj => {
+                const option = document.createElement('option');
+                option.value = proj.id;
+                option.textContent = proj.project_title;
+                projectSelect.appendChild(option);
+            });
+        }
 
-        <button type="submit">Hantar Data NG</button>
-    </form>
-</div>
+        // 4. JANA BORANG DINAMIK APABILA PROJEK DIPILIH
+        document.getElementById('projectSelect').addEventListener('change', function() {
+            const selectedId = this.value;
+            const ngModeSelect = document.getElementById('ngModeSelect');
+            const paramsContainer = document.getElementById('dynamicParamsContainer');
+            const dynamicFields = document.getElementById('dynamicFields');
 
-<script>
-    // Set 자동 Tarikh & Masa semasa
-    function updateDateTime() {
-        const now = new Date();
-        document.getElementById('dateTime').value = now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 8);
-    }
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
+            dynamicFields.innerHTML = '';
 
-    // Fungsiubah form mengikut Projek yang dipilih
-    function loadProjectConfig() {
-        const select = document.getElementById('projectSelect');
-        const option = select.options[select.selectedIndex];
-        
-        const p1Group = document.getElementById('param1Group');
-        const p2Group = document.getElementById('param2Group');
-        const ngModeSelect = document.getElementById('ngMode');
+            if (!selectedId) {
+                ngModeSelect.innerHTML = '<option value="">-- Pilih Projek Dahulu --</option>';
+                ngModeSelect.disabled = true;
+                ngModeSelect.classList.add('bg-slate-100');
+                paramsContainer.classList.add('hidden');
+                return;
+            }
 
-        if (!select.value) {
-            p1Group.style.display = 'none';
-            p2Group.style.display = 'none';
+            const project = projectsData.find(p => p.id === selectedId);
+
+            // Isi Dropdown Mod NG
+            ngModeSelect.disabled = false;
+            ngModeSelect.classList.remove('bg-slate-100');
             ngModeSelect.innerHTML = '<option value="">-- Pilih Jenis NG --</option>';
-            return;
-        }
+            
+            (project.ng_modes || []).forEach(mode => {
+                const opt = document.createElement('option');
+                opt.value = mode;
+                opt.textContent = mode;
+                ngModeSelect.appendChild(opt);
+            });
 
-        // Setup Parameter 1
-        const p1Name = option.getAttribute('data-p1');
-        if(p1Name) {
-            document.getElementById('labelParam1').innerText = p1Name;
-            p1Group.style.display = 'block';
-        }
-
-        // Setup Parameter 2
-        const p2Name = option.getAttribute('data-p2');
-        if(p2Name) {
-            document.getElementById('labelParam2').innerText = p2Name;
-            p2Group.style.display = 'block';
-        }
-
-        // Setup Mod NG Dropdown
-        const ngModes = option.getAttribute('data-ng').split(',');
-        ngModeSelect.innerHTML = '<option value="">-- Pilih Jenis NG --</option>';
-        ngModes.forEach(mode => {
-            let opt = document.createElement('option');
-            opt.value = mode.trim();
-            opt.innerHTML = mode.trim();
-            ngModeSelect.appendChild(opt);
+            // Jana Input Parameter Dinamik
+            const labels = project.parameter_labels || [];
+            if (labels.length > 0) {
+                paramsContainer.classList.remove('hidden');
+                labels.forEach((label, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = `
+                        <label class="block text-sm font-medium text-slate-700 mb-1">${label} <span class="text-red-500">*</span></label>
+                        <input type="text" data-param-label="${label}" required 
+                               placeholder="Masukkan nilai ${label}" 
+                               class="dynamic-param-input w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                    `;
+                    dynamicFields.appendChild(wrapper);
+                });
+            } else {
+                paramsContainer.classList.add('hidden');
+            }
         });
-    }
 
-    // Handle Submit ke Supabase (Contoh Dummy)
-    document.getElementById('ngForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Data berjaya dihantar ke Supabase!');
-        // Di sini anda boleh guna supabase.from('ng_records').insert({...})
-    });
-</script>
+        // 5. HANTAR DATA KE SUPABASE
+        document.getElementById('ngForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menghantar...';
 
+            // Kumpul semua nilai parameter dinamik ke dalam objek JSON
+            const parameterValues = {};
+            document.querySelectorAll('.dynamic-param-input').forEach(input => {
+                const label = input.getAttribute('data-param-label');
+                parameterValues[label] = input.value.trim();
+            });
+
+            const payload = {
+                project_id: document.getElementById('projectSelect').value,
+                recorded_date: document.getElementById('recordedDate').value,
+                recorded_time: document.getElementById('recordedTime').value,
+                operator_name: document.getElementById('operatorName').value.trim(),
+                ng_mode: document.getElementById('ngModeSelect').value,
+                parameter_values: parameterValues,
+                remarks: document.getElementById('remarks').value.trim() || null
+            };
+
+            const { error } = await supabaseClient
+                .from('ng_records')
+                .insert([payload]);
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Hantar Rekod NG';
+
+            if (error) {
+                showAlert('Ralat menyimpan data: ' + error.message, 'error');
+            } else {
+                showAlert('Rekod NG berjaya disimpan!', 'success');
+                // Reset input parameter & mod NG sahaja supaya operator mudah key-in rekod seterusnya
+                document.getElementById('ngModeSelect').value = '';
+                document.getElementById('remarks').value = '';
+                document.querySelectorAll('.dynamic-param-input').forEach(input => input.value = '');
+                setCurrentDateTime();
+            }
+        });
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `mb-4 p-3 rounded-lg text-sm font-medium ${
+                type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'
+            }`;
+            alertBox.classList.remove('hidden');
+            setTimeout(() => alertBox.classList.add('hidden'), 4000);
+        }
+
+        // Mulakan aplikasi
+        setCurrentDateTime();
+        fetchProjects();
+    </script>
 </body>
 </html>
