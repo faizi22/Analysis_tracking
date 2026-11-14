@@ -135,24 +135,24 @@
 
         // Tukar Tab (Operator / Admin)
         function switchTab(tab) {
-            const opSec = document.getElementById('sectionOperator');
-            const adSec = document.getElementById('sectionAdmin');
-            const tabOp = document.getElementById('tabOperator');
-            const tabAd = document.getElementById('tabAdmin');
+    const opSec = document.getElementById('sectionOperator');
+    const adSec = document.getElementById('sectionAdmin');
+    const tabOp = document.getElementById('tabOperator');
+    const tabAd = document.getElementById('tabAdmin');
 
-            if (tab === 'operator') {
-                opSec.classList.remove('hidden');
-                adSec.classList.add('hidden');
-                tabOp.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
-                tabAd.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
-                fetchProjects();
-            } else {
-                opSec.classList.add('hidden');
-                adSec.classList.remove('hidden');
-                tabAd.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
-                tabOp.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
-            }
-        }
+    if (tab === 'operator') {
+        opSec.classList.remove('hidden');
+        adSec.classList.add('hidden');
+        tabOp.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
+        tabAd.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
+        fetchProjects(); // <--- Pastikan baris ini ada supaya senarai ditarik semula setiap kali buka tab operator
+    } else {
+        opSec.classList.add('hidden');
+        adSec.classList.remove('hidden');
+        tabAd.className = "flex-1 py-3 text-center font-bold text-blue-600 border-b-2 border-blue-600";
+        tabOp.className = "flex-1 py-3 text-center font-bold text-slate-400 border-b-2 border-transparent";
+    }
+}
 
         // Semak Password Admin (Contoh password mudah: "admin123")
         function verifyAdmin() {
