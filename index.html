@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General NG Tracking System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
+        .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sistem Tracking NG (General & Dinamik)</h2>
+    
+    <div class="form-group">
+        <label for="projectSelect">Pilih Projek / Mesin:</label>
+        <select id="projectSelect" onchange="loadProjectConfig()">
+            <option value="">-- Sila Pilih Projek --</option>
+            <!-- Data ini akan ditarik dari table ng_projects Supabase -->
+            <option value="proj_1" data-p1="Pressure (Bar)" data-p2="Temperature (°C)" data-ng="Short Molding,Flash,Scratch">Projek A: Hydraulic Press Line</option>
+            <option value="proj_2" data-p1="Clamp Force (kN)" data-p2="Cycle Time (s)" data-ng="Dimension Out,Short Shot,Sink Mark">Projek B: Injection Molding 02</option>
+        </select>
+    </div>
+
+    <form id="ngForm">
+        <div class="form-group">
+            <label>Tarikh & Masa:</label>
+            <input type="text" id="dateTime" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="operatorName">Key-in Oleh (Nama Operator):</label>
+            <input type="text" id="operatorName" required placeholder="Masukkan nama anda">
+        </div>
+
+        <div class="form-group">
+            <label for="ngMode">Mod NG:</label>
+            <select id="ngMode" required>
+                <option value="">-- Pilih Jenis NG --</option>
+            </select>
+        </div>
+
+        <!-- Dynamic Parameter Fields -->
+        <div class="form-group" id="param1Group" style="display:none;">
+            <label id="labelParam1">Parameter 1</label>
+            <input type="text" id="valParam1">
+        </div>
+
+        <div class="form-group" id="param2Group" style="display:none;">
+            <label id="labelParam2">Parameter 2</label>
+            <input type="text" id="valParam2">
+        </div>
+
+        <div class="form-group">
+            <label for="remarks">Catatan Tambahan (Opsyen):</label>
+            <textarea id="remarks" rows="2"></textarea>
+        </div>
+
+        <button type="submit">Hantar Data NG</button>
+    </form>
+</div>
+
+<script>
+    // Set 자동 Tarikh & Masa semasa
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('dateTime').value = now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 8);
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Fungsiubah form mengikut Projek yang dipilih
+    function loadProjectConfig() {
+        const select = document.getElementById('projectSelect');
+        const option = select.options[select.selectedIndex];
+        
+        const p1Group = document.getElementById('param1Group');
+        const p2Group = document.getElementById('param2Group');
+        const ngModeSelect = document.getElementById('ngMode');
+
+        if (!select.value) {
+            p1Group.style.display = 'none';
+            p2Group.style.display = 'none';
+            ngModeSelect.innerHTML = '<option value="">-- Pilih Jenis NG --</option>';
+            return;
+        }
+
+        // Setup Parameter 1
+        const p1Name = option.getAttribute('data-p1');
+        if(p1Name) {
+            document.getElementById('labelParam1').innerText = p1Name;
+            p1Group.style.display = 'block';
+        }
+
+        // Setup Parameter 2
+        const p2Name = option.getAttribute('data-p2');
+        if(p2Name) {
+            document.getElementById('labelParam2').innerText = p2Name;
+            p2Group.style.display = 'block';
+        }
+
+        // Setup Mod NG Dropdown
+        const ngModes = option.getAttribute('data-ng').split(',');
+        ngModeSelect.innerHTML = '<option value="">-- Pilih Jenis NG --</option>';
+        ngModes.forEach(mode => {
+            let opt = document.createElement('option');
+            opt.value = mode.trim();
+            opt.innerHTML = mode.trim();
+            ngModeSelect.appendChild(opt);
+        });
+    }
+
+    // Handle Submit ke Supabase (Contoh Dummy)
+    document.getElementById('ngForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Data berjaya dihantar ke Supabase!');
+        // Di sini anda boleh guna supabase.from('ng_records').insert({...})
+    });
+</script>
+
+</body>
+</html>
