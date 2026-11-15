@@ -147,14 +147,14 @@
                 </div>
             </div>
 
-            <!-- Add / Edit Action Taken Form Box (Collapsible, Now With PNG Report Upload) -->
+            <!-- Add / Edit Action Taken Form Box (Collapsible) -->
             <div id="actionModalBox" class="hidden bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-200">
                     <div class="flex items-center gap-2">
                         <span id="actionEditBadge" class="hidden px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-amber-200 text-amber-900">Edit Mode</span>
                         <div>
                             <h3 id="actionModalTitle" class="text-sm font-bold text-emerald-950">Log Engineering Action Taken</h3>
-                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">Pin an action to the timeline and optionally upload your PowerPoint PNG report slide.</p>
+                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">Pin an action to the timeline and optionally log trial Run Hours / Total Output to measure exact Defect %.</p>
                         </div>
                     </div>
                     <button type="button" onclick="window.cancelEditAction(true)" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950 px-2.5 py-1 rounded bg-white border border-emerald-200">
@@ -180,7 +180,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="sm:col-span-4">
+                    <div class="sm:col-span-3">
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Action Description (Details) <span class="text-red-500">*</span></label>
                         <input type="text" id="actionDesc" required placeholder="e.g. Adjusted clamp & guide pin to reduce variation." class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
                     </div>
@@ -192,21 +192,7 @@
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Total Output (Opt)</label>
                         <input type="number" step="1" min="0" id="actionTotalOutput" placeholder="e.g. 800" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
                     </div>
-
-                    <!-- PNG Report Upload Row -->
-                    <div class="sm:col-span-4">
-                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Upload Report Slide (PNG / JPG — Double-click Action # to view)</label>
-                        <div class="flex flex-wrap items-center gap-2.5">
-                            <input type="file" id="actionReportFile" accept="image/png,image/jpeg,image/webp" class="text-xs text-zinc-700 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-emerald-300 file:text-xs file:font-semibold file:bg-white file:text-emerald-800 hover:file:bg-emerald-100 cursor-pointer">
-                            <div id="actionReportPreviewWrap" class="hidden flex items-center gap-2 bg-white px-2.5 py-1 rounded-lg border border-emerald-200">
-                                <img id="actionReportThumb" src="" alt="Report thumbnail" class="w-8 h-6 object-cover rounded border border-zinc-200">
-                                <span id="actionReportStatusText" class="text-[11px] font-semibold text-emerald-700">PNG Slide Attached</span>
-                                <button type="button" id="btnClearActionReport" onclick="window.clearActionReportImage()" class="text-[11px] text-red-600 hover:text-red-800 font-bold ml-1" title="Remove report image">Remove</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-2 flex items-end justify-end gap-1.5">
+                    <div class="flex items-end gap-1.5">
                         <button type="submit" id="actionSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition">
                             Pin Action
                         </button>
@@ -228,7 +214,7 @@
                 </ul>
             </div>
 
-            <!-- Summary Cards -->
+            <!-- Summary Cards (Includes NG Qty, NG/hr, Defect Rate %, and MTBF) -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
                     <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Total NG & Hourly Rate</p>
@@ -274,7 +260,7 @@
                 <div id="floatingActionCard" class="hidden mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-md">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <span id="cardActionNum" title="Double-click to view PNG report" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0 cursor-pointer">1</span>
+                            <span id="cardActionNum" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
                             <h4 id="cardActionTitle" class="font-bold text-zinc-900 text-sm">Mechanical Alignment</h4>
                         </div>
                         <button type="button" onclick="document.getElementById('floatingActionCard').classList.add('hidden')" class="text-zinc-400 hover:text-zinc-700 text-xs font-bold">✕</button>
@@ -289,14 +275,9 @@
                         <span id="cardActionStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
                             ✔ Completed
                         </span>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" id="cardActionViewReportBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
-                                📄 View PNG Report
-                            </button>
-                            <button type="button" id="cardActionEditBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
-                                Edit
-                            </button>
-                        </div>
+                        <button type="button" id="cardActionEditBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
+                            Edit Action
+                        </button>
                     </div>
                 </div>
 
@@ -307,12 +288,12 @@
 
             <!-- ACTION HISTORY LIST -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-zinc-50/60">
+                <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/60">
                     <div class="flex items-center gap-2.5">
                         <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✔</div>
                         <div>
                             <h3 class="text-base font-bold text-zinc-900">Action History & Before/After Impact</h3>
-                            <p class="text-[11px] text-zinc-500"><b>Double-click</b> any Action number (<b>1</b>, <b>2</b>...) or row to open its full PowerPoint PNG report slide.</p>
+                            <p class="text-[11px] text-zinc-500">Compares Parameter Avg, NG/hr Rate, Defect Rate (%), and MTBF before vs. after each action.</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -523,72 +504,12 @@
         </div>
     </main>
 
-    <!-- ================= FULL-SCREEN PNG REPORT LIGHTBOX MODAL ================= -->
-    <div id="reportLightboxModal" class="hidden fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" onclick="if(event.target===this){window.closeReportLightbox();}">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
-            <!-- Modal Header -->
-            <div class="px-5 py-3.5 border-b border-zinc-200 flex items-center justify-between gap-3 bg-zinc-50">
-                <div class="flex items-center gap-3 min-w-0">
-                    <span id="lightboxActionNum" class="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2">
-                            <h3 id="lightboxActionTitle" class="font-bold text-zinc-900 text-sm sm:text-base truncate">Action Title</h3>
-                            <span id="lightboxActionStatus" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 shrink-0">✔ Completed</span>
-                        </div>
-                        <p id="lightboxActionMeta" class="text-xs text-zinc-500 truncate">CW46 • 14 Nov 2026 • 02:03 PM</p>
-                    </div>
-                </div>
-
-                <!-- Zoom & Action Controls -->
-                <div class="flex items-center gap-1.5 shrink-0">
-                    <div id="lightboxZoomControls" class="hidden sm:flex items-center gap-1 bg-white border border-zinc-200 rounded-lg px-1.5 py-1">
-                        <button type="button" onclick="window.adjustReportZoom(-25)" class="px-2 py-0.5 text-xs font-bold text-zinc-700 hover:bg-zinc-100 rounded" title="Zoom Out">-</button>
-                        <span id="lightboxZoomLabel" class="text-[11px] font-semibold text-zinc-600 w-10 text-center">100%</span>
-                        <button type="button" onclick="window.adjustReportZoom(25)" class="px-2 py-0.5 text-xs font-bold text-zinc-700 hover:bg-zinc-100 rounded" title="Zoom In">+</button>
-                    </div>
-                    <a id="lightboxDownloadBtn" href="#" download="Action_Report.png" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white transition">
-                        Download PNG
-                    </a>
-                    <button type="button" id="lightboxEditBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition">
-                        Edit / Replace
-                    </button>
-                    <button type="button" onclick="window.closeReportLightbox()" class="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/70 font-bold text-sm transition" title="Close (Esc)">
-                        ✕
-                    </button>
-                </div>
-            </div>
-
-            <!-- Action Description & Impact Sub-bar -->
-            <div class="px-5 py-2.5 bg-white border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <p id="lightboxActionDesc" class="text-zinc-700 font-medium"></p>
-                <div id="lightboxActionImpact" class="text-[11px] text-blue-700 font-semibold shrink-0"></div>
-            </div>
-
-            <!-- Image Canvas Area -->
-            <div class="flex-1 overflow-auto bg-zinc-900/95 p-4 flex items-center justify-center min-h-[320px]">
-                <div id="lightboxImageWrap" class="hidden flex items-center justify-center">
-                    <img id="lightboxReportImg" src="" alt="Action Report Slide" style="width: 100%; max-width: 100%;" class="rounded-lg shadow-xl border border-zinc-700 transition-all duration-150">
-                </div>
-                <div id="lightboxEmptyState" class="hidden text-center max-w-sm p-6 bg-zinc-800/80 rounded-2xl border border-zinc-700 text-zinc-200 space-y-3">
-                    <div class="text-3xl">📄</div>
-                    <h4 class="font-bold text-sm text-white">No PNG Report Attached Yet</h4>
-                    <p class="text-xs text-zinc-400">Upload your team's PowerPoint slide (saved as PNG) for this action so anyone double-clicking it can inspect the full engineering details.</p>
-                    <button type="button" id="lightboxUploadNowBtn" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition">
-                        + Upload PNG Report Now
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPT 1: TAB NAVIGATION, SECURITY, PNG SLIDE COMPRESSOR & 15-PARAMETER BUILDER -->
+    <!-- SCRIPT 1: TAB NAVIGATION, SECURITY & ADMIN 15-PARAMETER BUILDER -->
     <script>
         var ADMIN_PASSWORD = 'mesin2026';
 
         window.editingProjectId = null;
         window.editingActionId = null;
-        window.currentActionReportDataUrl = null;
-        window.currentLightboxZoom = 100;
 
         window.showAlert = function(message, type) {
             var alertBox = document.getElementById('alertBox');
@@ -599,101 +520,6 @@
             );
             alertBox.classList.remove('hidden');
             setTimeout(function() { alertBox.classList.add('hidden'); }, 4500);
-        };
-
-        window.setActionReportPreview = function(dataUrl, labelText) {
-            window.currentActionReportDataUrl = dataUrl || null;
-            var wrap = document.getElementById('actionReportPreviewWrap');
-            var thumb = document.getElementById('actionReportThumb');
-            var statusTxt = document.getElementById('actionReportStatusText');
-            if (!wrap || !thumb) return;
-
-            if (dataUrl) {
-                thumb.src = dataUrl;
-                statusTxt.textContent = labelText || 'PNG Slide Attached';
-                wrap.classList.remove('hidden');
-            } else {
-                thumb.src = '';
-                wrap.classList.add('hidden');
-            }
-        };
-
-        window.clearActionReportImage = function() {
-            var fileInput = document.getElementById('actionReportFile');
-            if (fileInput) fileInput.value = '';
-            window.setActionReportPreview(null, '');
-        };
-
-        // Compress & resize uploaded PowerPoint PNG slide client-side so text stays sharp while keeping DB payload fast
-        window.handleActionReportUpload = function(file) {
-            if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function(evt) {
-                var img = new Image();
-                img.onload = function() {
-                    var maxW = 1600;
-                    var targetW = img.width;
-                    var targetH = img.height;
-                    if (targetW > maxW) {
-                        targetH = Math.round((targetH * maxW) / targetW);
-                        targetW = maxW;
-                    }
-                    var canvas = document.createElement('canvas');
-                    canvas.width = targetW;
-                    canvas.height = targetH;
-                    var ctx = canvas.getContext('2d');
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, targetW, targetH);
-                    ctx.drawImage(img, 0, 0, targetW, targetH);
-
-                    // Use WebP (crisp text & small size) with JPEG fallback
-                    var optimizedUrl = canvas.toDataURL('image/webp', 0.86);
-                    if (optimizedUrl.indexOf('data:image/webp') !== 0 || optimizedUrl.length > 450000) {
-                        optimizedUrl = canvas.toDataURL('image/jpeg', 0.85);
-                    }
-                    var kbSize = Math.round((optimizedUrl.length * 3) / 4 / 1024);
-                    window.setActionReportPreview(optimizedUrl, 'Slide Ready (' + kbSize + ' KB)');
-                };
-                img.src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var fInp = document.getElementById('actionReportFile');
-            if (fInp) {
-                fInp.addEventListener('change', function() {
-                    if (this.files && this.files[0]) {
-                        window.handleActionReportUpload(this.files[0]);
-                    }
-                });
-            }
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    window.closeReportLightbox();
-                }
-            });
-        });
-
-        window.closeReportLightbox = function() {
-            var modal = document.getElementById('reportLightboxModal');
-            if (modal) modal.classList.add('hidden');
-        };
-
-        window.adjustReportZoom = function(delta) {
-            window.currentLightboxZoom = Math.max(75, Math.min(200, window.currentLightboxZoom + delta));
-            var img = document.getElementById('lightboxReportImg');
-            var lbl = document.getElementById('lightboxZoomLabel');
-            if (lbl) lbl.textContent = window.currentLightboxZoom + '%';
-            if (img) {
-                if (window.currentLightboxZoom === 100) {
-                    img.style.width = '100%';
-                    img.style.maxWidth = '100%';
-                } else {
-                    img.style.maxWidth = 'none';
-                    img.style.width = window.currentLightboxZoom + '%';
-                }
-            }
         };
 
         window.toggleActionModal = function(show) {
@@ -721,7 +547,6 @@
             var toEl = document.getElementById('actionTotalOutput');
             if (rhEl) rhEl.value = '';
             if (toEl) toEl.value = '';
-            window.clearActionReportImage();
             window.setCurrentDateTime();
 
             var box = document.getElementById('actionModalBox');
@@ -734,7 +559,7 @@
             box.className = (closeBox ? 'hidden ' : '') + 'bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm';
             badge.classList.add('hidden');
             titleEl.textContent = 'Log Engineering Action Taken';
-            subEl.textContent = 'Pin an action to the timeline and optionally upload your PowerPoint PNG report slide.';
+            subEl.textContent = 'Pin an action to the timeline and optionally log trial Run Hours / Total Output to measure exact Defect %.';
             submitBtn.textContent = 'Pin Action';
             submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
             cancelBtn.classList.add('hidden');
@@ -879,7 +704,7 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, PNG REPORT VIEWER, RATE METRICS & ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, EXACT DEFECT RATE (%), RUN HOURS & ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -912,6 +737,7 @@
                 return isNaN(d.getTime()) ? 0 : d.getTime();
             }
 
+            // Calculate Time-Normalized NG Rate (NG/Hr), Exact Defect Rate (%), and Mean Time Between NGs (MTBF)
             function calcTimeRateMetrics(records, actionLogs) {
                 var n = records.length;
                 var acts = actionLogs || [];
@@ -1081,7 +907,7 @@
                 });
             }
 
-            // Custom Chart.js Plugin: Red Vertical Date Dividers + Numbered Action Badges
+            // Custom Chart.js Plugin: Draws Red Vertical New-Date Line + Date•CW Pill Below Axis + Numbered Action Badges
             var actionBadgesPlugin = {
                 id: 'actionBadgesPlugin',
                 afterDraw: function(chart, args, pluginOptions) {
@@ -1216,81 +1042,6 @@
                 Chart.register(actionBadgesPlugin);
             }
 
-            // OPEN FULL-SCREEN PNG REPORT LIGHTBOX ON DOUBLE-CLICK
-            window.openActionReportModal = function(actionNum) {
-                var act = projectActionLogs.find(function(a) { return a.num === actionNum; });
-                if (!act) return;
-
-                var modal = document.getElementById('reportLightboxModal');
-                var numBadge = document.getElementById('lightboxActionNum');
-                var titleEl = document.getElementById('lightboxActionTitle');
-                var statusEl = document.getElementById('lightboxActionStatus');
-                var metaEl = document.getElementById('lightboxActionMeta');
-                var descEl = document.getElementById('lightboxActionDesc');
-                var impactEl = document.getElementById('lightboxActionImpact');
-
-                var imgWrap = document.getElementById('lightboxImageWrap');
-                var imgEl = document.getElementById('lightboxReportImg');
-                var emptyEl = document.getElementById('lightboxEmptyState');
-                var zoomCtrls = document.getElementById('lightboxZoomControls');
-                var dlBtn = document.getElementById('lightboxDownloadBtn');
-                var editBtn = document.getElementById('lightboxEditBtn');
-                var uploadNowBtn = document.getElementById('lightboxUploadNowBtn');
-
-                var isComp = act.status === 'Completed';
-                numBadge.textContent = act.num;
-                numBadge.className = 'w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' + (isComp ? 'bg-emerald-600' : 'bg-amber-500');
-
-                titleEl.textContent = act.title;
-                metaEl.textContent = act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time);
-                descEl.textContent = act.description;
-                impactEl.textContent = act.impactSummary || '';
-
-                if (isComp) {
-                    statusEl.textContent = '✔ Completed';
-                    statusEl.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 shrink-0';
-                } else {
-                    statusEl.textContent = '🕒 Monitoring';
-                    statusEl.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 shrink-0';
-                }
-
-                // Reset Zoom to 100%
-                window.currentLightboxZoom = 100;
-                window.adjustReportZoom(0);
-
-                if (act.reportImage) {
-                    imgEl.src = act.reportImage;
-                    imgWrap.classList.remove('hidden');
-                    emptyEl.classList.add('hidden');
-                    zoomCtrls.classList.remove('hidden');
-                    dlBtn.classList.remove('hidden');
-                    dlBtn.href = act.reportImage;
-                    dlBtn.download = 'Action_' + act.num + '_' + act.title.replace(/\s+/g, '_') + '_Report.png';
-                } else {
-                    imgEl.src = '';
-                    imgWrap.classList.add('hidden');
-                    emptyEl.classList.remove('hidden');
-                    zoomCtrls.classList.add('hidden');
-                    dlBtn.classList.add('hidden');
-                }
-
-                editBtn.onclick = function() {
-                    window.closeReportLightbox();
-                    window.startEditAction(act.id);
-                };
-
-                uploadNowBtn.onclick = function() {
-                    window.closeReportLightbox();
-                    window.startEditAction(act.id);
-                    setTimeout(function() {
-                        var fileInp = document.getElementById('actionReportFile');
-                        if (fileInp) fileInp.click();
-                    }, 200);
-                };
-
-                modal.classList.remove('hidden');
-            };
-
             function renderOperatorFieldsForProject(selectedId, preserveEnteredValues) {
                 var ngModeSelect = document.getElementById('ngModeSelect');
                 var paramsContainer = document.getElementById('dynamicParamsContainer');
@@ -1334,4 +1085,1632 @@
                         var isText = paramObj.type === 'text';
                         var badgeHtml = isText
                             ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Text</span>'
-                            : '<span class="text-[10px] font-semibold px-1.5 py
+                            : '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Number</span>';
+
+                        var savedVal = (preserveEnteredValues && previousValues[paramObj.label] !== undefined) ? previousValues[paramObj.label] : '';
+
+                        var inputHtml = isText
+                            ? '<input type="text" data-param-label="' + paramObj.label + '" data-param-type="text" value="' + savedVal + '" required placeholder="Enter text for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">'
+                            : '<input type="number" step="any" data-param-label="' + paramObj.label + '" data-param-type="number" value="' + savedVal + '" required placeholder="Enter number for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
+
+                        var wrapper = document.createElement('div');
+                        wrapper.innerHTML =
+                            '<div class="flex items-center justify-between mb-1">' +
+                                '<label class="block text-xs font-semibold text-zinc-700">' + paramObj.label + ' <span class="text-red-500">*</span></label>' +
+                                badgeHtml +
+                            '</div>' + inputHtml;
+                        dynamicFields.appendChild(wrapper);
+                    });
+                } else {
+                    paramsContainer.classList.add('hidden');
+                }
+            }
+
+            window.refreshSupabaseProjects = async function(loadDashboardAfter) {
+                if (!supabaseClient) return;
+                var projectSelect = document.getElementById('projectSelect');
+                var dashSelect = document.getElementById('dashboardProjectSelect');
+
+                var res = await supabaseClient
+                    .from('ng_projects')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                if (res.error) {
+                    window.showAlert('Database error: ' + res.error.message, 'error');
+                    return;
+                }
+
+                projectsData = res.data || [];
+                var prevOpVal = projectSelect.value;
+                var prevDashVal = dashSelect.value;
+
+                projectSelect.innerHTML = '<option value="">-- Select Machine / Project --</option>';
+                dashSelect.innerHTML = '<option value="">-- Select Project --</option>';
+
+                projectsData.forEach(function(proj) {
+                    var opt1 = document.createElement('option');
+                    opt1.value = proj.id;
+                    opt1.textContent = proj.project_title;
+                    projectSelect.appendChild(opt1);
+
+                    var opt2 = document.createElement('option');
+                    opt2.value = proj.id;
+                    opt2.textContent = proj.project_title;
+                    dashSelect.appendChild(opt2);
+                });
+
+                renderAdminProjectList();
+
+                if (prevOpVal && projectsData.some(function(p) { return p.id === prevOpVal; })) {
+                    projectSelect.value = prevOpVal;
+                    renderOperatorFieldsForProject(prevOpVal, true);
+                } else {
+                    renderOperatorFieldsForProject('', false);
+                }
+
+                if (prevDashVal && projectsData.some(function(p) { return p.id === prevDashVal; })) {
+                    dashSelect.value = prevDashVal;
+                } else if (projectsData.length > 0) {
+                    dashSelect.value = projectsData[0].id;
+                }
+
+                if (loadDashboardAfter && dashSelect.value) {
+                    loadDashboardData(dashSelect.value);
+                }
+            };
+
+            window.startEditProject = function(projectId) {
+                var proj = projectsData.find(function(p) { return p.id === projectId; });
+                if (!proj) return;
+
+                window.editingProjectId = proj.id;
+                document.getElementById('adminProjectTitle').value = proj.project_title || '';
+                document.getElementById('adminNgModes').value = (proj.ng_modes || []).join(', ');
+
+                var normParams = getProjectParams(proj);
+                for (var i = 1; i <= 15; i++) {
+                    var input = document.getElementById('adminParam' + i);
+                    var btn = document.getElementById('adminParamTypeBtn' + i);
+                    var item = normParams[i - 1];
+                    if (item) {
+                        input.value = item.label;
+                        input.setAttribute('data-original-label', item.label);
+                        window.setParamButtonStyle(btn, item.type);
+                    } else {
+                        input.value = '';
+                        input.setAttribute('data-original-label', '');
+                        window.setParamButtonStyle(btn, 'number');
+                    }
+                }
+
+                document.getElementById('editingProjectLabel').textContent = 'Editing: ' + proj.project_title;
+                document.getElementById('editModeBanner').classList.remove('hidden');
+                document.getElementById('adminCancelBtn').classList.remove('hidden');
+
+                var submitBtn = document.getElementById('adminSubmitBtn');
+                submitBtn.textContent = 'Update Project Changes';
+                submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition';
+
+                document.getElementById('sectionAdmin').scrollIntoView({ behavior: 'smooth' });
+            };
+
+            window.deleteProjectById = async function(projectId, projectTitle) {
+                if (!supabaseClient) return;
+                var confirmed = window.confirm('Are you sure you want to delete "' + projectTitle + '" and all of its NG records?');
+                if (!confirmed) return;
+
+                var res = await supabaseClient
+                    .from('ng_projects')
+                    .delete()
+                    .eq('id', projectId);
+
+                if (res.error) {
+                    window.showAlert('Failed to delete project: ' + res.error.message, 'error');
+                } else {
+                    if (window.editingProjectId === projectId) {
+                        window.cancelEditProject();
+                    }
+                    window.showAlert('Project "' + projectTitle + '" deleted.', 'success');
+                    window.refreshSupabaseProjects(false);
+                }
+            };
+
+            function renderAdminProjectList() {
+                var container = document.getElementById('adminProjectList');
+                if (!container) return;
+                if (projectsData.length === 0) {
+                    container.innerHTML = '<p class="text-xs text-zinc-400">No active projects found.</p>';
+                    return;
+                }
+                container.innerHTML = '';
+                projectsData.forEach(function(p) {
+                    var normParams = getProjectParams(p);
+                    var paramsSummary = normParams.map(function(item) {
+                        return item.label + (item.type === 'text' ? ' [Text]' : ' [Num]');
+                    }).join(', ');
+                    var modes = (p.ng_modes || []).join(', ');
+
+                    var row = document.createElement('div');
+                    row.className = 'flex items-center justify-between gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200';
+
+                    var infoDiv = document.createElement('div');
+                    infoDiv.className = 'min-w-0 flex-1';
+                    infoDiv.innerHTML = '<p class="font-semibold text-zinc-900 truncate">' + p.project_title + '</p>' +
+                        '<p class="text-xs text-zinc-500 truncate">Params (' + normParams.length + '): ' + paramsSummary + '</p>' +
+                        '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + modes + '</p>';
+
+                    var btnGroup = document.createElement('div');
+                    btnGroup.className = 'flex items-center gap-1.5 shrink-0';
+
+                    var editBtn = document.createElement('button');
+                    editBtn.type = 'button';
+                    editBtn.className = 'px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition';
+                    editBtn.textContent = 'Edit';
+                    editBtn.addEventListener('click', function() {
+                        window.startEditProject(p.id);
+                    });
+
+                    var delBtn = document.createElement('button');
+                    delBtn.type = 'button';
+                    delBtn.className = 'px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition';
+                    delBtn.textContent = 'Delete';
+                    delBtn.addEventListener('click', function() {
+                        window.deleteProjectById(p.id, p.project_title);
+                    });
+
+                    btnGroup.appendChild(editBtn);
+                    btnGroup.appendChild(delBtn);
+
+                    row.appendChild(infoDiv);
+                    row.appendChild(btnGroup);
+                    container.appendChild(row);
+                });
+            }
+
+            document.getElementById('projectSelect').addEventListener('change', function() {
+                renderOperatorFieldsForProject(this.value, false);
+            });
+
+            document.getElementById('adminForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!supabaseClient) return;
+
+                var title = document.getElementById('adminProjectTitle').value.trim();
+                var modesRaw = document.getElementById('adminNgModes').value;
+                var ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
+
+                var parameterConfigs = [];
+                var renamedMap = {};
+
+                for (var i = 1; i <= 15; i++) {
+                    var el = document.getElementById('adminParam' + i);
+                    var btn = document.getElementById('adminParamTypeBtn' + i);
+                    var labelVal = el && el.value ? el.value.trim() : '';
+                    var origLabel = el ? (el.getAttribute('data-original-label') || '').trim() : '';
+                    var typeVal = btn ? (btn.getAttribute('data-type') || 'number') : 'number';
+
+                    if (labelVal.length > 0) {
+                        parameterConfigs.push({
+                            label: labelVal,
+                            type: typeVal === 'text' ? 'text' : 'number'
+                        });
+                        if (window.editingProjectId && origLabel.length > 0 && origLabel !== labelVal) {
+                            renamedMap[origLabel] = labelVal;
+                        }
+                    }
+                }
+
+                if (window.editingProjectId) {
+                    var targetId = window.editingProjectId;
+                    var updateRes = await supabaseClient
+                        .from('ng_projects')
+                        .update({
+                            project_title: title,
+                            parameter_labels: parameterConfigs,
+                            ng_modes: ngModes
+                        })
+                        .eq('id', targetId);
+
+                    if (updateRes.error) {
+                        window.showAlert('Failed to update project: ' + updateRes.error.message, 'error');
+                        return;
+                    }
+
+                    var oldKeys = Object.keys(renamedMap);
+                    if (oldKeys.length > 0) {
+                        var recRes = await supabaseClient
+                            .from('ng_records')
+                            .select('id, parameter_values')
+                            .eq('project_id', targetId);
+
+                        if (!recRes.error && Array.isArray(recRes.data)) {
+                            for (var rIdx = 0; rIdx < recRes.data.length; rIdx++) {
+                                var rec = recRes.data[rIdx];
+                                var vals = Object.assign({}, rec.parameter_values || {});
+                                var changed = false;
+                                oldKeys.forEach(function(oldK) {
+                                    var newK = renamedMap[oldK];
+                                    if (vals[oldK] !== undefined && vals[newK] === undefined) {
+                                        vals[newK] = vals[oldK];
+                                        delete vals[oldK];
+                                        changed = true;
+                                    }
+                                });
+                                if (changed) {
+                                    await supabaseClient
+                                        .from('ng_records')
+                                        .update({ parameter_values: vals })
+                                        .eq('id', rec.id);
+                                }
+                            }
+                        }
+                    }
+
+                    window.showAlert('Project "' + title + '" updated successfully!', 'success');
+                    window.cancelEditProject();
+                    window.refreshSupabaseProjects(false);
+                } else {
+                    var res = await supabaseClient.from('ng_projects').insert([{
+                        project_title: title,
+                        parameter_labels: parameterConfigs,
+                        ng_modes: ngModes,
+                        is_active: true
+                    }]);
+
+                    if (res.error) {
+                        window.showAlert('Failed to save project: ' + res.error.message, 'error');
+                    } else {
+                        window.showAlert('New project saved with ' + parameterConfigs.length + ' parameters!', 'success');
+                        document.getElementById('adminProjectTitle').value = '';
+                        document.getElementById('adminNgModes').value = '';
+                        window.resetAdminParamSlots();
+                        window.refreshSupabaseProjects(false);
+                    }
+                }
+            });
+
+            // SAVE OPERATOR NG RECORD (WITH OPTIONAL RUN HOURS & TOTAL OUTPUT)
+            document.getElementById('ngForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!supabaseClient) return;
+
+                var parameterValues = {};
+                document.querySelectorAll('.dynamic-param-input').forEach(function(input) {
+                    var label = input.getAttribute('data-param-label');
+                    var pType = input.getAttribute('data-param-type') || 'number';
+                    var rawVal = input.value.trim();
+                    parameterValues[label] = pType === 'text' ? rawVal : Number(rawVal);
+                });
+
+                var runHrsVal = document.getElementById('ngRunHours').value.trim();
+                var totOutVal = document.getElementById('ngTotalOutput').value.trim();
+                if (runHrsVal !== '' && Number(runHrsVal) > 0) {
+                    parameterValues._run_hours = Number(runHrsVal);
+                }
+                if (totOutVal !== '' && Number(totOutVal) > 0) {
+                    parameterValues._total_output = Number(totOutVal);
+                }
+
+                var payload = {
+                    project_id: document.getElementById('projectSelect').value,
+                    recorded_date: document.getElementById('recordedDate').value,
+                    recorded_time: document.getElementById('recordedTime').value,
+                    operator_name: document.getElementById('operatorName').value.trim(),
+                    ng_mode: document.getElementById('ngModeSelect').value,
+                    parameter_values: parameterValues,
+                    remarks: document.getElementById('remarks').value.trim() || null
+                };
+
+                var res = await supabaseClient.from('ng_records').insert([payload]);
+
+                if (res.error) {
+                    window.showAlert('Error saving record: ' + res.error.message, 'error');
+                } else {
+                    window.showAlert('NG record saved!', 'success');
+                    document.getElementById('ngModeSelect').value = '';
+                    document.getElementById('remarks').value = '';
+                    document.getElementById('ngRunHours').value = '';
+                    document.getElementById('ngTotalOutput').value = '';
+                    document.querySelectorAll('.dynamic-param-input').forEach(function(input) { input.value = ''; });
+                    window.setCurrentDateTime();
+                }
+            });
+
+            // START EDITING AN EXISTING ACTION TAKEN RECORD
+            window.startEditAction = function(actionId) {
+                var act = projectActionLogs.find(function(a) { return a.id === actionId; });
+                if (!act) return;
+
+                window.editingActionId = act.id;
+                document.getElementById('actionTitle').value = act.title || '';
+                document.getElementById('actionDate').value = act.date || '';
+                document.getElementById('actionTime').value = (act.time || '08:00').slice(0, 5);
+                document.getElementById('actionStatus').value = act.status === 'Monitoring' ? 'Monitoring' : 'Completed';
+                document.getElementById('actionDesc').value = act.description || '';
+                document.getElementById('actionRunHours').value = act.runHours ? act.runHours : '';
+                document.getElementById('actionTotalOutput').value = act.totalOutput ? act.totalOutput : '';
+
+                var box = document.getElementById('actionModalBox');
+                var badge = document.getElementById('actionEditBadge');
+                var titleEl = document.getElementById('actionModalTitle');
+                var subEl = document.getElementById('actionModalSubtitle');
+                var submitBtn = document.getElementById('actionSubmitBtn');
+                var cancelBtn = document.getElementById('actionCancelEditBtn');
+
+                box.className = 'bg-amber-50/80 border border-amber-300 rounded-xl p-5 shadow-sm';
+                badge.classList.remove('hidden');
+                titleEl.textContent = 'Edit Action Taken #' + act.num + ': ' + act.title;
+                subEl.textContent = 'Modify Title, Date, Time, Status, Description, or Trial Run Hours / Output below.';
+                submitBtn.textContent = 'Update';
+                submitBtn.className = 'flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
+                cancelBtn.classList.remove('hidden');
+
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            };
+
+            // SAVE NEW OR UPDATE EXISTING ACTION TAKEN RECORD (WITH OPTIONAL RUN HOURS & TOTAL OUTPUT)
+            document.getElementById('actionTakenForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!supabaseClient || !currentProject) {
+                    window.showAlert('Please select a project first.', 'error');
+                    return;
+                }
+
+                var title = document.getElementById('actionTitle').value.trim();
+                var desc = document.getElementById('actionDesc').value.trim();
+                var aDate = document.getElementById('actionDate').value;
+                var aTime = document.getElementById('actionTime').value;
+                if (aTime.length === 5) aTime = aTime + ':00';
+                var aStatus = document.getElementById('actionStatus').value;
+
+                var aRunHrs = document.getElementById('actionRunHours').value.trim();
+                var aTotOut = document.getElementById('actionTotalOutput').value.trim();
+
+                var pVals = {
+                    _is_action: true,
+                    title: title,
+                    description: desc,
+                    status: aStatus
+                };
+                if (aRunHrs !== '' && Number(aRunHrs) > 0) pVals._run_hours = Number(aRunHrs);
+                if (aTotOut !== '' && Number(aTotOut) > 0) pVals._total_output = Number(aTotOut);
+
+                var actionPayload = {
+                    project_id: currentProject.id,
+                    recorded_date: aDate,
+                    recorded_time: aTime,
+                    operator_name: aStatus,
+                    ng_mode: ACTION_MARKER_MODE,
+                    parameter_values: pVals,
+                    remarks: desc
+                };
+
+                if (window.editingActionId) {
+                    var targetActId = window.editingActionId;
+                    var updateRes = await supabaseClient
+                        .from('ng_records')
+                        .update(actionPayload)
+                        .eq('id', targetActId);
+
+                    if (updateRes.error) {
+                        window.showAlert('Failed to update Action Taken: ' + updateRes.error.message, 'error');
+                    } else {
+                        window.showAlert('Action "' + title + '" updated successfully!', 'success');
+                        document.getElementById('floatingActionCard').classList.add('hidden');
+                        window.cancelEditAction(true);
+                        loadDashboardData(currentProject.id);
+                    }
+                } else {
+                    var res = await supabaseClient.from('ng_records').insert([actionPayload]);
+                    if (res.error) {
+                        window.showAlert('Failed to save Action Taken: ' + res.error.message, 'error');
+                    } else {
+                        window.showAlert('Action "' + title + '" pinned to chart!', 'success');
+                        window.cancelEditAction(true);
+                        loadDashboardData(currentProject.id);
+                    }
+                }
+            });
+
+            window.toggleActionStatus = async function(actionId) {
+                if (!supabaseClient || !currentProject) return;
+                var act = projectActionLogs.find(function(a) { return a.id === actionId; });
+                if (!act) return;
+
+                var nextStatus = act.status === 'Completed' ? 'Monitoring' : 'Completed';
+                var updatedVals = {
+                    _is_action: true,
+                    title: act.title,
+                    description: act.description,
+                    status: nextStatus
+                };
+                if (act.runHours) updatedVals._run_hours = act.runHours;
+                if (act.totalOutput) updatedVals._total_output = act.totalOutput;
+
+                var res = await supabaseClient
+                    .from('ng_records')
+                    .update({ operator_name: nextStatus, parameter_values: updatedVals })
+                    .eq('id', actionId);
+
+                if (res.error) {
+                    window.showAlert('Could not update status: ' + res.error.message, 'error');
+                } else {
+                    loadDashboardData(currentProject.id);
+                }
+            };
+
+            window.deleteActionLog = async function(actionId, title) {
+                if (!supabaseClient || !currentProject) return;
+                if (!window.confirm('Remove action "' + title + '"?')) return;
+
+                var res = await supabaseClient
+                    .from('ng_records')
+                    .delete()
+                    .eq('id', actionId);
+
+                if (res.error) {
+                    window.showAlert('Need DELETE policy on ng_records in Supabase: ' + res.error.message, 'error');
+                } else {
+                    if (window.editingActionId === actionId) {
+                        window.cancelEditAction(true);
+                    }
+                    document.getElementById('floatingActionCard').classList.add('hidden');
+                    loadDashboardData(currentProject.id);
+                }
+            };
+
+            window.inspectActionCard = function(actionNum) {
+                var act = projectActionLogs.find(function(a) { return a.num === actionNum; });
+                if (!act) return;
+
+                var card = document.getElementById('floatingActionCard');
+                var numBadge = document.getElementById('cardActionNum');
+                var statusBadge = document.getElementById('cardActionStatus');
+                var editBtn = document.getElementById('cardActionEditBtn');
+
+                numBadge.textContent = act.num;
+                numBadge.className = 'w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' +
+                    (act.status === 'Completed' ? 'bg-emerald-600' : 'bg-amber-500');
+
+                document.getElementById('cardActionTitle').textContent = act.title;
+                document.getElementById('cardActionDate').textContent = '📅 ' + act.cw + ' • ' + formatPrettyDate(act.date);
+                document.getElementById('cardActionTime').textContent = '🕒 ' + formatPrettyTime(act.time);
+                document.getElementById('cardActionDesc').textContent = act.description;
+
+                var impactEl = document.getElementById('cardActionImpact');
+                if (act.impactHtml) {
+                    impactEl.innerHTML = act.impactHtml;
+                    impactEl.classList.remove('hidden');
+                } else {
+                    impactEl.classList.add('hidden');
+                }
+
+                if (act.status === 'Completed') {
+                    statusBadge.textContent = '✔ Completed';
+                    statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-md';
+                } else {
+                    statusBadge.textContent = '🕒 Monitoring';
+                    statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
+                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-amber-400 shadow-md max-w-md';
+                }
+
+                editBtn.onclick = function() {
+                    window.startEditAction(act.id);
+                };
+
+                card.classList.remove('hidden');
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
+
+            // DASHBOARD CONTROLS
+            document.getElementById('dashboardProjectSelect').addEventListener('change', function() {
+                if (this.value) loadDashboardData(this.value);
+            });
+            document.getElementById('btnRefreshDashboard').addEventListener('click', function() {
+                var val = document.getElementById('dashboardProjectSelect').value;
+                if (val) loadDashboardData(val);
+            });
+            document.getElementById('dashboardDateFilter').addEventListener('change', applyFiltersAndRender);
+            document.getElementById('dashboardModeFilter').addEventListener('change', applyFiltersAndRender);
+            document.getElementById('ngGroupSelect').addEventListener('change', renderWeeklyStackChart);
+            document.getElementById('toggleNgRateOverlay').addEventListener('change', renderTrendChart);
+            document.getElementById('trendGroupSelect').addEventListener('change', renderTrendChart);
+            document.getElementById('trendParamSelect').addEventListener('change', renderTrendChart);
+            document.getElementById('inputLSL').addEventListener('input', renderTrendChart);
+            document.getElementById('inputUSL').addEventListener('input', renderTrendChart);
+            document.getElementById('scatterXSelect').addEventListener('change', renderScatterChart);
+            document.getElementById('scatterYSelect').addEventListener('change', renderScatterChart);
+
+            async function loadDashboardData(projectId) {
+                if (!supabaseClient) return;
+                currentProject = projectsData.find(function(p) { return p.id === projectId; });
+                if (!currentProject) return;
+
+                var modeFilter = document.getElementById('dashboardModeFilter');
+                modeFilter.innerHTML = '<option value="all">All NG Modes</option>';
+                (currentProject.ng_modes || []).forEach(function(m) {
+                    var opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = m;
+                    modeFilter.appendChild(opt);
+                });
+
+                var allParams = getProjectParams(currentProject);
+                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
+
+                var trendSel = document.getElementById('trendParamSelect');
+                var xSel = document.getElementById('scatterXSelect');
+                var ySel = document.getElementById('scatterYSelect');
+
+                trendSel.innerHTML = '<option value="__ALL__">Show All Number Parameters</option>';
+                xSel.innerHTML = '';
+                ySel.innerHTML = '';
+
+                numParams.forEach(function(p) {
+                    var oT = document.createElement('option');
+                    oT.value = p.label;
+                    oT.textContent = 'Focus: ' + p.label;
+                    trendSel.appendChild(oT);
+
+                    var oX = document.createElement('option');
+                    oX.value = p.label;
+                    oX.textContent = p.label;
+                    xSel.appendChild(oX);
+
+                    var oY = document.createElement('option');
+                    oY.value = p.label;
+                    oY.textContent = p.label;
+                    ySel.appendChild(oY);
+                });
+
+                if (numParams.length > 0) {
+                    trendSel.value = numParams[0].label;
+                    xSel.value = numParams[0].label;
+                    ySel.value = numParams.length > 1 ? numParams[1].label : numParams[0].label;
+                }
+
+                var res = await supabaseClient
+                    .from('ng_records')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .order('recorded_date', { ascending: true })
+                    .order('recorded_time', { ascending: true });
+
+                if (res.error) {
+                    window.showAlert('Failed to load records: ' + res.error.message, 'error');
+                    return;
+                }
+
+                var allRows = res.data || [];
+                rawProjectRecords = [];
+                projectActionLogs = [];
+
+                allRows.forEach(function(row) {
+                    var pv = row.parameter_values || {};
+                    if (row.ng_mode === ACTION_MARKER_MODE || pv._is_action) {
+                        var tInfo = getWeekTimelineInfo(row.recorded_date);
+                        projectActionLogs.push({
+                            id: row.id,
+                            date: row.recorded_date,
+                            time: row.recorded_time,
+                            cw: tInfo.cw,
+                            weekSortKey: tInfo.weekSortKey,
+                            dayAxisLabel: tInfo.dayAxisLabel,
+                            title: pv.title || 'Action Taken',
+                            description: pv.description || row.remarks || '',
+                            status: pv.status || row.operator_name || 'Completed',
+                            runHours: pv._run_hours || null,
+                            totalOutput: pv._total_output || null
+                        });
+                    } else {
+                        rawProjectRecords.push(row);
+                    }
+                });
+
+                projectActionLogs.forEach(function(act, i) {
+                    act.num = i + 1;
+                });
+
+                applyFiltersAndRender();
+            }
+
+            function applyFiltersAndRender() {
+                if (!currentProject) return;
+                var dateFilter = document.getElementById('dashboardDateFilter').value;
+                var modeFilter = document.getElementById('dashboardModeFilter').value;
+
+                var now = new Date();
+                var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+                filteredRecords = rawProjectRecords.filter(function(r) {
+                    if (modeFilter !== 'all' && r.ng_mode !== modeFilter) return false;
+                    if (dateFilter === 'today') return r.recorded_date === todayStr;
+                    if (dateFilter === '7days' || dateFilter === '30days') {
+                        var days = dateFilter === '7days' ? 7 : 30;
+                        var recDate = new Date(r.recorded_date);
+                        var diff = (now - recDate) / (1000 * 60 * 60 * 24);
+                        return diff <= days;
+                    }
+                    return true;
+                });
+
+                updateDashboardAnalytics();
+            }
+
+            function calcStats(arr) {
+                var valid = arr.filter(function(v) { return v !== null && v !== undefined && v !== '' && !isNaN(v); }).map(Number);
+                var n = valid.length;
+                if (n === 0) return { mean: 0, std: 0, min: 0, max: 0, n: 0 };
+                var sum = valid.reduce(function(a, b) { return a + b; }, 0);
+                var mean = sum / n;
+                var variance = valid.reduce(function(a, b) { return a + Math.pow(b - mean, 2); }, 0) / n;
+                return {
+                    mean: mean,
+                    std: Math.sqrt(variance),
+                    min: Math.min.apply(null, valid),
+                    max: Math.max.apply(null, valid),
+                    n: n
+                };
+            }
+
+            function calcTopText(arr) {
+                var counts = {};
+                var total = 0;
+                arr.forEach(function(v) {
+                    if (v !== null && v !== undefined && String(v).trim() !== '') {
+                        var key = String(v).trim();
+                        counts[key] = (counts[key] || 0) + 1;
+                        total++;
+                    }
+                });
+                if (total === 0) return { top: '-', count: 0, pct: 0 };
+                var topKey = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; })[0];
+                return {
+                    top: topKey,
+                    count: counts[topKey],
+                    pct: Math.round((counts[topKey] / total) * 100)
+                };
+            }
+
+            // Compute Time-Normalized & Output-Normalized Before vs After Impact for each Action Taken
+            function computeActionImpacts(allParams, records) {
+                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
+                var selectedFocus = document.getElementById('trendParamSelect') ? document.getElementById('trendParamSelect').value : '__ALL__';
+                var primaryParam = (selectedFocus && selectedFocus !== '__ALL__')
+                    ? selectedFocus
+                    : (numParams.length > 0 ? numParams[0].label : null);
+
+                projectActionLogs.forEach(function(act) {
+                    var actStamp = act.date + ' ' + act.time;
+                    var beforeRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) < actStamp; });
+                    var afterRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) >= actStamp; });
+
+                    var beforeActs = projectActionLogs.filter(function(a) { return (a.date + ' ' + a.time) < actStamp; });
+                    var afterActs = projectActionLogs.filter(function(a) { return (a.date + ' ' + a.time) >= actStamp; });
+
+                    var bRate = calcTimeRateMetrics(beforeRecs, beforeActs);
+                    var aRate = calcTimeRateMetrics(afterRecs, afterActs);
+
+                    var rateChangeBadge = '';
+                    if (beforeRecs.length > 0 && afterRecs.length > 0 && bRate.ngPerHour > 0) {
+                        var pctDiff = ((aRate.ngPerHour - bRate.ngPerHour) / bRate.ngPerHour) * 100;
+                        var sign = pctDiff > 0 ? '+' : '';
+                        var colorCls = pctDiff <= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700';
+                        rateChangeBadge = ' <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ' + colorCls + '">' + sign + pctDiff.toFixed(0) + '% rate</span>';
+                    }
+
+                    var paramLine = '';
+                    if (primaryParam && beforeRecs.length > 0 && afterRecs.length > 0) {
+                        var bStat = calcStats(beforeRecs.map(function(r) { return (r.parameter_values || {})[primaryParam]; }));
+                        var aStat = calcStats(afterRecs.map(function(r) { return (r.parameter_values || {})[primaryParam]; }));
+                        paramLine = '<div>⚙️ <b>' + primaryParam + ':</b> ' + bStat.mean.toFixed(3) + ' (Before) → <b>' + aStat.mean.toFixed(3) + ' (After)</b></div>';
+                    }
+
+                    var rateLine = '<div>⏱️ <b>NG Rate:</b> ' + bRate.ngPerHour.toFixed(2) + ' NG/hr (' + beforeRecs.length + ' NGs / ' + bRate.activeHours.toFixed(1) + 'h) → <b>' + aRate.ngPerHour.toFixed(2) + ' NG/hr</b> (' + afterRecs.length + ' NGs / ' + aRate.activeHours.toFixed(1) + 'h)' + rateChangeBadge + '</div>';
+
+                    var defectPctLine = '';
+                    if (bRate.defectRatePct !== null || aRate.defectRatePct !== null) {
+                        var bPctStr = bRate.defectRatePct !== null ? (bRate.defectRatePct.toFixed(2) + '% (' + beforeRecs.length + '/' + bRate.totalOutput + ')') : 'N/A';
+                        var aPctStr = aRate.defectRatePct !== null ? (aRate.defectRatePct.toFixed(2) + '% (' + afterRecs.length + '/' + aRate.totalOutput + ')') : 'N/A';
+                        defectPctLine = '<div>🎯 <b>Defect Rate (%):</b> ' + bPctStr + ' → <b>' + aPctStr + '</b></div>';
+                    }
+
+                    var mtbfLine = '<div>⏳ <b>Time Between NGs:</b> ' + formatGapDuration(bRate.avgGapMins) + ' → <b>' + formatGapDuration(aRate.avgGapMins) + '</b></div>';
+
+                    act.impactHtml = paramLine + rateLine + defectPctLine + mtbfLine;
+                    act.impactSummary = (aRate.defectRatePct !== null)
+                        ? ('NG/hr: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' | Defect %: ' + (bRate.defectRatePct !== null ? bRate.defectRatePct.toFixed(2) + '%' : 'N/A') + ' → ' + aRate.defectRatePct.toFixed(2) + '%')
+                        : ('NG/hr: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' NG/hr');
+                });
+            }
+
+            function renderActionHistoryList() {
+                var badge = document.getElementById('actionCountBadge');
+                var container = document.getElementById('actionHistoryContainer');
+                badge.textContent = projectActionLogs.length + (projectActionLogs.length === 1 ? ' Action Taken' : ' Actions Taken');
+
+                if (projectActionLogs.length === 0) {
+                    container.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No actions recorded yet. Click "+ Add Action Taken" above when you adjust machine settings.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                projectActionLogs.forEach(function(act) {
+                    var isComp = act.status === 'Completed';
+                    var circleClass = isComp ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white';
+                    var pillClass = isComp
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                        : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100';
+                    var pillLabel = isComp ? '✔ Completed' : '🕒 Monitoring';
+
+                    var trialTags = [];
+                    if (act.runHours) trialTags.push(act.runHours + 'h run');
+                    if (act.totalOutput) trialTags.push(act.totalOutput + ' pcs out');
+                    var trialTagHtml = trialTags.length > 0
+                        ? '<span class="inline-block mt-1 px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 text-[10px] font-semibold">' + trialTags.join(' • ') + '</span>'
+                        : '';
+
+                    var row = document.createElement('div');
+                    row.className = 'p-4 hover:bg-zinc-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer';
+                    row.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'BUTTON') return;
+                        window.inspectActionCard(act.num);
+                    });
+
+                    row.innerHTML =
+                        '<div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">' +
+                            '<span class="w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ' + circleClass + '">' + act.num + '</span>' +
+                            '<div class="sm:w-52 shrink-0">' +
+                                '<p class="font-bold text-zinc-900 text-sm truncate">' + act.title + '</p>' +
+                                '<p class="text-xs text-zinc-500">' + act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time) + '</p>' +
+                                trialTagHtml +
+                            '</div>' +
+                            '<div class="hidden sm:block w-px h-10 bg-zinc-200 shrink-0"></div>' +
+                            '<div class="min-w-0 flex-1">' +
+                                '<p class="text-xs sm:text-sm font-medium text-zinc-800">' + act.description + '</p>' +
+                                '<div class="text-[11px] text-zinc-600 mt-1 space-y-0.5">' + (act.impactHtml || '') + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">' +
+                            '<button type="button" onclick="window.toggleActionStatus(\'' + act.id + '\')" title="Click to switch status" class="px-3 py-1 rounded-full text-xs font-semibold transition ' + pillClass + '">' +
+                                pillLabel +
+                            '</button>' +
+                            '<button type="button" onclick="window.startEditAction(\'' + act.id + '\')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition" title="Edit Action">' +
+                                'Edit' +
+                            '</button>' +
+                            '<button type="button" onclick="window.deleteActionLog(\'' + act.id + '\', \'' + act.title.replace(/'/g, "\\'") + '\')" class="px-2 py-1 text-xs text-zinc-400 hover:text-red-600 font-bold" title="Delete Action">✕</button>' +
+                        '</div>';
+
+                    container.appendChild(row);
+                });
+            }
+
+            function updateDashboardAnalytics() {
+                var allParams = getProjectParams(currentProject);
+                var records = filteredRecords;
+
+                computeActionImpacts(allParams, records);
+                renderActionHistoryList();
+
+                document.getElementById('statTotalNg').textContent = records.length;
+
+                if (records.length === 0) {
+                    document.getElementById('statNgPerHour').textContent = '0.00 NG/hr';
+                    document.getElementById('statDateSpan').textContent = 'No records in this range';
+                    document.getElementById('statDefectPct').textContent = '-';
+                    document.getElementById('statTotalOutputDesc').textContent = 'Log Total Output for exact %';
+                    document.getElementById('statMtbf').textContent = '-';
+                    document.getElementById('statTopMode').textContent = '-';
+                    document.getElementById('statTopModePct').textContent = '-';
+                    document.getElementById('insightList').innerHTML = '<li>No NG records found for this filter.</li>';
+                    currentModeCounts = {};
+                    renderWeeklyStackChart();
+                    renderTrendChart();
+                    renderScatterChart();
+                    renderParetoChart();
+                    renderMatrixTable(allParams, [], {});
+                    renderRecordsTable(allParams, []);
+                    return;
+                }
+
+                var rateStats = calcTimeRateMetrics(records, projectActionLogs);
+                document.getElementById('statNgPerHour').textContent = rateStats.ngPerHour.toFixed(2) + ' NG/hr';
+
+                if (rateStats.defectRatePct !== null) {
+                    document.getElementById('statDefectPct').textContent = rateStats.defectRatePct.toFixed(2) + '%';
+                    document.getElementById('statTotalOutputDesc').textContent = records.length + ' NGs / ' + rateStats.totalOutput + ' Total Output';
+                } else {
+                    document.getElementById('statDefectPct').textContent = 'N/A';
+                    document.getElementById('statTotalOutputDesc').textContent = 'Add Total Output when logging';
+                }
+
+                document.getElementById('statMtbf').textContent = formatGapDuration(rateStats.avgGapMins);
+                document.getElementById('statMtbfDesc').textContent = (rateStats.hasExplicitHours ? 'Logged run: ' : 'Est. span: ') + rateStats.activeHours.toFixed(1) + ' hrs';
+
+                var firstInfo = getWeekTimelineInfo(records[0].recorded_date);
+                var lastInfo = getWeekTimelineInfo(records[records.length - 1].recorded_date);
+                document.getElementById('statDateSpan').textContent = firstInfo.dayAxisLabel + ' → ' + lastInfo.dayAxisLabel;
+
+                var modeCounts = {};
+                records.forEach(function(r) {
+                    modeCounts[r.ng_mode] = (modeCounts[r.ng_mode] || 0) + 1;
+                });
+                currentModeCounts = modeCounts;
+
+                var sortedModes = Object.keys(modeCounts).sort(function(a, b) { return modeCounts[b] - modeCounts[a]; });
+                var topMode = sortedModes[0];
+                var topCount = modeCounts[topMode];
+                var topPct = ((topCount / records.length) * 100).toFixed(1);
+
+                document.getElementById('statTopMode').textContent = topMode + ' (' + topCount + ')';
+                document.getElementById('statTopModePct').textContent = topPct + '% of total NGs';
+
+                generateSmartInsights(allParams, records, sortedModes, modeCounts, rateStats);
+                renderWeeklyStackChart();
+                renderTrendChart();
+                renderScatterChart();
+                renderParetoChart();
+                renderMatrixTable(allParams, records, modeCounts);
+                renderRecordsTable(allParams, records);
+            }
+
+            // CHART 1: STACKED NG BARS (LEFT AXIS) + NG RATE (NG/HR) & DEFECT RATE (%) LINES (RIGHT AXIS)
+            function renderWeeklyStackChart() {
+                if (typeof Chart === 'undefined' || !currentProject) return;
+                if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
+
+                var groupBy = document.getElementById('ngGroupSelect').value;
+                var bucketInfoMap = {};
+                var bucketRecsMap = {};
+                var bucketActsMap = {};
+
+                filteredRecords.forEach(function(r) {
+                    var tInfo = getWeekTimelineInfo(r.recorded_date);
+                    var sKey = groupBy === 'weekly' ? tInfo.weekSortKey : r.recorded_date;
+                    bucketInfoMap[sKey] = tInfo;
+                    if (!bucketRecsMap[sKey]) bucketRecsMap[sKey] = [];
+                    bucketRecsMap[sKey].push(r);
+                });
+
+                projectActionLogs.forEach(function(a) {
+                    var tInfo = getWeekTimelineInfo(a.date);
+                    var sKey = groupBy === 'weekly' ? tInfo.weekSortKey : a.date;
+                    bucketInfoMap[sKey] = tInfo;
+                    if (!bucketRecsMap[sKey]) bucketRecsMap[sKey] = [];
+                    if (!bucketActsMap[sKey]) bucketActsMap[sKey] = [];
+                    bucketActsMap[sKey].push(a);
+                });
+
+                var sortedKeys = Object.keys(bucketInfoMap).sort();
+                var displayLabels = sortedKeys.map(function(k) {
+                    var info = bucketInfoMap[k];
+                    return groupBy === 'weekly' ? [info.cw, info.weekMonthShort] : [info.dayMonth, info.cw];
+                });
+
+                var modes = Object.keys(currentModeCounts);
+                var stackColors = [
+                    '#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6',
+                    '#06b6d4', '#f97316', '#ec4899', '#475569', '#14b8a6'
+                ];
+
+                var hasAnyDefectPct = false;
+                var rateLineData = [];
+                var defectPctLineData = [];
+
+                sortedKeys.forEach(function(bKey) {
+                    var recs = bucketRecsMap[bKey] || [];
+                    var acts = bucketActsMap[bKey] || [];
+                    var m = calcTimeRateMetrics(recs, acts);
+                    rateLineData.push(Number(m.ngPerHour.toFixed(2)));
+                    if (m.defectRatePct !== null) {
+                        hasAnyDefectPct = true;
+                        defectPctLineData.push(Number(m.defectRatePct.toFixed(2)));
+                    } else {
+                        defectPctLineData.push(null);
+                    }
+                });
+
+                var datasets = [
+                    {
+                        type: 'line',
+                        label: 'NG Rate (NG / Hr)',
+                        data: rateLineData,
+                        borderColor: '#7c3aed',
+                        backgroundColor: '#7c3aed',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        tension: 0.25,
+                        yAxisID: 'yRate',
+                        order: 0
+                    }
+                ];
+
+                if (hasAnyDefectPct) {
+                    datasets.push({
+                        type: 'line',
+                        label: 'Defect Rate (%)',
+                        data: defectPctLineData,
+                        borderColor: '#059669',
+                        backgroundColor: '#059669',
+                        borderDash: [4, 3],
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        spanGaps: true,
+                        tension: 0.25,
+                        yAxisID: 'yRate',
+                        order: 0
+                    });
+                }
+
+                modes.forEach(function(mode, idx) {
+                    var dataCounts = sortedKeys.map(function(bKey) {
+                        return (bucketRecsMap[bKey] || []).filter(function(r) {
+                            return r.ng_mode === mode;
+                        }).length;
+                    });
+                    datasets.push({
+                        type: 'bar',
+                        label: mode,
+                        data: dataCounts,
+                        backgroundColor: stackColors[idx % stackColors.length],
+                        borderRadius: 3,
+                        yAxisID: 'y',
+                        order: 1
+                    });
+                });
+
+                var markers = projectActionLogs.map(function(act) {
+                    var targetKey = groupBy === 'weekly' ? act.weekSortKey : act.date;
+                    return {
+                        num: act.num,
+                        title: act.title,
+                        status: act.status,
+                        xIndex: sortedKeys.indexOf(targetKey)
+                    };
+                }).filter(function(m) { return m.xIndex !== -1; });
+
+                var ctx = document.getElementById('weeklyStackChart').getContext('2d');
+                weeklyStackChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: displayLabels, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: { top: 42 } },
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: { maxRotation: 0, autoSkip: true }
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                position: 'left',
+                                ticks: { precision: 0 },
+                                title: { display: true, text: 'NG Qty (Units)' }
+                            },
+                            yRate: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                title: { display: true, text: hasAnyDefectPct ? 'NG/Hr & Defect %' : 'NG Rate (NG / Hr)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                            actionBadgesPlugin: { markers: markers, dateBoundaries: [] }
+                        }
+                    }
+                });
+            }
+
+            function generateSmartInsights(allParams, records, sortedModes, modeCounts, rateStats) {
+                var insights = [];
+                var topMode = sortedModes[0];
+                var topPct = ((modeCounts[topMode] / records.length) * 100).toFixed(0);
+
+                var summaryHeadline = '<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects.';
+                if (rateStats.defectRatePct !== null) {
+                    summaryHeadline += ' Overall Defect Rate is <b>' + rateStats.defectRatePct.toFixed(2) + '%</b> (' + records.length + ' NGs out of ' + rateStats.totalOutput + ' units).';
+                }
+                insights.push(summaryHeadline);
+
+                // Compare latest 2 dates using both NG/hr and Defect Rate %
+                var byDate = {};
+                records.forEach(function(r) {
+                    if (!byDate[r.recorded_date]) byDate[r.recorded_date] = [];
+                    byDate[r.recorded_date].push(r);
+                });
+                var dates = Object.keys(byDate).sort();
+                if (dates.length >= 2) {
+                    var lastDate = dates[dates.length - 1];
+                    var prevDate = dates[dates.length - 2];
+                    var lastRecs = byDate[lastDate];
+                    var prevRecs = byDate[prevDate];
+                    var lastActs = projectActionLogs.filter(function(a) { return a.date === lastDate; });
+                    var prevActs = projectActionLogs.filter(function(a) { return a.date === prevDate; });
+                    var lastM = calcTimeRateMetrics(lastRecs, lastActs);
+                    var prevM = calcTimeRateMetrics(prevRecs, prevActs);
+
+                    if (lastRecs.length < prevRecs.length && lastM.ngPerHour > prevM.ngPerHour) {
+                        var extraPct = (lastM.defectRatePct !== null && prevM.defectRatePct !== null)
+                            ? (' and Defect Rate went from <b>' + prevM.defectRatePct.toFixed(2) + '%</b> to <b>' + lastM.defectRatePct.toFixed(2) + '%</b>')
+                            : '';
+                        insights.push('<b>Short Trial Warning (' + formatPrettyDate(lastDate) + '):</b> Raw NG Qty dropped from <b>' + prevRecs.length + '</b> to <b>' + lastRecs.length + '</b>, but over the shorter run (' + lastM.activeHours.toFixed(1) + ' hrs), NG rate actually rose from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b>' + extraPct + '.');
+                    } else if (lastM.ngPerHour < prevM.ngPerHour) {
+                        var impPct = (lastM.defectRatePct !== null && prevM.defectRatePct !== null)
+                            ? (' | Defect Rate: <b>' + prevM.defectRatePct.toFixed(2) + '% → ' + lastM.defectRatePct.toFixed(2) + '%</b>')
+                            : '';
+                        insights.push('<b>True Rate Improvement (' + formatPrettyDate(lastDate) + '):</b> Defect frequency improved from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> down to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b>' + impPct + '.');
+                    }
+                }
+
+                if (projectActionLogs.length > 0) {
+                    var latestAct = projectActionLogs[projectActionLogs.length - 1];
+                    insights.push('<b>Latest Action Impact (#' + latestAct.num + ' ' + latestAct.title + '):</b> ' + (latestAct.impactSummary || ''));
+                }
+
+                document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
+            }
+
+            // CHART 2: PARAMETER TREND OVER TIME + INSTANT NG RATE (NG/HR) OVERLAY
+            function renderTrendChart() {
+                if (typeof Chart === 'undefined' || !currentProject) return;
+                if (trendChartInstance) trendChartInstance.destroy();
+
+                computeActionImpacts(getProjectParams(currentProject), filteredRecords);
+                renderActionHistoryList();
+
+                var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
+                var selectedParam = document.getElementById('trendParamSelect').value;
+                var trendGroup = document.getElementById('trendGroupSelect').value;
+                var showRateOverlay = document.getElementById('toggleNgRateOverlay').checked;
+
+                var fullTooltipTitles = [];
+                var fullTooltipFooters = [];
+                var bucketKeys = [];
+                var bucketRecordsMap = {};
+                var xAxisShortLabels = [];
+                var dateBoundaries = [];
+                var instantNgRateSeries = [];
+
+                if (trendGroup === 'raw') {
+                    var lastSeenDate = '';
+
+                    filteredRecords.forEach(function(r, idx) {
+                        var tInfo = getWeekTimelineInfo(r.recorded_date);
+                        var shortTime = r.recorded_time.slice(0, 5);
+                        bucketKeys.push(r.recorded_date + ' ' + r.recorded_time);
+                        xAxisShortLabels.push(shortTime);
+
+                        var startIdx = Math.max(0, idx - 2);
+                        var windowRecs = filteredRecords.slice(startIdx, idx + 1);
+                        var instRate = calcTimeRateMetrics(windowRecs, []);
+                        instantNgRateSeries.push(Number(instRate.ngPerHour.toFixed(2)));
+
+                        var gapStr = 'First record';
+                        if (idx > 0) {
+                            var prevMs = toEpochMs(filteredRecords[idx - 1].recorded_date, filteredRecords[idx - 1].recorded_time);
+                            var currMs = toEpochMs(r.recorded_date, r.recorded_time);
+                            gapStr = formatGapDuration(Math.max(1, (currMs - prevMs) / 60000)) + ' since prev';
+                        }
+
+                        var pv = r.parameter_values || {};
+                        var extraTrial = [];
+                        if (pv._run_hours) extraTrial.push('Run: ' + pv._run_hours + 'h');
+                        if (pv._total_output) extraTrial.push('Output: ' + pv._total_output);
+                        var trialSuffix = extraTrial.length > 0 ? (' | ' + extraTrial.join(', ')) : '';
+
+                        fullTooltipTitles.push(tInfo.cw + ' • ' + formatPrettyDate(r.recorded_date) + ' • ' + shortTime + ' (' + r.ng_mode + ')');
+                        fullTooltipFooters.push('Gap: ' + gapStr + ' | Rolling: ' + instRate.ngPerHour.toFixed(2) + ' NG/hr' + trialSuffix);
+
+                        if (r.recorded_date !== lastSeenDate) {
+                            dateBoundaries.push({
+                                index: idx,
+                                label: tInfo.dayMonth + ' • ' + tInfo.cw
+                            });
+                            lastSeenDate = r.recorded_date;
+                        }
+                    });
+                } else {
+                    var bucketMetaMap = {};
+                    filteredRecords.forEach(function(r) {
+                        var tInfo = getWeekTimelineInfo(r.recorded_date);
+                        var key = trendGroup === 'weekly' ? tInfo.weekSortKey : r.recorded_date;
+                        if (!bucketRecordsMap[key]) {
+                            bucketRecordsMap[key] = [];
+                            bucketMetaMap[key] = tInfo;
+                        }
+                        bucketRecordsMap[key].push(r);
+                    });
+
+                    bucketKeys = Object.keys(bucketRecordsMap).sort();
+
+                    bucketKeys.forEach(function(k, idx) {
+                        var info = bucketMetaMap[k];
+                        var recs = bucketRecordsMap[k];
+                        var actsInBucket = projectActionLogs.filter(function(a) {
+                            var aKey = trendGroup === 'weekly' ? a.weekSortKey : a.date;
+                            return aKey === k;
+                        });
+                        var grpRate = calcTimeRateMetrics(recs, actsInBucket);
+                        instantNgRateSeries.push(Number(grpRate.ngPerHour.toFixed(2)));
+
+                        if (trendGroup === 'weekly') {
+                            xAxisShortLabels.push(info.cw + ' • ' + info.weekMonthShort);
+                            fullTooltipTitles.push(info.cw + ' (' + info.weekMonthShort + ') • Weekly Average');
+                        } else {
+                            xAxisShortLabels.push(info.dayMonth);
+                            fullTooltipTitles.push(info.cw + ' • ' + formatPrettyDate(k) + ' • Daily Average');
+                            dateBoundaries.push({
+                                index: idx,
+                                label: info.dayMonth + ' • ' + info.cw
+                            });
+                        }
+
+                        var defectStr = grpRate.defectRatePct !== null ? (' | Defect: ' + grpRate.defectRatePct.toFixed(2) + '%') : '';
+                        fullTooltipFooters.push('NGs: ' + recs.length + ' | Run: ' + grpRate.activeHours.toFixed(1) + 'h | Rate: ' + grpRate.ngPerHour.toFixed(2) + ' NG/hr' + defectStr);
+                    });
+                }
+
+                function getSeriesForParam(paramLabel) {
+                    if (trendGroup === 'raw') {
+                        return filteredRecords.map(function(r) {
+                            var v = (r.parameter_values || {})[paramLabel];
+                            return v !== undefined && v !== '' && !isNaN(v) ? Number(v) : null;
+                        });
+                    } else {
+                        return bucketKeys.map(function(k) {
+                            var recs = bucketRecordsMap[k] || [];
+                            var st = calcStats(recs.map(function(r) { return (r.parameter_values || {})[paramLabel]; }));
+                            return st.n > 0 ? Number(st.mean.toFixed(3)) : null;
+                        });
+                    }
+                }
+
+                var datasets = [];
+                var lineColors = [
+                    '#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea',
+                    '#0891b2', '#db2777', '#4f46e5', '#65a30d', '#ea580c',
+                    '#0d9488', '#7c3aed', '#be123c', '#0284c7', '#ca8a04'
+                ];
+
+                var modeSuffix = trendGroup === 'weekly' ? ' (Weekly Avg)' : (trendGroup === 'daily' ? ' (Daily Avg)' : '');
+
+                if (selectedParam === '__ALL__' || !selectedParam) {
+                    document.getElementById('specLimitInputs').classList.add('hidden');
+                    numParams.forEach(function(p, idx) {
+                        var c = lineColors[idx % lineColors.length];
+                        datasets.push({
+                            label: p.label + modeSuffix,
+                            data: getSeriesForParam(p.label),
+                            borderColor: c,
+                            backgroundColor: c,
+                            tension: 0.2,
+                            pointRadius: 3.5,
+                            yAxisID: 'y'
+                        });
+                    });
+                } else {
+                    document.getElementById('specLimitInputs').classList.remove('hidden');
+
+                    var allRawVals = filteredRecords.map(function(r) {
+                        var v = (r.parameter_values || {})[selectedParam];
+                        return v !== undefined && v !== '' && !isNaN(v) ? Number(v) : null;
+                    });
+                    var overallSt = calcStats(allRawVals);
+                    var seriesVals = getSeriesForParam(selectedParam);
+
+                    var maVals = seriesVals.map(function(v, idx, arr) {
+                        if (idx < 2) return null;
+                        var slice = [arr[idx - 2], arr[idx - 1], arr[idx]].filter(function(x) { return x !== null; });
+                        if (slice.length === 0) return null;
+                        return Number((slice.reduce(function(a, b) { return a + b; }, 0) / slice.length).toFixed(3));
+                    });
+
+                    var lslInput = document.getElementById('inputLSL').value;
+                    var uslInput = document.getElementById('inputUSL').value;
+                    var lslVal = lslInput !== '' ? Number(lslInput) : (overallSt.n > 1 ? overallSt.mean - (2 * overallSt.std) : null);
+                    var uslVal = uslInput !== '' ? Number(uslInput) : (overallSt.n > 1 ? overallSt.mean + (2 * overallSt.std) : null);
+
+                    datasets.push({
+                        label: selectedParam + (trendGroup === 'raw' ? ' (Actual)' : modeSuffix),
+                        data: seriesVals,
+                        borderColor: '#18181b',
+                        backgroundColor: '#18181b',
+                        pointRadius: 4.5,
+                        borderWidth: 2,
+                        tension: 0.15,
+                        yAxisID: 'y'
+                    });
+
+                    datasets.push({
+                        label: '3-Pt Moving Avg (Smooth Trend)',
+                        data: maVals,
+                        borderColor: '#2563eb',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.35,
+                        yAxisID: 'y'
+                    });
+
+                    if (overallSt.n > 0) {
+                        datasets.push({
+                            label: 'Overall Average (' + overallSt.mean.toFixed(2) + ')',
+                            data: seriesVals.map(function() { return overallSt.mean; }),
+                            borderColor: '#10b981',
+                            borderDash: [4, 4],
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            yAxisID: 'y'
+                        });
+                    }
+
+                    if (uslVal !== null && overallSt.n > 1) {
+                        datasets.push({
+                            label: (uslInput !== '' ? 'Max Limit' : '+2σ Upper') + ' (' + uslVal.toFixed(2) + ')',
+                            data: seriesVals.map(function() { return uslVal; }),
+                            borderColor: '#ef4444',
+                            borderDash: [6, 4],
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            yAxisID: 'y'
+                        });
+                    }
+
+                    if (lslVal !== null && overallSt.n > 1) {
+                        datasets.push({
+                            label: (lslInput !== '' ? 'Min Limit' : '-2σ Lower') + ' (' + lslVal.toFixed(2) + ')',
+                            data: seriesVals.map(function() { return lslVal; }),
+                            borderColor: '#f97316',
+                            borderDash: [6, 4],
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            yAxisID: 'y'
+                        });
+                    }
+                }
+
+                if (showRateOverlay) {
+                    datasets.push({
+                        label: 'NG Rate (NG / Hr) [Right Axis]',
+                        data: instantNgRateSeries,
+                        borderColor: '#9333ea',
+                        backgroundColor: 'rgba(147, 51, 234, 0.08)',
+                        borderDash: [3, 3],
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: true,
+                        yAxisID: 'yRate'
+                    });
+                }
+
+                var trendMarkers = [];
+                if (bucketKeys.length > 0) {
+                    projectActionLogs.forEach(function(act) {
+                        var targetKey = trendGroup === 'raw'
+                            ? (act.date + ' ' + act.time)
+                            : (trendGroup === 'weekly' ? act.weekSortKey : act.date);
+
+                        var idx = bucketKeys.findIndex(function(k) { return k >= targetKey; });
+                        if (idx === -1) idx = bucketKeys.length - 1;
+                        trendMarkers.push({
+                            num: act.num,
+                            title: act.title,
+                            status: act.status,
+                            xIndex: idx
+                        });
+                    });
+                }
+
+                var scalesConfig = {
+                    x: {
+                        afterFit: function(scale) {
+                            if (dateBoundaries.length > 0) {
+                                scale.height += 22;
+                            }
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 12,
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        position: 'left',
+                        title: { display: true, text: selectedParam === '__ALL__' ? 'Parameter Value' : selectedParam }
+                    }
+                };
+
+                if (showRateOverlay) {
+                    scalesConfig.yRate = {
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'NG Rate (NG / Hr)' }
+                    };
+                }
+
+                var ctx = document.getElementById('trendChart').getContext('2d');
+                trendChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: xAxisShortLabels, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: { top: 38, bottom: 6 } },
+                        interaction: { mode: 'index', intersect: false },
+                        scales: scalesConfig,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        if (!tooltipItems || tooltipItems.length === 0) return '';
+                                        var idx = tooltipItems[0].dataIndex;
+                                        return fullTooltipTitles[idx] || '';
+                                    },
+                                    footer: function(tooltipItems) {
+                                        if (!tooltipItems || tooltipItems.length === 0) return '';
+                                        var idx = tooltipItems[0].dataIndex;
+                                        return fullTooltipFooters[idx] || '';
+                                    }
+                                }
+                            },
+                            actionBadgesPlugin: {
+                                markers: trendMarkers,
+                                dateBoundaries: dateBoundaries
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderScatterChart() {
+                if (typeof Chart === 'undefined') return;
+                if (scatterChartInstance) scatterChartInstance.destroy();
+
+                var xLabel = document.getElementById('scatterXSelect').value || 'Param 1';
+                var yLabel = document.getElementById('scatterYSelect').value || 'Param 2';
+
+                var palette = [
+                    '#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea',
+                    '#0891b2', '#db2777', '#4f46e5', '#65a30d', '#ea580c'
+                ];
+                var uniqueModes = Object.keys(currentModeCounts);
+                var scatterDatasets = uniqueModes.map(function(mode, idx) {
+                    var color = palette[idx % palette.length];
+                    var pts = filteredRecords
+                        .filter(function(r) { return r.ng_mode === mode; })
+                        .map(function(r) {
+                            var vals = r.parameter_values || {};
+                            return { x: Number(vals[xLabel] || 0), y: Number(vals[yLabel] || 0) };
+                        });
+                    return { label: mode, data: pts, backgroundColor: color, pointRadius: 6 };
+                });
+
+                var ctx = document.getElementById('scatterChart').getContext('2d');
+                scatterChartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets: scatterDatasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: xLabel } },
+                            y: { title: { display: true, text: yLabel } }
+                        }
+                    }
+                });
+            }
+
+            function renderParetoChart() {
+                if (typeof Chart === 'undefined') return;
+                if (modeBarChartInstance) modeBarChartInstance.destroy();
+
+                var sortedModes = Object.keys(currentModeCounts).sort(function(a, b) { return currentModeCounts[b] - currentModeCounts[a]; });
+                var counts = sortedModes.map(function(m) { return currentModeCounts[m]; });
+                var total = counts.reduce(function(a, b) { return a + b; }, 0);
+
+                var cumSum = 0;
+                var cumPct = counts.map(function(c) {
+                    cumSum += c;
+                    return total > 0 ? Number(((cumSum / total) * 100).toFixed(1)) : 0;
+                });
+
+                var ctx = document.getElementById('modeBarChart').getContext('2d');
+                modeBarChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedModes,
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'Cumulative (%)',
+                                data: cumPct,
+                                borderColor: '#dc2626',
+                                backgroundColor: '#dc2626',
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                yAxisID: 'y1'
+                            },
+                            {
+                                type: 'bar',
+                                label: 'NG Count',
+                                data: counts,
+                                backgroundColor: '#18181b',
+                                borderRadius: 4,
+                                yAxisID: 'y'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, position: 'left', ticks: { precision: 0 } },
+                            y1: { beginAtZero: true, max: 100, position: 'right', grid: { drawOnChartArea: false } }
+                        }
+                    }
+                });
+            }
+
+            function renderMatrixTable(allParams, records, modeCounts) {
+                var thead = document.getElementById('matrixHeaderRow');
+                var tbody = document.getElementById('matrixTableBody');
+
+                thead.innerHTML = '<th class="p-3 whitespace-nowrap">NG Mode</th><th class="p-3 whitespace-nowrap">Count</th>' +
+                    allParams.map(function(p) {
+                        var prefix = p.type === 'text' ? 'Top ' : 'Avg ';
+                        return '<th class="p-3 whitespace-nowrap">' + prefix + p.label + '</th>';
+                    }).join('');
+
+                var modes = Object.keys(modeCounts).sort(function(a, b) { return modeCounts[b] - modeCounts[a]; });
+                if (modes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="' + (allParams.length + 2) + '" class="p-4 text-center text-zinc-400">No data.</td></tr>';
+                    return;
+                }
+
+                var overallMeans = {};
+                allParams.forEach(function(p) {
+                    if (p.type === 'number') {
+                        overallMeans[p.label] = calcStats(records.map(function(r) { return (r.parameter_values || {})[p.label]; })).mean;
+                    }
+                });
+
+                tbody.innerHTML = '';
+                modes.forEach(function(mode) {
+                    var modeRecs = records.filter(function(r) { return r.ng_mode === mode; });
+                    var cells = allParams.map(function(p) {
+                        var l = p.label;
+                        if (p.type === 'text') {
+                            var tStat = calcTopText(modeRecs.map(function(r) { return (r.parameter_values || {})[l]; }));
+                            if (tStat.top === '-') return '<td class="p-3 text-zinc-400">-</td>';
+                            return '<td class="p-3 font-medium whitespace-nowrap">' + tStat.top + ' <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800">' + tStat.pct + '%</span></td>';
+                        } else {
+                            var st = calcStats(modeRecs.map(function(r) { return (r.parameter_values || {})[l]; }));
+                            var base = overallMeans[l];
+                            var diffPct = base !== 0 ? ((st.mean - base) / Math.abs(base)) * 100 : 0;
+                            var badge = '';
+                            if (Math.abs(diffPct) >= 5) {
+                                var sign = diffPct > 0 ? '+' : '';
+                                badge = ' <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-600">' + sign + diffPct.toFixed(0) + '%</span>';
+                            }
+                            return '<td class="p-3 font-medium whitespace-nowrap">' + st.mean.toFixed(2) + badge + '</td>';
+                        }
+                    }).join('');
+
+                    var tr = document.createElement('tr');
+                    tr.className = 'hover:bg-zinc-50';
+                    tr.innerHTML = '<td class="p-3 font-bold text-zinc-900 whitespace-nowrap">' + mode + '</td>' +
+                        '<td class="p-3 text-zinc-600 whitespace-nowrap">' + modeCounts[mode] + '</td>' + cells;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function renderRecordsTable(allParams, records) {
+                var tbody = document.getElementById('recordsTableBody');
+                if (records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-zinc-400">No records found.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+
+                var enriched = records.map(function(r, idx) {
+                    var gapLabel = '-';
+                    if (idx > 0) {
+                        var t1 = toEpochMs(records[idx - 1].recorded_date, records[idx - 1].recorded_time);
+                        var t2 = toEpochMs(r.recorded_date, r.recorded_time);
+                        var mins = Math.max(1, (t2 - t1) / 60000);
+                        gapLabel = formatGapDuration(mins);
+                    }
+                    return { rec: r, gap: gapLabel };
+                });
+
+                enriched.slice().reverse().forEach(function(item) {
+                    var r = item.rec;
+                    var vals = r.parameter_values || {};
+                    var tInfo = getWeekTimelineInfo(r.recorded_date);
+                    var paramStr = allParams.map(function(p) {
+                        var v = vals[p.label] !== undefined ? vals[p.label] : '-';
+                        var badgeStyle = p.type === 'text' ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-zinc-100 text-zinc-800';
+                        return '<span class="inline-block ' + badgeStyle + ' px-2 py-0.5 rounded text-xs mr-1 mb-1">' + p.label + ': <b>' + v + '</b></span>';
+                    }).join('');
+
+                    if (vals._run_hours) {
+                        paramStr += '<span class="inline-block bg-purple-50 text-purple-800 border border-purple-200 px-2 py-0.5 rounded text-xs mr-1 mb-1">Run: <b>' + vals._run_hours + 'h</b></span>';
+                    }
+                    if (vals._total_output) {
+                        paramStr += '<span class="inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-xs mr-1 mb-1">Out: <b>' + vals._total_output + '</b></span>';
+                    }
+
+                    var tr = document.createElement('tr');
+                    tr.className = 'hover:bg-zinc-50';
+                    tr.innerHTML = '<td class="p-3 whitespace-nowrap text-zinc-600"><span class="font-semibold text-zinc-800">' + tInfo.cw + '</span> • ' + formatPrettyDate(r.recorded_date) + ' ' + r.recorded_time.slice(0, 5) + '</td>' +
+                        '<td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold text-xs">' + item.gap + '</span></td>' +
+                        '<td class="p-3 font-medium">' + r.operator_name + '</td>' +
+                        '<td class="p-3 font-semibold text-red-600">' + r.ng_mode + '</td>' +
+                        '<td class="p-3">' + paramStr + '</td>' +
+                        '<td class="p-3 text-zinc-500">' + (r.remarks || '-') + '</td>';
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('btnExportCsv').addEventListener('click', function() {
+                if (!currentProject || filteredRecords.length === 0) {
+                    window.showAlert('No data to export!', 'error');
+                    return;
+                }
+                var allParams = getProjectParams(currentProject);
+                var labels = allParams.map(function(p) { return p.label; });
+                var headers = ['Date', 'Time', 'CW', 'Month', 'Minutes_Since_Prev_NG', 'Run_Hours', 'Total_Output', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
+                var rows = [headers.join(',')];
+
+                filteredRecords.forEach(function(r, idx) {
+                    var vals = r.parameter_values || {};
+                    var tInfo = getWeekTimelineInfo(r.recorded_date);
+                    var gapMins = '';
+                    if (idx > 0) {
+                        var t1 = toEpochMs(filteredRecords[idx - 1].recorded_date, filteredRecords[idx - 1].recorded_time);
+                        var t2 = toEpochMs(r.recorded_date, r.recorded_time);
+                        gapMins = Math.round(Math.max(1, (t2 - t1) / 60000));
+                    }
+                    var row = [
+                        r.recorded_date,
+                        r.recorded_time,
+                        tInfo.cw,
+                        tInfo.monthShort,
+                        gapMins,
+                        vals._run_hours || '',
+                        vals._total_output || '',
+                        '"' + (r.operator_name || '').replace(/"/g, '""') + '"',
+                        '"' + (r.ng_mode || '').replace(/"/g, '""') + '"'
+                    ];
+                    allParams.forEach(function(p) {
+                        var v = vals[p.label] !== undefined ? String(vals[p.label]).replace(/"/g, '""') : '';
+                        row.push(p.type === 'text' ? '"' + v + '"' : v);
+                    });
+                    row.push('"' + (r.remarks || '').replace(/"/g, '""') + '"');
+                    rows.push(row.join(','));
+                });
+
+                var csvContent = "data:text/csv;charset=utf-8," + rows.join("\n");
+                var link = document.createElement("a");
+                link.setAttribute("href", encodeURI(csvContent));
+                link.setAttribute("download", currentProject.project_title.replace(/\s+/g, '_') + "_NG_Report.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            window.refreshSupabaseProjects(false);
+        })();
+    </script>
+</body>
+</html>
