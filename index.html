@@ -266,8 +266,8 @@
         <div id="sectionAdmin" class="hidden max-w-3xl mx-auto space-y-6 mt-2">
             <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-6">
                 <div class="pb-4 mb-4 border-b border-zinc-100">
-                    <h1 class="text-lg font-bold text-zinc-900">Register & Manage Projects</h1>
-                    <p class="text-xs text-zinc-500">Set up project name, NG modes, and up to 15 parameters (default: Number, click button to switch to Text).</p>
+                    <h1 id="adminFormTitle" class="text-lg font-bold text-zinc-900">Register & Manage Projects</h1>
+                    <p class="text-xs text-zinc-500">Create a new project or click <b>Edit</b> on an active project below to rename or add parameters/NG modes.</p>
                 </div>
 
                 <div id="adminLoginBox" class="space-y-4">
@@ -281,6 +281,19 @@
                 </div>
 
                 <div id="adminContentWrap" class="hidden space-y-6">
+                    
+                    <!-- Edit Mode Banner -->
+                    <div id="editModeBanner" class="hidden p-3.5 rounded-lg bg-amber-50 border border-amber-300 flex items-center justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200 text-amber-900">Edit Mode</span>
+                            <p id="editingProjectLabel" class="text-xs font-semibold text-amber-900 mt-1">Editing Project</p>
+                            <p class="text-[11px] text-amber-700">Renaming any parameter will automatically update existing NG records.</p>
+                        </div>
+                        <button type="button" onclick="window.cancelEditProject()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 shrink-0">
+                            Cancel Edit
+                        </button>
+                    </div>
+
                     <form id="adminForm" class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1">Project / Machine Name <span class="text-red-500">*</span></label>
@@ -304,16 +317,21 @@
                             <div id="adminParamsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
                         </div>
 
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition">
-                            Save Project
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="submit" id="adminSubmitBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition">
+                                Save New Project
+                            </button>
+                            <button type="button" id="adminCancelBtn" onclick="window.cancelEditProject()" class="hidden px-5 bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-semibold py-2.5 rounded-lg text-sm transition">
+                                Cancel
+                            </button>
+                        </div>
                     </form>
 
-                    <!-- Registered Projects List with Delete Button -->
+                    <!-- Registered Projects List with Edit & Delete Buttons -->
                     <div class="pt-5 border-t border-zinc-200">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Active Projects</h3>
-                            <span class="text-[11px] text-zinc-400">Deleting a project also removes its NG logs</span>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Active Projects (Click Edit to Modify)</h3>
+                            <span class="text-[11px] text-zinc-400">Live editable</span>
                         </div>
                         <div id="adminProjectList" class="space-y-2 text-sm"></div>
                     </div>
@@ -324,6 +342,8 @@
 
     <!-- SCRIPT 1: TAB NAVIGATION & ADMIN 15-PARAMETER BUILDER -->
     <script>
+        window.editingProjectId = null;
+
         window.showAlert = function(message, type) {
             var alertBox = document.getElementById('alertBox');
             if (!alertBox) return;
@@ -335,7 +355,19 @@
             setTimeout(function() { alertBox.classList.add('hidden'); }, 4500);
         };
 
-        // Build 15 Parameter Slots in Admin Panel with Number/Text Toggle Button (Default: Number)
+        window.setParamButtonStyle = function(btn, typeVal) {
+            if (!btn) return;
+            if (typeVal === 'text') {
+                btn.setAttribute('data-type', 'text');
+                btn.textContent = 'Abc Text';
+                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 transition cursor-pointer';
+            } else {
+                btn.setAttribute('data-type', 'number');
+                btn.textContent = '# Number';
+                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer';
+            }
+        };
+
         window.initAdminParamSlots = function() {
             var grid = document.getElementById('adminParamsGrid');
             if (!grid) return;
@@ -353,7 +385,7 @@
                             '# Number' +
                         '</button>' +
                     '</div>' +
-                    '<input type="text" id="adminParam' + i + '" value="' + defaultVal + '" ' + (isReq ? 'required ' : '') +
+                    '<input type="text" id="adminParam' + i + '" data-original-label="" value="' + defaultVal + '" ' + (isReq ? 'required ' : '') +
                         'placeholder="' + (isReq ? 'Required' : 'Optional label') + '" ' +
                         'class="w-full border border-zinc-300 rounded-md p-1.5 text-xs bg-white focus:ring-2 focus:ring-zinc-900 outline-none">';
                 grid.appendChild(card);
@@ -364,28 +396,31 @@
             var btn = document.getElementById('adminParamTypeBtn' + index);
             if (!btn) return;
             var current = btn.getAttribute('data-type') || 'number';
-            if (current === 'number') {
-                btn.setAttribute('data-type', 'text');
-                btn.textContent = 'Abc Text';
-                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 transition cursor-pointer';
-            } else {
-                btn.setAttribute('data-type', 'number');
-                btn.textContent = '# Number';
-                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer';
-            }
+            window.setParamButtonStyle(btn, current === 'number' ? 'text' : 'number');
         };
 
         window.resetAdminParamSlots = function() {
             for (var i = 1; i <= 15; i++) {
                 var input = document.getElementById('adminParam' + i);
                 var btn = document.getElementById('adminParamTypeBtn' + i);
-                if (input && i >= 3) input.value = '';
-                if (btn) {
-                    btn.setAttribute('data-type', 'number');
-                    btn.textContent = '# Number';
-                    btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer';
+                if (input) {
+                    input.value = i === 1 ? 'Motion 1' : (i === 2 ? 'Motion 2' : '');
+                    input.setAttribute('data-original-label', '');
                 }
+                window.setParamButtonStyle(btn, 'number');
             }
+        };
+
+        window.cancelEditProject = function() {
+            window.editingProjectId = null;
+            document.getElementById('adminProjectTitle').value = '';
+            document.getElementById('adminNgModes').value = '';
+            document.getElementById('editModeBanner').classList.add('hidden');
+            document.getElementById('adminCancelBtn').classList.add('hidden');
+            var submitBtn = document.getElementById('adminSubmitBtn');
+            submitBtn.textContent = 'Save New Project';
+            submitBtn.className = 'flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition';
+            window.resetAdminParamSlots();
         };
 
         window.switchAppTab = function(activeKey) {
@@ -458,7 +493,6 @@
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
 
-            // Helper: Supports both old string arrays ["Motion 1"] and new object arrays [{label: "Motion 1", type: "number"}]
             function getProjectParams(project) {
                 if (!project || !Array.isArray(project.parameter_labels)) return [];
                 return project.parameter_labels.map(function(item) {
@@ -474,6 +508,71 @@
                 }).filter(function(item) {
                     return item && item.label.length > 0;
                 });
+            }
+
+            // RENDER OPERATOR FIELDS FOR SELECTED PROJECT
+            function renderOperatorFieldsForProject(selectedId, preserveEnteredValues) {
+                var ngModeSelect = document.getElementById('ngModeSelect');
+                var paramsContainer = document.getElementById('dynamicParamsContainer');
+                var dynamicFields = document.getElementById('dynamicFields');
+
+                var previousValues = {};
+                var prevMode = ngModeSelect.value;
+                if (preserveEnteredValues) {
+                    document.querySelectorAll('.dynamic-param-input').forEach(function(inp) {
+                        previousValues[inp.getAttribute('data-param-label')] = inp.value;
+                    });
+                }
+
+                dynamicFields.innerHTML = '';
+                if (!selectedId) {
+                    ngModeSelect.innerHTML = '<option value="">Select Project First</option>';
+                    ngModeSelect.disabled = true;
+                    paramsContainer.classList.add('hidden');
+                    return;
+                }
+
+                var project = projectsData.find(function(p) { return p.id === selectedId; });
+                if (!project) return;
+
+                ngModeSelect.disabled = false;
+                ngModeSelect.innerHTML = '<option value="">-- Select NG Mode --</option>';
+                (project.ng_modes || []).forEach(function(mode) {
+                    var opt = document.createElement('option');
+                    opt.value = mode;
+                    opt.textContent = mode;
+                    ngModeSelect.appendChild(opt);
+                });
+                if (preserveEnteredValues && prevMode && (project.ng_modes || []).indexOf(prevMode) !== -1) {
+                    ngModeSelect.value = prevMode;
+                }
+
+                var paramsList = getProjectParams(project);
+                if (paramsList.length > 0) {
+                    paramsContainer.classList.remove('hidden');
+                    paramsList.forEach(function(paramObj) {
+                        var isText = paramObj.type === 'text';
+                        var badgeHtml = isText
+                            ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Text</span>'
+                            : '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Number</span>';
+
+                        var savedVal = (preserveEnteredValues && previousValues[paramObj.label] !== undefined) ? previousValues[paramObj.label] : '';
+
+                        var inputHtml = isText
+                            ? '<input type="text" data-param-label="' + paramObj.label + '" data-param-type="text" value="' + savedVal + '" required placeholder="Enter text for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">'
+                            : '<input type="number" step="any" data-param-label="' + paramObj.label + '" data-param-type="number" value="' + savedVal + '" required placeholder="Enter number for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
+
+                        var wrapper = document.createElement('div');
+                        wrapper.innerHTML =
+                            '<div class="flex items-center justify-between mb-1">' +
+                                '<label class="block text-xs font-semibold text-zinc-700">' + paramObj.label + ' <span class="text-red-500">*</span></label>' +
+                                badgeHtml +
+                            '</div>' + inputHtml;
+                        dynamicFields.appendChild(wrapper);
+                    });
+                } else {
+                    paramsContainer.classList.add('hidden');
+                }
             }
 
             window.refreshSupabaseProjects = async function(loadDashboardAfter) {
@@ -515,10 +614,9 @@
 
                 if (prevOpVal && projectsData.some(function(p) { return p.id === prevOpVal; })) {
                     projectSelect.value = prevOpVal;
+                    renderOperatorFieldsForProject(prevOpVal, true);
                 } else {
-                    document.getElementById('dynamicParamsContainer').classList.add('hidden');
-                    document.getElementById('ngModeSelect').innerHTML = '<option value="">Select Project First</option>';
-                    document.getElementById('ngModeSelect').disabled = true;
+                    renderOperatorFieldsForProject('', false);
                 }
 
                 if (prevDashVal && projectsData.some(function(p) { return p.id === prevDashVal; })) {
@@ -530,6 +628,42 @@
                 if (loadDashboardAfter && dashSelect.value) {
                     loadDashboardData(dashSelect.value);
                 }
+            };
+
+            // LOAD PROJECT INTO ADMIN FORM FOR EDITING
+            window.startEditProject = function(projectId) {
+                var proj = projectsData.find(function(p) { return p.id === projectId; });
+                if (!proj) return;
+
+                window.editingProjectId = proj.id;
+                document.getElementById('adminProjectTitle').value = proj.project_title || '';
+                document.getElementById('adminNgModes').value = (proj.ng_modes || []).join(', ');
+
+                var normParams = getProjectParams(proj);
+                for (var i = 1; i <= 15; i++) {
+                    var input = document.getElementById('adminParam' + i);
+                    var btn = document.getElementById('adminParamTypeBtn' + i);
+                    var item = normParams[i - 1];
+                    if (item) {
+                        input.value = item.label;
+                        input.setAttribute('data-original-label', item.label);
+                        window.setParamButtonStyle(btn, item.type);
+                    } else {
+                        input.value = '';
+                        input.setAttribute('data-original-label', '');
+                        window.setParamButtonStyle(btn, 'number');
+                    }
+                }
+
+                document.getElementById('editingProjectLabel').textContent = 'Editing: ' + proj.project_title;
+                document.getElementById('editModeBanner').classList.remove('hidden');
+                document.getElementById('adminCancelBtn').classList.remove('hidden');
+
+                var submitBtn = document.getElementById('adminSubmitBtn');
+                submitBtn.textContent = 'Update Project Changes';
+                submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition';
+
+                document.getElementById('sectionAdmin').scrollIntoView({ behavior: 'smooth' });
             };
 
             window.deleteProjectById = async function(projectId, projectTitle) {
@@ -545,6 +679,9 @@
                 if (res.error) {
                     window.showAlert('Failed to delete project: ' + res.error.message, 'error');
                 } else {
+                    if (window.editingProjectId === projectId) {
+                        window.cancelEditProject();
+                    }
                     window.showAlert('Project "' + projectTitle + '" deleted.', 'success');
                     window.refreshSupabaseProjects(false);
                 }
@@ -574,74 +711,39 @@
                         '<p class="text-xs text-zinc-500 truncate">Params (' + normParams.length + '): ' + paramsSummary + '</p>' +
                         '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + modes + '</p>';
 
+                    var btnGroup = document.createElement('div');
+                    btnGroup.className = 'flex items-center gap-1.5 shrink-0';
+
+                    var editBtn = document.createElement('button');
+                    editBtn.type = 'button';
+                    editBtn.className = 'px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition';
+                    editBtn.textContent = 'Edit';
+                    editBtn.addEventListener('click', function() {
+                        window.startEditProject(p.id);
+                    });
+
                     var delBtn = document.createElement('button');
                     delBtn.type = 'button';
-                    delBtn.className = 'px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition shrink-0';
+                    delBtn.className = 'px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition';
                     delBtn.textContent = 'Delete';
                     delBtn.addEventListener('click', function() {
                         window.deleteProjectById(p.id, p.project_title);
                     });
 
+                    btnGroup.appendChild(editBtn);
+                    btnGroup.appendChild(delBtn);
+
                     row.appendChild(infoDiv);
-                    row.appendChild(delBtn);
+                    row.appendChild(btnGroup);
                     container.appendChild(row);
                 });
             }
 
-            // DYNAMIC OPERATOR FORM (RENDERS NUMBER OR TEXT INPUT BASED ON ADMIN SELECTION)
             document.getElementById('projectSelect').addEventListener('change', function() {
-                var selectedId = this.value;
-                var ngModeSelect = document.getElementById('ngModeSelect');
-                var paramsContainer = document.getElementById('dynamicParamsContainer');
-                var dynamicFields = document.getElementById('dynamicFields');
-
-                dynamicFields.innerHTML = '';
-                if (!selectedId) {
-                    ngModeSelect.innerHTML = '<option value="">Select Project First</option>';
-                    ngModeSelect.disabled = true;
-                    paramsContainer.classList.add('hidden');
-                    return;
-                }
-
-                var project = projectsData.find(function(p) { return p.id === selectedId; });
-                if (!project) return;
-
-                ngModeSelect.disabled = false;
-                ngModeSelect.innerHTML = '<option value="">-- Select NG Mode --</option>';
-                (project.ng_modes || []).forEach(function(mode) {
-                    var opt = document.createElement('option');
-                    opt.value = mode;
-                    opt.textContent = mode;
-                    ngModeSelect.appendChild(opt);
-                });
-
-                var paramsList = getProjectParams(project);
-                if (paramsList.length > 0) {
-                    paramsContainer.classList.remove('hidden');
-                    paramsList.forEach(function(paramObj) {
-                        var isText = paramObj.type === 'text';
-                        var badgeHtml = isText
-                            ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Text</span>'
-                            : '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Number</span>';
-
-                        var inputHtml = isText
-                            ? '<input type="text" data-param-label="' + paramObj.label + '" data-param-type="text" required placeholder="Enter text for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">'
-                            : '<input type="number" step="any" data-param-label="' + paramObj.label + '" data-param-type="number" required placeholder="Enter number for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
-
-                        var wrapper = document.createElement('div');
-                        wrapper.innerHTML =
-                            '<div class="flex items-center justify-between mb-1">' +
-                                '<label class="block text-xs font-semibold text-zinc-700">' + paramObj.label + ' <span class="text-red-500">*</span></label>' +
-                                badgeHtml +
-                            '</div>' + inputHtml;
-                        dynamicFields.appendChild(wrapper);
-                    });
-                } else {
-                    paramsContainer.classList.add('hidden');
-                }
+                renderOperatorFieldsForProject(this.value, false);
             });
 
-            // SAVE NEW PROJECT (UP TO 15 PARAMETERS WITH NUMBER OR TEXT TYPE)
+            // CREATE OR UPDATE PROJECT (ADMIN)
             document.getElementById('adminForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -651,34 +753,95 @@
                 var ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
 
                 var parameterConfigs = [];
+                var renamedMap = {}; // { oldLabel: newLabel }
+
                 for (var i = 1; i <= 15; i++) {
                     var el = document.getElementById('adminParam' + i);
                     var btn = document.getElementById('adminParamTypeBtn' + i);
                     var labelVal = el && el.value ? el.value.trim() : '';
+                    var origLabel = el ? (el.getAttribute('data-original-label') || '').trim() : '';
                     var typeVal = btn ? (btn.getAttribute('data-type') || 'number') : 'number';
+
                     if (labelVal.length > 0) {
                         parameterConfigs.push({
                             label: labelVal,
                             type: typeVal === 'text' ? 'text' : 'number'
                         });
+                        if (window.editingProjectId && origLabel.length > 0 && origLabel !== labelVal) {
+                            renamedMap[origLabel] = labelVal;
+                        }
                     }
                 }
 
-                var res = await supabaseClient.from('ng_projects').insert([{
-                    project_title: title,
-                    parameter_labels: parameterConfigs,
-                    ng_modes: ngModes,
-                    is_active: true
-                }]);
+                if (window.editingProjectId) {
+                    // UPDATE EXISTING PROJECT
+                    var targetId = window.editingProjectId;
+                    var updateRes = await supabaseClient
+                        .from('ng_projects')
+                        .update({
+                            project_title: title,
+                            parameter_labels: parameterConfigs,
+                            ng_modes: ngModes
+                        })
+                        .eq('id', targetId);
 
-                if (res.error) {
-                    window.showAlert('Failed to save project: ' + res.error.message, 'error');
-                } else {
-                    window.showAlert('New project saved with ' + parameterConfigs.length + ' parameters!', 'success');
-                    document.getElementById('adminProjectTitle').value = '';
-                    document.getElementById('adminNgModes').value = '';
-                    window.resetAdminParamSlots();
+                    if (updateRes.error) {
+                        window.showAlert('Failed to update project: ' + updateRes.error.message, 'error');
+                        return;
+                    }
+
+                    // If any parameter was renamed, migrate old parameter keys in ng_records so historical data stays intact
+                    var oldKeys = Object.keys(renamedMap);
+                    if (oldKeys.length > 0) {
+                        var recRes = await supabaseClient
+                            .from('ng_records')
+                            .select('id, parameter_values')
+                            .eq('project_id', targetId);
+
+                        if (!recRes.error && Array.isArray(recRes.data)) {
+                            for (var rIdx = 0; rIdx < recRes.data.length; rIdx++) {
+                                var rec = recRes.data[rIdx];
+                                var vals = Object.assign({}, rec.parameter_values || {});
+                                var changed = false;
+                                oldKeys.forEach(function(oldK) {
+                                    var newK = renamedMap[oldK];
+                                    if (vals[oldK] !== undefined && vals[newK] === undefined) {
+                                        vals[newK] = vals[oldK];
+                                        delete vals[oldK];
+                                        changed = true;
+                                    }
+                                });
+                                if (changed) {
+                                    await supabaseClient
+                                        .from('ng_records')
+                                        .update({ parameter_values: vals })
+                                        .eq('id', rec.id);
+                                }
+                            }
+                        }
+                    }
+
+                    window.showAlert('Project "' + title + '" updated successfully!', 'success');
+                    window.cancelEditProject();
                     window.refreshSupabaseProjects(false);
+                } else {
+                    // INSERT NEW PROJECT
+                    var res = await supabaseClient.from('ng_projects').insert([{
+                        project_title: title,
+                        parameter_labels: parameterConfigs,
+                        ng_modes: ngModes,
+                        is_active: true
+                    }]);
+
+                    if (res.error) {
+                        window.showAlert('Failed to save project: ' + res.error.message, 'error');
+                    } else {
+                        window.showAlert('New project saved with ' + parameterConfigs.length + ' parameters!', 'success');
+                        document.getElementById('adminProjectTitle').value = '';
+                        document.getElementById('adminNgModes').value = '';
+                        window.resetAdminParamSlots();
+                        window.refreshSupabaseProjects(false);
+                    }
                 }
             });
 
@@ -930,7 +1093,6 @@
                 var textParams = allParams.filter(function(p) { return p.type === 'text'; });
                 var topModeRecords = records.filter(function(r) { return r.ng_mode === topMode; });
 
-                // Number parameter shift detection
                 var overallStats = {};
                 numParams.forEach(function(p) {
                     overallStats[p.label] = calcStats(records.map(function(r) { return (r.parameter_values || {})[p.label]; }));
@@ -960,7 +1122,6 @@
                     insights.push('<b>Number Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than normal average ' + overallStats[maxShiftParam].mean.toFixed(2) + ').');
                 }
 
-                // Text parameter pattern detection
                 textParams.forEach(function(p) {
                     var tStat = calcTopText(topModeRecords.map(function(r) { return (r.parameter_values || {})[p.label]; }));
                     if (tStat.count >= 2 && tStat.pct >= 60) {
