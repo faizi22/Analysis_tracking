@@ -206,22 +206,22 @@
                 </div>
             </div>
 
-            <!-- NEW CHART: Weekly / Daily NG Stacked Bar Chart + Action Callouts + Floating Card -->
+            <!-- CHART 1: Weekly / Daily NG Stacked Bar Chart + Action Callouts + Floating Card -->
             <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm relative">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-zinc-100">
                     <div>
-                        <h3 class="text-sm font-bold text-zinc-900">1. NG Total Trend by Mode & Action Taken Markers</h3>
-                        <p class="text-xs text-zinc-500">Numbered badges (1, 2, 3...) show where actions were taken. Click any action below to inspect details.</p>
+                        <h3 class="text-sm font-bold text-zinc-900">1. NG Total Trend by Mode & Action Taken Markers (Timeline: CW & Month)</h3>
+                        <p class="text-xs text-zinc-500">X-Axis shows Calendar Week (CW) & Month shortform. Click any action below to inspect details.</p>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
-                            <option value="weekly">Group by Calendar Week (CW)</option>
-                            <option value="daily">Group by Date (Daily)</option>
+                            <option value="weekly">Weekly View: CW + Month (e.g. CW41 • Oct)</option>
+                            <option value="daily">Daily View: CW + Date (e.g. CW41 • 26 Oct)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Floating Action Callout Card (Matches Screenshot Design) -->
+                <!-- Floating Action Callout Card -->
                 <div id="floatingActionCard" class="hidden mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-sm">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex items-center gap-2">
@@ -248,7 +248,7 @@
                 </div>
             </div>
 
-            <!-- ACTION HISTORY LIST (Matches Screenshot Design) -->
+            <!-- ACTION HISTORY LIST -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/60">
                     <div class="flex items-center gap-2.5">
@@ -272,12 +272,12 @@
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 
-                <!-- Chart 2: Parameter Trend Chart with Action Lines -->
+                <!-- Chart 2: Parameter Trend Chart with Action Lines & CW + Month Axis -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
-                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Trend Over Time & Action Markers</h3>
-                            <p class="text-xs text-zinc-500">Green vertical lines (1, 2, 3...) mark exact points where actions were taken so you can see parameter shifts.</p>
+                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Trend Over Time & Action Markers (CW & Month Timeline)</h3>
+                            <p class="text-xs text-zinc-500">X-Axis displays CW, Day, Month shortform & Time (e.g. CW41 • 26 Oct 10:30) with green action markers.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <select id="trendParamSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
@@ -355,7 +355,7 @@
                     <table class="w-full text-left border-collapse text-xs sm:text-sm">
                         <thead>
                             <tr class="bg-white text-zinc-500 border-b border-zinc-200">
-                                <th class="p-3">Date & Time</th>
+                                <th class="p-3">CW • Date & Time</th>
                                 <th class="p-3">Operator</th>
                                 <th class="p-3">NG Mode</th>
                                 <th class="p-3">Parameters</th>
@@ -620,13 +620,14 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, ACTION TAKEN TRACKER & DASHBOARD ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, TIMELINE (CW + MONTH) & DASHBOARD ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
             var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
 
             var ACTION_MARKER_MODE = '__ACTION_TAKEN__';
+            var SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
             var supabaseClient = null;
             var projectsData = [];
@@ -645,27 +646,53 @@
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
 
-            // ISO Calendar Week Helper (e.g. CW41)
-            function getCalendarWeek(dateStr) {
+            // Returns full ISO Calendar Week & Month info for any YYYY-MM-DD date
+            function getWeekTimelineInfo(dateStr) {
                 var d = new Date(dateStr + 'T00:00:00');
-                if (isNaN(d.getTime())) return 'CW--';
+                if (isNaN(d.getTime())) {
+                    return {
+                        cw: 'CW--',
+                        monthShort: '',
+                        weekSortKey: dateStr,
+                        weekAxisLabel: 'CW--',
+                        dayAxisLabel: dateStr
+                    };
+                }
+                var dayNum = String(d.getDate()).padStart(2, '0');
+                var dateMonthShort = SHORT_MONTHS[d.getMonth()];
+
+                // Calculate Thursday of ISO week so all days in the same CW share the exact same week bucket
                 var target = new Date(d.valueOf());
                 var dayNr = (d.getDay() + 6) % 7;
                 target.setDate(target.getDate() - dayNr + 3);
+                var isoYear = target.getFullYear();
+                var weekMonthShort = SHORT_MONTHS[target.getMonth()];
+
                 var firstThursday = target.valueOf();
                 target.setMonth(0, 1);
                 if (target.getDay() !== 4) {
                     target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
                 }
                 var weekNum = 1 + Math.ceil((firstThursday - target) / 604800000);
-                return 'CW' + String(weekNum).padStart(2, '0');
+                var cwStr = 'CW' + String(weekNum).padStart(2, '0');
+
+                return {
+                    cw: cwStr,
+                    monthShort: dateMonthShort,
+                    weekSortKey: isoYear + '-' + cwStr,
+                    weekAxisLabel: cwStr + ' • ' + weekMonthShort,
+                    dayAxisLabel: cwStr + ' • ' + dayNum + ' ' + dateMonthShort
+                };
+            }
+
+            function getCalendarWeek(dateStr) {
+                return getWeekTimelineInfo(dateStr).cw;
             }
 
             function formatPrettyDate(dateStr) {
                 var d = new Date(dateStr + 'T00:00:00');
                 if (isNaN(d.getTime())) return dateStr;
-                var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                return String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+                return String(d.getDate()).padStart(2, '0') + ' ' + SHORT_MONTHS[d.getMonth()] + ' ' + d.getFullYear();
             }
 
             function formatPrettyTime(timeStr) {
@@ -714,14 +741,12 @@
                         var xPos = xAxis.getPixelForValue(m.xIndex);
                         if (xPos < xAxis.left || xPos > xAxis.right) return;
 
-                        // Stagger vertical height slightly if multiple actions share similar x positions
                         var badgeY = yAxis.top + 14 + ((idx % 2) * 26);
                         var isCompleted = m.status !== 'Monitoring';
                         var mainColor = isCompleted ? '#10b981' : '#f59e0b';
                         var bgColor = isCompleted ? '#ecfdf5' : '#fffbeb';
                         var textColor = isCompleted ? '#065f46' : '#92400e';
 
-                        // Draw vertical pointer line
                         ctx.beginPath();
                         ctx.setLineDash([4, 3]);
                         ctx.strokeStyle = mainColor;
@@ -731,13 +756,11 @@
                         ctx.stroke();
                         ctx.setLineDash([]);
 
-                        // Draw small anchor dot
                         ctx.beginPath();
                         ctx.arc(xPos, yAxis.bottom - 6, 3.5, 0, Math.PI * 2);
                         ctx.fillStyle = mainColor;
                         ctx.fill();
 
-                        // Measure badge pill
                         var shortText = m.title.length > 18 ? m.title.slice(0, 17) + '…' : m.title;
                         ctx.font = 'bold 10px Inter, sans-serif';
                         var textW = ctx.measureText(shortText).width;
@@ -746,7 +769,6 @@
                         var pillX = Math.max(xAxis.left + 2, Math.min(xPos - pillW / 2, xAxis.right - pillW - 2));
                         var pillY = badgeY - pillH / 2;
 
-                        // Pill background & border
                         ctx.fillStyle = bgColor;
                         ctx.strokeStyle = mainColor;
                         ctx.lineWidth = 1.5;
@@ -755,7 +777,6 @@
                         ctx.fill();
                         ctx.stroke();
 
-                        // Number circle inside pill
                         var cirX = pillX + 11;
                         var cirY = pillY + pillH / 2;
                         ctx.beginPath();
@@ -769,7 +790,6 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText(String(m.num), cirX, cirY + 0.5);
 
-                        // Title text inside pill
                         ctx.fillStyle = textColor;
                         ctx.font = '600 10px Inter, sans-serif';
                         ctx.textAlign = 'left';
@@ -1234,7 +1254,7 @@
                 }
             };
 
-            // SHOW FLOATING ACTION CARD (MATCHES SCREENSHOT)
+            // SHOW FLOATING ACTION CARD
             window.inspectActionCard = function(actionNum) {
                 var act = projectActionLogs.find(function(a) { return a.num === actionNum; });
                 if (!act) return;
@@ -1358,11 +1378,15 @@
                 allRows.forEach(function(row) {
                     var pv = row.parameter_values || {};
                     if (row.ng_mode === ACTION_MARKER_MODE || pv._is_action) {
+                        var tInfo = getWeekTimelineInfo(row.recorded_date);
                         projectActionLogs.push({
                             id: row.id,
                             date: row.recorded_date,
                             time: row.recorded_time,
-                            cw: getCalendarWeek(row.recorded_date),
+                            cw: tInfo.cw,
+                            weekSortKey: tInfo.weekSortKey,
+                            weekAxisLabel: tInfo.weekAxisLabel,
+                            dayAxisLabel: tInfo.dayAxisLabel,
                             title: pv.title || 'Action Taken',
                             description: pv.description || row.remarks || '',
                             status: pv.status || row.operator_name || 'Completed'
@@ -1372,7 +1396,6 @@
                     }
                 });
 
-                // Number actions 1, 2, 3... chronologically
                 projectActionLogs.forEach(function(act, i) {
                     act.num = i + 1;
                 });
@@ -1455,7 +1478,6 @@
                 return num / den;
             }
 
-            // Compute Before vs After impact for each Action Taken
             function computeActionImpacts(allParams, records) {
                 var numParams = allParams.filter(function(p) { return p.type === 'number'; });
                 var primaryParam = numParams.length > 0 ? numParams[0].label : null;
@@ -1551,7 +1573,9 @@
                     return;
                 }
 
-                document.getElementById('statDateSpan').textContent = records[0].recorded_date + ' to ' + records[records.length - 1].recorded_date;
+                var firstInfo = getWeekTimelineInfo(records[0].recorded_date);
+                var lastInfo = getWeekTimelineInfo(records[records.length - 1].recorded_date);
+                document.getElementById('statDateSpan').textContent = firstInfo.dayAxisLabel + ' → ' + lastInfo.dayAxisLabel;
 
                 var modeCounts = {};
                 records.forEach(function(r) {
@@ -1576,34 +1600,41 @@
                 renderRecordsTable(allParams, records);
             }
 
-            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART WITH ACTION PINS (MATCHES IMAGE)
+            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART WITH CW + MONTH SHORTFORM ON X-AXIS
             function renderWeeklyStackChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
 
                 var groupBy = document.getElementById('ngGroupSelect').value; // 'weekly' or 'daily'
-                var bucketSet = {};
+                var bucketLabelMap = {};
 
                 filteredRecords.forEach(function(r) {
-                    var key = groupBy === 'weekly' ? getCalendarWeek(r.recorded_date) : r.recorded_date;
-                    bucketSet[key] = true;
-                });
-                projectActionLogs.forEach(function(a) {
-                    var key = groupBy === 'weekly' ? a.cw : a.date;
-                    bucketSet[key] = true;
+                    var tInfo = getWeekTimelineInfo(r.recorded_date);
+                    var sKey = groupBy === 'weekly' ? tInfo.weekSortKey : r.recorded_date;
+                    var dLabel = groupBy === 'weekly' ? tInfo.weekAxisLabel : tInfo.dayAxisLabel;
+                    bucketLabelMap[sKey] = dLabel;
                 });
 
-                var buckets = Object.keys(bucketSet).sort();
+                projectActionLogs.forEach(function(a) {
+                    var tInfo = getWeekTimelineInfo(a.date);
+                    var sKey = groupBy === 'weekly' ? tInfo.weekSortKey : a.date;
+                    var dLabel = groupBy === 'weekly' ? tInfo.weekAxisLabel : tInfo.dayAxisLabel;
+                    bucketLabelMap[sKey] = dLabel;
+                });
+
+                var sortedKeys = Object.keys(bucketLabelMap).sort();
+                var displayLabels = sortedKeys.map(function(k) { return bucketLabelMap[k]; });
                 var modes = Object.keys(currentModeCounts);
+
                 var stackColors = [
                     '#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6',
                     '#06b6d4', '#f97316', '#ec4899', '#475569', '#14b8a6'
                 ];
 
                 var datasets = modes.map(function(mode, idx) {
-                    var dataCounts = buckets.map(function(bKey) {
+                    var dataCounts = sortedKeys.map(function(bKey) {
                         return filteredRecords.filter(function(r) {
-                            var rKey = groupBy === 'weekly' ? getCalendarWeek(r.recorded_date) : r.recorded_date;
+                            var rKey = groupBy === 'weekly' ? getWeekTimelineInfo(r.recorded_date).weekSortKey : r.recorded_date;
                             return rKey === bKey && r.ng_mode === mode;
                         }).length;
                     });
@@ -1615,27 +1646,29 @@
                     };
                 });
 
-                // Map each Action Taken to its bucket index
                 var markers = projectActionLogs.map(function(act) {
-                    var targetKey = groupBy === 'weekly' ? act.cw : act.date;
+                    var targetKey = groupBy === 'weekly' ? act.weekSortKey : act.date;
                     return {
                         num: act.num,
                         title: act.title,
                         status: act.status,
-                        xIndex: buckets.indexOf(targetKey)
+                        xIndex: sortedKeys.indexOf(targetKey)
                     };
                 }).filter(function(m) { return m.xIndex !== -1; });
 
                 var ctx = document.getElementById('weeklyStackChart').getContext('2d');
                 weeklyStackChartInstance = new Chart(ctx, {
                     type: 'bar',
-                    data: { labels: buckets, datasets: datasets },
+                    data: { labels: displayLabels, datasets: datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         layout: { padding: { top: 42 } },
                         scales: {
-                            x: { stacked: true },
+                            x: {
+                                stacked: true,
+                                title: { display: true, text: groupBy === 'weekly' ? 'Timeline (Calendar Week • Month)' : 'Timeline (Calendar Week • Date)' }
+                            },
                             y: {
                                 stacked: true,
                                 beginAtZero: true,
@@ -1693,7 +1726,7 @@
 
                 if (projectActionLogs.length > 0) {
                     var latestAct = projectActionLogs[projectActionLogs.length - 1];
-                    insights.push('<b>Latest Action Taken (#' + latestAct.num + ' ' + latestAct.title + '):</b> ' + latestAct.impactText + '.');
+                    insights.push('<b>Latest Action Taken (#' + latestAct.num + ' ' + latestAct.title + ' - ' + latestAct.dayAxisLabel + '):</b> ' + latestAct.impactText + '.');
                 }
 
                 textParams.forEach(function(p) {
@@ -1706,14 +1739,19 @@
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
-            // CHART 2: PARAMETER TREND OVER TIME + ACTION MARKERS
+            // CHART 2: PARAMETER TREND OVER TIME WITH CW + DAY + MONTH SHORTFORM ON X-AXIS
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
 
                 var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
                 var selectedParam = document.getElementById('trendParamSelect').value;
-                var timeLabels = filteredRecords.map(function(r) { return r.recorded_date.slice(5) + ' ' + r.recorded_time.slice(0, 5); });
+
+                // X-Axis Labels now include CW + Day + Short Month + Time (e.g. "CW41 • 26 Oct 10:30")
+                var timeLabels = filteredRecords.map(function(r) {
+                    var tInfo = getWeekTimelineInfo(r.recorded_date);
+                    return tInfo.dayAxisLabel + ' ' + r.recorded_time.slice(0, 5);
+                });
 
                 var datasets = [];
                 var lineColors = [
@@ -1820,7 +1858,6 @@
                     }
                 }
 
-                // Locate closest record timestamp for each Action Taken to pin on the parameter trend chart
                 var trendMarkers = [];
                 if (filteredRecords.length > 0) {
                     projectActionLogs.forEach(function(act) {
@@ -1847,6 +1884,11 @@
                         maintainAspectRatio: false,
                         layout: { padding: { top: 38 } },
                         interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Timeline (CW • Date & Time)' }
+                            }
+                        },
                         plugins: {
                             legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
                             actionBadgesPlugin: { markers: trendMarkers }
@@ -2020,6 +2062,7 @@
                 tbody.innerHTML = '';
                 records.slice().reverse().forEach(function(r) {
                     var vals = r.parameter_values || {};
+                    var tInfo = getWeekTimelineInfo(r.recorded_date);
                     var paramStr = allParams.map(function(p) {
                         var v = vals[p.label] !== undefined ? vals[p.label] : '-';
                         var badgeStyle = p.type === 'text' ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-zinc-100 text-zinc-800';
@@ -2027,7 +2070,7 @@
                     }).join('');
                     var tr = document.createElement('tr');
                     tr.className = 'hover:bg-zinc-50';
-                    tr.innerHTML = '<td class="p-3 whitespace-nowrap text-zinc-600">' + r.recorded_date + ' ' + r.recorded_time.slice(0, 5) + '</td>' +
+                    tr.innerHTML = '<td class="p-3 whitespace-nowrap text-zinc-600"><span class="font-semibold text-zinc-800">' + tInfo.cw + '</span> • ' + formatPrettyDate(r.recorded_date) + ' ' + r.recorded_time.slice(0, 5) + '</td>' +
                         '<td class="p-3 font-medium">' + r.operator_name + '</td>' +
                         '<td class="p-3 font-semibold text-red-600">' + r.ng_mode + '</td>' +
                         '<td class="p-3">' + paramStr + '</td>' +
@@ -2043,15 +2086,17 @@
                 }
                 var allParams = getProjectParams(currentProject);
                 var labels = allParams.map(function(p) { return p.label; });
-                var headers = ['Date', 'Time', 'CW', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
+                var headers = ['Date', 'Time', 'CW', 'Month', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
                 var rows = [headers.join(',')];
 
                 filteredRecords.forEach(function(r) {
                     var vals = r.parameter_values || {};
+                    var tInfo = getWeekTimelineInfo(r.recorded_date);
                     var row = [
                         r.recorded_date,
                         r.recorded_time,
-                        getCalendarWeek(r.recorded_date),
+                        tInfo.cw,
+                        tInfo.monthShort,
                         '"' + (r.operator_name || '').replace(/"/g, '""') + '"',
                         '"' + (r.ng_mode || '').replace(/"/g, '""') + '"'
                     ];
