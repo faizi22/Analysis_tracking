@@ -117,13 +117,58 @@
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button type="button" onclick="window.toggleActionModal(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                        <span>+ Add Action Taken</span>
+                    </button>
                     <button type="button" id="btnRefreshDashboard" class="border border-zinc-300 hover:bg-zinc-100 text-zinc-700 px-3 py-2 rounded-lg text-xs font-semibold transition">
                         Refresh
                     </button>
-                    <button type="button" id="btnExportCsv" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition">
+                    <button type="button" id="btnExportCsv" class="bg-zinc-900 hover:bg-zinc-800 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition">
                         Export CSV
                     </button>
                 </div>
+            </div>
+
+            <!-- Add Action Taken Form Box (Collapsible) -->
+            <div id="actionModalBox" class="hidden bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-200">
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-950">Log Engineering Action Taken</h3>
+                        <p class="text-xs text-emerald-700">This action will be pinned with a number badge on the charts to track data changes before vs. after.</p>
+                    </div>
+                    <button type="button" onclick="window.toggleActionModal(false)" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950 px-2.5 py-1 rounded bg-white border border-emerald-200">
+                        Close
+                    </button>
+                </div>
+                <form id="actionTakenForm" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Short Action Title <span class="text-red-500">*</span></label>
+                        <input type="text" id="actionTitle" required maxlength="35" placeholder="e.g. Mechanical Alignment / Camera Optimization" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Date <span class="text-red-500">*</span></label>
+                        <input type="date" id="actionDate" required class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Time & Status <span class="text-red-500">*</span></label>
+                        <div class="flex gap-1.5">
+                            <input type="time" id="actionTime" required class="w-1/2 border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none">
+                            <select id="actionStatus" class="w-1/2 border border-emerald-300 rounded-lg p-2 text-xs bg-white font-semibold outline-none">
+                                <option value="Completed">Completed</option>
+                                <option value="Monitoring">Monitoring</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Action Description (Details) <span class="text-red-500">*</span></label>
+                        <input type="text" id="actionDesc" required placeholder="e.g. Adjusted clamp & guide pin to reduce variation." class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow-sm transition">
+                            Pin Action to Chart
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <!-- Smart Suggestions Box -->
@@ -161,15 +206,78 @@
                 </div>
             </div>
 
+            <!-- NEW CHART: Weekly / Daily NG Stacked Bar Chart + Action Callouts + Floating Card -->
+            <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm relative">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-zinc-100">
+                    <div>
+                        <h3 class="text-sm font-bold text-zinc-900">1. NG Total Trend by Mode & Action Taken Markers</h3>
+                        <p class="text-xs text-zinc-500">Numbered badges (1, 2, 3...) show where actions were taken. Click any action below to inspect details.</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
+                            <option value="weekly">Group by Calendar Week (CW)</option>
+                            <option value="daily">Group by Date (Daily)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Floating Action Callout Card (Matches Screenshot Design) -->
+                <div id="floatingActionCard" class="hidden mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-sm">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span id="cardActionNum" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                            <h4 id="cardActionTitle" class="font-bold text-zinc-900 text-sm">Mechanical Alignment</h4>
+                        </div>
+                        <button type="button" onclick="document.getElementById('floatingActionCard').classList.add('hidden')" class="text-zinc-400 hover:text-zinc-700 text-xs font-bold">✕</button>
+                    </div>
+                    <div class="mt-2 space-y-1 text-xs text-zinc-600">
+                        <p id="cardActionDate" class="font-medium">📅 CW41 • 26 Oct 2026</p>
+                        <p id="cardActionTime" class="font-medium">🕒 10:30 AM</p>
+                        <p id="cardActionDesc" class="text-zinc-700 pt-1 pb-1">Adjusted clamp & guide pin to reduce variation.</p>
+                        <p id="cardActionImpact" class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100"></p>
+                    </div>
+                    <div class="mt-2.5">
+                        <span id="cardActionStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            ✔ Completed
+                        </span>
+                    </div>
+                </div>
+
+                <div class="h-80">
+                    <canvas id="weeklyStackChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ACTION HISTORY LIST (Matches Screenshot Design) -->
+            <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/60">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✔</div>
+                        <h3 class="text-base font-bold text-zinc-900">Action History</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="actionCountBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            0 Actions Taken
+                        </span>
+                        <button type="button" onclick="window.toggleActionModal(true)" class="px-3 py-1 rounded-full text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition">
+                            + Add Action
+                        </button>
+                    </div>
+                </div>
+                <div id="actionHistoryContainer" class="divide-y divide-zinc-200">
+                    <div class="p-6 text-center text-xs text-zinc-400">No actions recorded yet. Click "+ Add Action Taken" above when you adjust machine settings.</div>
+                </div>
+            </div>
+
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 
-                <!-- Chart 1: Trend Chart -->
+                <!-- Chart 2: Parameter Trend Chart with Action Lines -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
-                            <h3 class="text-sm font-bold text-zinc-900">1. Parameter Trend Over Time (Number Parameters)</h3>
-                            <p class="text-xs text-zinc-500">Pick one number parameter to see the Average line, Trend line, and test Min/Max limits.</p>
+                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Trend Over Time & Action Markers</h3>
+                            <p class="text-xs text-zinc-500">Green vertical lines (1, 2, 3...) mark exact points where actions were taken so you can see parameter shifts.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <select id="trendParamSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
@@ -186,11 +294,11 @@
                     </div>
                 </div>
 
-                <!-- Chart 2: Scatter Plot -->
+                <!-- Chart 3: Scatter Plot -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-zinc-100">
                         <div>
-                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Relationship (X vs Y)</h3>
+                            <h3 class="text-sm font-bold text-zinc-900">3. Parameter Relationship (X vs Y)</h3>
                             <p class="text-xs text-zinc-500">See how two number parameters interact for each NG Mode.</p>
                         </div>
                         <div class="flex items-center gap-1 text-xs">
@@ -204,10 +312,10 @@
                     </div>
                 </div>
 
-                <!-- Chart 3: Pareto Chart -->
+                <!-- Chart 4: Pareto Chart -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm">
                     <div class="mb-4 pb-2 border-b border-zinc-100">
-                        <h3 class="text-sm font-bold text-zinc-900">3. NG Mode Breakdown (Pareto 80/20)</h3>
+                        <h3 class="text-sm font-bold text-zinc-900">4. NG Mode Breakdown (Pareto 80/20)</h3>
                         <p class="text-xs text-zinc-500">Bars show NG count; red line shows total percentage (%).</p>
                     </div>
                     <div class="h-64">
@@ -219,7 +327,7 @@
             <!-- Matrix Table: Average / Top Text per NG Mode -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-zinc-200">
-                    <h3 class="text-sm font-bold text-zinc-900">4. Parameter Summary by NG Mode (Average Value / Most Common Text)</h3>
+                    <h3 class="text-sm font-bold text-zinc-900">5. Parameter Summary by NG Mode (Average Value / Most Common Text)</h3>
                     <p class="text-xs text-zinc-500">Shows Average for Number parameters (red badge if shifted ≥5%) and Most Common value for Text parameters.</p>
                 </div>
                 <div class="overflow-x-auto">
@@ -347,8 +455,7 @@
 
     <!-- SCRIPT 1: TAB NAVIGATION, SECURITY & ADMIN 15-PARAMETER BUILDER -->
     <script>
-        // TETAPAN KATA LALUAN ADMIN (Tukar di sini jika perlu)
-        var ADMIN_PASSWORD = 'PE123';
+        var ADMIN_PASSWORD = 'mesin2026';
 
         window.editingProjectId = null;
 
@@ -361,6 +468,17 @@
             );
             alertBox.classList.remove('hidden');
             setTimeout(function() { alertBox.classList.add('hidden'); }, 4500);
+        };
+
+        window.toggleActionModal = function(show) {
+            var box = document.getElementById('actionModalBox');
+            if (!box) return;
+            if (show) {
+                box.classList.remove('hidden');
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                box.classList.add('hidden');
+            }
         };
 
         window.setParamButtonStyle = function(btn, typeVal) {
@@ -461,7 +579,6 @@
                 }
             });
 
-            // Auto-lock Admin apabila beralih ke tab lain
             if (activeKey !== 'admin') {
                 window.lockAdminPanel();
             }
@@ -474,7 +591,7 @@
         window.verifyAdminPass = function() {
             var passInput = document.getElementById('adminPassword');
             if (passInput.value === ADMIN_PASSWORD) {
-                passInput.value = ''; // Kosongkan kotak password selepas berjaya
+                passInput.value = '';
                 document.getElementById('adminLoginBox').classList.add('hidden');
                 document.getElementById('adminContentWrap').classList.remove('hidden');
                 document.getElementById('btnLockAdmin').classList.remove('hidden');
@@ -491,33 +608,75 @@
             var localTime = now.toTimeString().slice(0, 8);
             var dEl = document.getElementById('recordedDate');
             var tEl = document.getElementById('recordedTime');
+            var adEl = document.getElementById('actionDate');
+            var atEl = document.getElementById('actionTime');
             if (dEl) dEl.value = localDate;
             if (tEl) tEl.value = localTime;
+            if (adEl) adEl.value = localDate;
+            if (atEl) atEl.value = localTime.slice(0, 5);
         };
 
         window.initAdminParamSlots();
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE & DASHBOARD ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, ACTION TAKEN TRACKER & DASHBOARD ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
             var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
 
+            var ACTION_MARKER_MODE = '__ACTION_TAKEN__';
+
             var supabaseClient = null;
             var projectsData = [];
             var rawProjectRecords = [];
+            var projectActionLogs = [];
             var filteredRecords = [];
             var currentProject = null;
             var currentModeCounts = {};
 
+            var weeklyStackChartInstance = null;
             var trendChartInstance = null;
             var scatterChartInstance = null;
             var modeBarChartInstance = null;
 
             if (window.supabase && typeof window.supabase.createClient === 'function') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+
+            // ISO Calendar Week Helper (e.g. CW41)
+            function getCalendarWeek(dateStr) {
+                var d = new Date(dateStr + 'T00:00:00');
+                if (isNaN(d.getTime())) return 'CW--';
+                var target = new Date(d.valueOf());
+                var dayNr = (d.getDay() + 6) % 7;
+                target.setDate(target.getDate() - dayNr + 3);
+                var firstThursday = target.valueOf();
+                target.setMonth(0, 1);
+                if (target.getDay() !== 4) {
+                    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+                }
+                var weekNum = 1 + Math.ceil((firstThursday - target) / 604800000);
+                return 'CW' + String(weekNum).padStart(2, '0');
+            }
+
+            function formatPrettyDate(dateStr) {
+                var d = new Date(dateStr + 'T00:00:00');
+                if (isNaN(d.getTime())) return dateStr;
+                var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return String(d.getDate()).padStart(2, '0') + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+            }
+
+            function formatPrettyTime(timeStr) {
+                if (!timeStr) return '';
+                var parts = timeStr.split(':');
+                var h = parseInt(parts[0], 10);
+                var m = parts[1] || '00';
+                var ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12;
+                if (h === 0) h = 12;
+                return String(h).padStart(2, '0') + ':' + m + ' ' + ampm;
             }
 
             function getProjectParams(project) {
@@ -535,6 +694,93 @@
                 }).filter(function(item) {
                     return item && item.label.length > 0;
                 });
+            }
+
+            // Custom Chart.js Plugin to Draw Numbered Action Badges (① Title) & Pointers on Charts
+            var actionBadgesPlugin = {
+                id: 'actionBadgesPlugin',
+                afterDatasetsDraw: function(chart, args, pluginOptions) {
+                    var markers = (pluginOptions && pluginOptions.markers) || [];
+                    if (markers.length === 0) return;
+
+                    var ctx = chart.ctx;
+                    var xAxis = chart.scales.x;
+                    var yAxis = chart.scales.y;
+                    if (!xAxis || !yAxis) return;
+
+                    ctx.save();
+                    markers.forEach(function(m, idx) {
+                        if (m.xIndex === undefined || m.xIndex < 0) return;
+                        var xPos = xAxis.getPixelForValue(m.xIndex);
+                        if (xPos < xAxis.left || xPos > xAxis.right) return;
+
+                        // Stagger vertical height slightly if multiple actions share similar x positions
+                        var badgeY = yAxis.top + 14 + ((idx % 2) * 26);
+                        var isCompleted = m.status !== 'Monitoring';
+                        var mainColor = isCompleted ? '#10b981' : '#f59e0b';
+                        var bgColor = isCompleted ? '#ecfdf5' : '#fffbeb';
+                        var textColor = isCompleted ? '#065f46' : '#92400e';
+
+                        // Draw vertical pointer line
+                        ctx.beginPath();
+                        ctx.setLineDash([4, 3]);
+                        ctx.strokeStyle = mainColor;
+                        ctx.lineWidth = 1.5;
+                        ctx.moveTo(xPos, badgeY + 12);
+                        ctx.lineTo(xPos, yAxis.bottom);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+
+                        // Draw small anchor dot
+                        ctx.beginPath();
+                        ctx.arc(xPos, yAxis.bottom - 6, 3.5, 0, Math.PI * 2);
+                        ctx.fillStyle = mainColor;
+                        ctx.fill();
+
+                        // Measure badge pill
+                        var shortText = m.title.length > 18 ? m.title.slice(0, 17) + '…' : m.title;
+                        ctx.font = 'bold 10px Inter, sans-serif';
+                        var textW = ctx.measureText(shortText).width;
+                        var pillW = textW + 28;
+                        var pillH = 22;
+                        var pillX = Math.max(xAxis.left + 2, Math.min(xPos - pillW / 2, xAxis.right - pillW - 2));
+                        var pillY = badgeY - pillH / 2;
+
+                        // Pill background & border
+                        ctx.fillStyle = bgColor;
+                        ctx.strokeStyle = mainColor;
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.roundRect(pillX, pillY, pillW, pillH, 11);
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // Number circle inside pill
+                        var cirX = pillX + 11;
+                        var cirY = pillY + pillH / 2;
+                        ctx.beginPath();
+                        ctx.arc(cirX, cirY, 7.5, 0, Math.PI * 2);
+                        ctx.fillStyle = mainColor;
+                        ctx.fill();
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 9px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(String(m.num), cirX, cirY + 0.5);
+
+                        // Title text inside pill
+                        ctx.fillStyle = textColor;
+                        ctx.font = '600 10px Inter, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(shortText, pillX + 22, cirY + 0.5);
+                    });
+                    ctx.restore();
+                }
+            };
+
+            if (typeof Chart !== 'undefined') {
+                Chart.register(actionBadgesPlugin);
             }
 
             function renderOperatorFieldsForProject(selectedId, preserveEnteredValues) {
@@ -866,6 +1112,7 @@
                 }
             });
 
+            // SAVE OPERATOR NG RECORD
             document.getElementById('ngForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -901,6 +1148,133 @@
                 }
             });
 
+            // SAVE ACTION TAKEN RECORD (ON DASHBOARD)
+            document.getElementById('actionTakenForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!supabaseClient || !currentProject) {
+                    window.showAlert('Please select a project first.', 'error');
+                    return;
+                }
+
+                var title = document.getElementById('actionTitle').value.trim();
+                var desc = document.getElementById('actionDesc').value.trim();
+                var aDate = document.getElementById('actionDate').value;
+                var aTime = document.getElementById('actionTime').value;
+                if (aTime.length === 5) aTime = aTime + ':00';
+                var aStatus = document.getElementById('actionStatus').value;
+
+                var actionPayload = {
+                    project_id: currentProject.id,
+                    recorded_date: aDate,
+                    recorded_time: aTime,
+                    operator_name: aStatus,
+                    ng_mode: ACTION_MARKER_MODE,
+                    parameter_values: {
+                        _is_action: true,
+                        title: title,
+                        description: desc,
+                        status: aStatus
+                    },
+                    remarks: desc
+                };
+
+                var res = await supabaseClient.from('ng_records').insert([actionPayload]);
+                if (res.error) {
+                    window.showAlert('Failed to save Action Taken: ' + res.error.message, 'error');
+                } else {
+                    window.showAlert('Action "' + title + '" pinned to chart!', 'success');
+                    document.getElementById('actionTitle').value = '';
+                    document.getElementById('actionDesc').value = '';
+                    window.toggleActionModal(false);
+                    loadDashboardData(currentProject.id);
+                }
+            });
+
+            // TOGGLE ACTION STATUS (COMPLETED <-> MONITORING)
+            window.toggleActionStatus = async function(actionId) {
+                if (!supabaseClient || !currentProject) return;
+                var act = projectActionLogs.find(function(a) { return a.id === actionId; });
+                if (!act) return;
+
+                var nextStatus = act.status === 'Completed' ? 'Monitoring' : 'Completed';
+                var updatedVals = {
+                    _is_action: true,
+                    title: act.title,
+                    description: act.description,
+                    status: nextStatus
+                };
+
+                var res = await supabaseClient
+                    .from('ng_records')
+                    .update({ operator_name: nextStatus, parameter_values: updatedVals })
+                    .eq('id', actionId);
+
+                if (res.error) {
+                    window.showAlert('Could not update status: ' + res.error.message, 'error');
+                } else {
+                    loadDashboardData(currentProject.id);
+                }
+            };
+
+            // DELETE ACTION LOG
+            window.deleteActionLog = async function(actionId, title) {
+                if (!supabaseClient || !currentProject) return;
+                if (!window.confirm('Remove action "' + title + '"?')) return;
+
+                var res = await supabaseClient
+                    .from('ng_records')
+                    .delete()
+                    .eq('id', actionId);
+
+                if (res.error) {
+                    window.showAlert('Need DELETE policy on ng_records in Supabase: ' + res.error.message, 'error');
+                } else {
+                    document.getElementById('floatingActionCard').classList.add('hidden');
+                    loadDashboardData(currentProject.id);
+                }
+            };
+
+            // SHOW FLOATING ACTION CARD (MATCHES SCREENSHOT)
+            window.inspectActionCard = function(actionNum) {
+                var act = projectActionLogs.find(function(a) { return a.num === actionNum; });
+                if (!act) return;
+
+                var card = document.getElementById('floatingActionCard');
+                var numBadge = document.getElementById('cardActionNum');
+                var statusBadge = document.getElementById('cardActionStatus');
+
+                numBadge.textContent = act.num;
+                numBadge.className = 'w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' +
+                    (act.status === 'Completed' ? 'bg-emerald-600' : 'bg-amber-500');
+
+                document.getElementById('cardActionTitle').textContent = act.title;
+                document.getElementById('cardActionDate').textContent = '📅 ' + act.cw + ' • ' + formatPrettyDate(act.date);
+                document.getElementById('cardActionTime').textContent = '🕒 ' + formatPrettyTime(act.time);
+                document.getElementById('cardActionDesc').textContent = act.description;
+
+                var impactEl = document.getElementById('cardActionImpact');
+                if (act.impactText) {
+                    impactEl.textContent = act.impactText;
+                    impactEl.classList.remove('hidden');
+                } else {
+                    impactEl.classList.add('hidden');
+                }
+
+                if (act.status === 'Completed') {
+                    statusBadge.textContent = '✔ Completed';
+                    statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-sm';
+                } else {
+                    statusBadge.textContent = '🕒 Monitoring';
+                    statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
+                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-amber-400 shadow-md max-w-sm';
+                }
+
+                card.classList.remove('hidden');
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
+
+            // DASHBOARD CONTROLS
             document.getElementById('dashboardProjectSelect').addEventListener('change', function() {
                 if (this.value) loadDashboardData(this.value);
             });
@@ -910,6 +1284,7 @@
             });
             document.getElementById('dashboardDateFilter').addEventListener('change', applyFiltersAndRender);
             document.getElementById('dashboardModeFilter').addEventListener('change', applyFiltersAndRender);
+            document.getElementById('ngGroupSelect').addEventListener('change', renderWeeklyStackChart);
             document.getElementById('trendParamSelect').addEventListener('change', renderTrendChart);
             document.getElementById('inputLSL').addEventListener('input', renderTrendChart);
             document.getElementById('inputUSL').addEventListener('input', renderTrendChart);
@@ -976,7 +1351,32 @@
                     return;
                 }
 
-                rawProjectRecords = res.data || [];
+                var allRows = res.data || [];
+                rawProjectRecords = [];
+                projectActionLogs = [];
+
+                allRows.forEach(function(row) {
+                    var pv = row.parameter_values || {};
+                    if (row.ng_mode === ACTION_MARKER_MODE || pv._is_action) {
+                        projectActionLogs.push({
+                            id: row.id,
+                            date: row.recorded_date,
+                            time: row.recorded_time,
+                            cw: getCalendarWeek(row.recorded_date),
+                            title: pv.title || 'Action Taken',
+                            description: pv.description || row.remarks || '',
+                            status: pv.status || row.operator_name || 'Completed'
+                        });
+                    } else {
+                        rawProjectRecords.push(row);
+                    }
+                });
+
+                // Number actions 1, 2, 3... chronologically
+                projectActionLogs.forEach(function(act, i) {
+                    act.num = i + 1;
+                });
+
                 applyFiltersAndRender();
             }
 
@@ -1055,9 +1455,82 @@
                 return num / den;
             }
 
+            // Compute Before vs After impact for each Action Taken
+            function computeActionImpacts(allParams, records) {
+                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
+                var primaryParam = numParams.length > 0 ? numParams[0].label : null;
+
+                projectActionLogs.forEach(function(act) {
+                    var actStamp = act.date + ' ' + act.time;
+                    var beforeRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) < actStamp; });
+                    var afterRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) >= actStamp; });
+
+                    if (primaryParam && beforeRecs.length > 0 && afterRecs.length > 0) {
+                        var bStat = calcStats(beforeRecs.map(function(r) { return (r.parameter_values || {})[primaryParam]; }));
+                        var aStat = calcStats(afterRecs.map(function(r) { return (r.parameter_values || {})[primaryParam]; }));
+                        act.impactText = primaryParam + ' Avg: ' + bStat.mean.toFixed(2) + ' (Before) → ' + aStat.mean.toFixed(2) + ' (After)';
+                    } else {
+                        act.impactText = 'NGs Before: ' + beforeRecs.length + ' | NGs After: ' + afterRecs.length;
+                    }
+                });
+            }
+
+            function renderActionHistoryList() {
+                var badge = document.getElementById('actionCountBadge');
+                var container = document.getElementById('actionHistoryContainer');
+                badge.textContent = projectActionLogs.length + (projectActionLogs.length === 1 ? ' Action Taken' : ' Actions Taken');
+
+                if (projectActionLogs.length === 0) {
+                    container.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No actions recorded yet. Click "+ Add Action Taken" when you adjust machine settings.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                projectActionLogs.forEach(function(act) {
+                    var isComp = act.status === 'Completed';
+                    var circleClass = isComp ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white';
+                    var pillClass = isComp
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                        : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100';
+                    var pillLabel = isComp ? '✔ Completed' : '🕒 Monitoring';
+
+                    var row = document.createElement('div');
+                    row.className = 'p-4 hover:bg-zinc-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer';
+                    row.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'BUTTON') return;
+                        window.inspectActionCard(act.num);
+                    });
+
+                    row.innerHTML =
+                        '<div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">' +
+                            '<span class="w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ' + circleClass + '">' + act.num + '</span>' +
+                            '<div class="sm:w-56 shrink-0">' +
+                                '<p class="font-bold text-zinc-900 text-sm truncate">' + act.title + '</p>' +
+                                '<p class="text-xs text-zinc-500">' + act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time) + '</p>' +
+                            '</div>' +
+                            '<div class="hidden sm:block w-px h-8 bg-zinc-200 shrink-0"></div>' +
+                            '<div class="min-w-0 flex-1">' +
+                                '<p class="text-xs sm:text-sm text-zinc-700">' + act.description + '</p>' +
+                                '<p class="text-[11px] font-medium text-blue-600 mt-0.5">' + (act.impactText || '') + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">' +
+                            '<button type="button" onclick="window.toggleActionStatus(\'' + act.id + '\')" title="Click to switch status" class="px-3 py-1 rounded-full text-xs font-semibold transition ' + pillClass + '">' +
+                                pillLabel +
+                            '</button>' +
+                            '<button type="button" onclick="window.deleteActionLog(\'' + act.id + '\', \'' + act.title.replace(/'/g, "\\'") + '\')" class="px-2 py-1 text-xs text-zinc-400 hover:text-red-600 font-bold" title="Delete Action">✕</button>' +
+                        '</div>';
+
+                    container.appendChild(row);
+                });
+            }
+
             function updateDashboardAnalytics() {
                 var allParams = getProjectParams(currentProject);
                 var records = filteredRecords;
+
+                computeActionImpacts(allParams, records);
+                renderActionHistoryList();
 
                 document.getElementById('statTotalNg').textContent = records.length;
 
@@ -1069,6 +1542,7 @@
                     document.getElementById('statStability').textContent = '-';
                     document.getElementById('insightList').innerHTML = '<li>No NG records found for this filter.</li>';
                     currentModeCounts = {};
+                    renderWeeklyStackChart();
                     renderTrendChart();
                     renderScatterChart();
                     renderParetoChart();
@@ -1094,11 +1568,87 @@
                 document.getElementById('statTopModePct').textContent = topPct + '% of total NGs';
 
                 generateSmartInsights(allParams, records, sortedModes, modeCounts);
+                renderWeeklyStackChart();
                 renderTrendChart();
                 renderScatterChart();
                 renderParetoChart();
                 renderMatrixTable(allParams, records, modeCounts);
                 renderRecordsTable(allParams, records);
+            }
+
+            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART WITH ACTION PINS (MATCHES IMAGE)
+            function renderWeeklyStackChart() {
+                if (typeof Chart === 'undefined' || !currentProject) return;
+                if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
+
+                var groupBy = document.getElementById('ngGroupSelect').value; // 'weekly' or 'daily'
+                var bucketSet = {};
+
+                filteredRecords.forEach(function(r) {
+                    var key = groupBy === 'weekly' ? getCalendarWeek(r.recorded_date) : r.recorded_date;
+                    bucketSet[key] = true;
+                });
+                projectActionLogs.forEach(function(a) {
+                    var key = groupBy === 'weekly' ? a.cw : a.date;
+                    bucketSet[key] = true;
+                });
+
+                var buckets = Object.keys(bucketSet).sort();
+                var modes = Object.keys(currentModeCounts);
+                var stackColors = [
+                    '#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6',
+                    '#06b6d4', '#f97316', '#ec4899', '#475569', '#14b8a6'
+                ];
+
+                var datasets = modes.map(function(mode, idx) {
+                    var dataCounts = buckets.map(function(bKey) {
+                        return filteredRecords.filter(function(r) {
+                            var rKey = groupBy === 'weekly' ? getCalendarWeek(r.recorded_date) : r.recorded_date;
+                            return rKey === bKey && r.ng_mode === mode;
+                        }).length;
+                    });
+                    return {
+                        label: mode,
+                        data: dataCounts,
+                        backgroundColor: stackColors[idx % stackColors.length],
+                        borderRadius: 3
+                    };
+                });
+
+                // Map each Action Taken to its bucket index
+                var markers = projectActionLogs.map(function(act) {
+                    var targetKey = groupBy === 'weekly' ? act.cw : act.date;
+                    return {
+                        num: act.num,
+                        title: act.title,
+                        status: act.status,
+                        xIndex: buckets.indexOf(targetKey)
+                    };
+                }).filter(function(m) { return m.xIndex !== -1; });
+
+                var ctx = document.getElementById('weeklyStackChart').getContext('2d');
+                weeklyStackChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: buckets, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: { padding: { top: 42 } },
+                        scales: {
+                            x: { stacked: true },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: { precision: 0 },
+                                title: { display: true, text: 'NG Total (Unit)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                            actionBadgesPlugin: { markers: markers }
+                        }
+                    }
+                });
             }
 
             function generateSmartInsights(allParams, records, sortedModes, modeCounts) {
@@ -1141,6 +1691,11 @@
                     insights.push('<b>Number Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than normal average ' + overallStats[maxShiftParam].mean.toFixed(2) + ').');
                 }
 
+                if (projectActionLogs.length > 0) {
+                    var latestAct = projectActionLogs[projectActionLogs.length - 1];
+                    insights.push('<b>Latest Action Taken (#' + latestAct.num + ' ' + latestAct.title + '):</b> ' + latestAct.impactText + '.');
+                }
+
                 textParams.forEach(function(p) {
                     var tStat = calcTopText(topModeRecords.map(function(r) { return (r.parameter_values || {})[p.label]; }));
                     if (tStat.count >= 2 && tStat.pct >= 60) {
@@ -1148,19 +1703,10 @@
                     }
                 });
 
-                if (records.length >= 4 && numParams.length > 0) {
-                    var p0 = numParams[0].label;
-                    var last3 = records.slice(-3).map(function(r) { return Number((r.parameter_values || {})[p0]); });
-                    if (last3[0] < last3[1] && last3[1] < last3[2]) {
-                        insights.push('<b>Trend Alert:</b> <b>' + p0 + '</b> went up 3 times in a row (' + last3.join(' → ') + '). Check machine stability.');
-                    } else if (last3[0] > last3[1] && last3[1] > last3[2]) {
-                        insights.push('<b>Trend Alert:</b> <b>' + p0 + '</b> went down 3 times in a row (' + last3.join(' → ') + '). Check machine stability.');
-                    }
-                }
-
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
+            // CHART 2: PARAMETER TREND OVER TIME + ACTION MARKERS
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
@@ -1274,6 +1820,24 @@
                     }
                 }
 
+                // Locate closest record timestamp for each Action Taken to pin on the parameter trend chart
+                var trendMarkers = [];
+                if (filteredRecords.length > 0) {
+                    projectActionLogs.forEach(function(act) {
+                        var actStamp = act.date + ' ' + act.time;
+                        var idx = filteredRecords.findIndex(function(r) {
+                            return (r.recorded_date + ' ' + r.recorded_time) >= actStamp;
+                        });
+                        if (idx === -1) idx = filteredRecords.length - 1;
+                        trendMarkers.push({
+                            num: act.num,
+                            title: act.title,
+                            status: act.status,
+                            xIndex: idx
+                        });
+                    });
+                }
+
                 var ctx = document.getElementById('trendChart').getContext('2d');
                 trendChartInstance = new Chart(ctx, {
                     type: 'line',
@@ -1281,8 +1845,12 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: { padding: { top: 38 } },
                         interaction: { mode: 'index', intersect: false },
-                        plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } }
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                            actionBadgesPlugin: { markers: trendMarkers }
+                        }
                     }
                 });
             }
@@ -1475,7 +2043,7 @@
                 }
                 var allParams = getProjectParams(currentProject);
                 var labels = allParams.map(function(p) { return p.label; });
-                var headers = ['Date', 'Time', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
+                var headers = ['Date', 'Time', 'CW', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
                 var rows = [headers.join(',')];
 
                 filteredRecords.forEach(function(r) {
@@ -1483,6 +2051,7 @@
                     var row = [
                         r.recorded_date,
                         r.recorded_time,
+                        getCalendarWeek(r.recorded_date),
                         '"' + (r.operator_name || '').replace(/"/g, '""') + '"',
                         '"' + (r.ng_mode || '').replace(/"/g, '""') + '"'
                     ];
