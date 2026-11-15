@@ -510,9 +510,16 @@
                     <div class="pt-5 border-t border-zinc-200">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Active Projects (Click Edit to Modify)</h3>
-                            <span class="text-[11px] text-zinc-400">Live editable</span>
+                            <div class="flex items-center gap-2">
+                                <span id="projectCountBadge" class="text-[11px] font-semibold text-zinc-500">0 Projects</span>
+                                <button type="button" onclick="window.refreshSupabaseProjects(false)" class="text-[11px] font-semibold text-blue-600 hover:underline">
+                                    ↻ Reload
+                                </button>
+                            </div>
                         </div>
-                        <div id="adminProjectList" class="space-y-2 text-sm"></div>
+                        <div id="adminProjectList" class="space-y-2 text-sm">
+                            <p class="text-xs text-zinc-400">Loading projects...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -563,7 +570,7 @@
                 type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'
             );
             alertBox.classList.remove('hidden');
-            setTimeout(function() { alertBox.classList.add('hidden'); }, 4500);
+            setTimeout(function() { alertBox.classList.add('hidden'); }, 5000);
         };
 
         window.toggleActionModal = function(show) {
@@ -731,6 +738,9 @@
                 document.getElementById('adminContentWrap').classList.remove('hidden');
                 document.getElementById('btnLockAdmin').classList.remove('hidden');
                 window.showAlert('Admin unlocked.', 'success');
+                if (typeof window.refreshSupabaseProjects === 'function') {
+                    window.refreshSupabaseProjects(false);
+                }
             } else {
                 passInput.value = '';
                 window.showAlert('Wrong password!', 'error');
@@ -780,6 +790,8 @@
 
             if (window.supabase && typeof window.supabase.createClient === 'function') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error('Supabase JS library failed to load.');
             }
 
             // Helper: Upload report file to Supabase Storage (with automatic Base64 fallback <= 3MB)
@@ -1271,6 +1283,8 @@
                 }
             }
 
+            // [FIX] Mengambil semua projek dari table ng_projects tanpa tersekat penapis is_active
+            // supaya projek yang tidak mempunyai kolum is_active atau bernilai null tetap muncul!
             window.refreshSupabaseProjects = async function(loadDashboardAfter) {
                 if (!supabaseClient) return;
                 var projectSelect = document.getElementById('projectSelect');
@@ -1279,15 +1293,22 @@
                 var res = await supabaseClient
                     .from('ng_projects')
                     .select('*')
-                    .eq('is_active', true)
                     .order('created_at', { ascending: false });
 
                 if (res.error) {
+                    console.error('Supabase ng_projects error:', res.error);
                     window.showAlert('Database error: ' + res.error.message, 'error');
                     return;
                 }
 
-                projectsData = res.data || [];
+                // Tapis hanya jika is_active secara eksplisit ditetapkan sebagai false
+                var allRows = res.data || [];
+                projectsData = allRows.filter(function(p) {
+                    return p.is_active !== false;
+                });
+
+                console.log('Loaded projects from Supabase:', projectsData);
+
                 var prevOpVal = projectSelect.value;
                 var prevDashVal = dashSelect.value;
 
@@ -1295,27 +1316,29 @@
                 dashSelect.innerHTML = '<option value="">-- Select Project --</option>';
 
                 projectsData.forEach(function(proj) {
+                    var labelText = proj.project_title || proj.name || ('Project #' + proj.id);
+
                     var opt1 = document.createElement('option');
                     opt1.value = proj.id;
-                    opt1.textContent = proj.project_title;
+                    opt1.textContent = labelText;
                     projectSelect.appendChild(opt1);
 
                     var opt2 = document.createElement('option');
                     opt2.value = proj.id;
-                    opt2.textContent = proj.project_title;
+                    opt2.textContent = labelText;
                     dashSelect.appendChild(opt2);
                 });
 
                 renderAdminProjectList();
 
-                if (prevOpVal && projectsData.some(function(p) { return p.id === prevOpVal; })) {
+                if (prevOpVal && projectsData.some(function(p) { return String(p.id) === String(prevOpVal); })) {
                     projectSelect.value = prevOpVal;
                     renderOperatorFieldsForProject(prevOpVal, true);
                 } else {
                     renderOperatorFieldsForProject('', false);
                 }
 
-                if (prevDashVal && projectsData.some(function(p) { return p.id === prevDashVal; })) {
+                if (prevDashVal && projectsData.some(function(p) { return String(p.id) === String(prevDashVal); })) {
                     dashSelect.value = prevDashVal;
                 } else if (projectsData.length > 0) {
                     dashSelect.value = projectsData[0].id;
@@ -1327,7 +1350,7 @@
             };
 
             window.startEditProject = function(projectId) {
-                var proj = projectsData.find(function(p) { return p.id === projectId; });
+                var proj = projectsData.find(function(p) { return String(p.id) === String(projectId); });
                 if (!proj) return;
 
                 window.editingProjectId = proj.id;
@@ -1374,7 +1397,7 @@
                 if (res.error) {
                     window.showAlert('Failed to delete project: ' + res.error.message, 'error');
                 } else {
-                    if (window.editingProjectId === projectId) {
+                    if (String(window.editingProjectId) === String(projectId)) {
                         window.cancelEditProject();
                     }
                     window.showAlert('Project "' + projectTitle + '" deleted.', 'success');
@@ -1384,13 +1407,24 @@
 
             function renderAdminProjectList() {
                 var container = document.getElementById('adminProjectList');
+                var countBadge = document.getElementById('projectCountBadge');
                 if (!container) return;
+
+                if (countBadge) {
+                    countBadge.textContent = projectsData.length + (projectsData.length === 1 ? ' Project' : ' Projects');
+                }
+
                 if (projectsData.length === 0) {
-                    container.innerHTML = '<p class="text-xs text-zinc-400">No active projects found.</p>';
+                    container.innerHTML = '<div class="p-4 rounded-lg border border-dashed border-zinc-300 text-center space-y-1">' +
+                        '<p class="text-xs font-semibold text-zinc-600">No projects found in table "ng_projects".</p>' +
+                        '<p class="text-[11px] text-zinc-400">Register a new project above, or ensure RLS is disabled / SELECT policy is enabled in Supabase.</p>' +
+                    '</div>';
                     return;
                 }
+
                 container.innerHTML = '';
                 projectsData.forEach(function(p) {
+                    var titleLabel = p.project_title || p.name || ('Project #' + p.id);
                     var normParams = getProjectParams(p);
                     var paramsSummary = normParams.map(function(item) {
                         return item.label + (item.type === 'text' ? ' [Text]' : ' [Num]');
@@ -1402,9 +1436,9 @@
 
                     var infoDiv = document.createElement('div');
                     infoDiv.className = 'min-w-0 flex-1';
-                    infoDiv.innerHTML = '<p class="font-semibold text-zinc-900 truncate">' + p.project_title + '</p>' +
-                        '<p class="text-xs text-zinc-500 truncate">Params (' + normParams.length + '): ' + paramsSummary + '</p>' +
-                        '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + modes + '</p>';
+                    infoDiv.innerHTML = '<p class="font-semibold text-zinc-900 truncate">' + titleLabel + '</p>' +
+                        '<p class="text-xs text-zinc-500 truncate">Params (' + normParams.length + '): ' + (paramsSummary || '-') + '</p>' +
+                        '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + (modes || '-') + '</p>';
 
                     var btnGroup = document.createElement('div');
                     btnGroup.className = 'flex items-center gap-1.5 shrink-0';
@@ -1422,7 +1456,7 @@
                     delBtn.className = 'px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition';
                     delBtn.textContent = 'Delete';
                     delBtn.addEventListener('click', function() {
-                        window.deleteProjectById(p.id, p.project_title);
+                        window.deleteProjectById(p.id, titleLabel);
                     });
 
                     btnGroup.appendChild(editBtn);
@@ -1842,7 +1876,7 @@
 
             async function loadDashboardData(projectId) {
                 if (!supabaseClient) return;
-                currentProject = projectsData.find(function(p) { return p.id === projectId; });
+                currentProject = projectsData.find(function(p) { return String(p.id) === String(projectId); });
                 if (!currentProject) return;
 
                 var modeFilter = document.getElementById('dashboardModeFilter');
@@ -2937,11 +2971,10 @@
                     rows.push(row.join(','));
                 });
 
-                var csvContent = "data:text/csv;charset=utf-8," + rows.join("
-");
+                var csvContent = "data:text/csv;charset=utf-8," + rows.join("\n");
                 var link = document.createElement("a");
                 link.setAttribute("href", encodeURI(csvContent));
-                link.setAttribute("download", currentProject.project_title.replace(/\s+/g, '_') + "_NG_Report.csv");
+                link.setAttribute("download", (currentProject.project_title || 'Project').replace(/\s+/g, '_') + "_NG_Report.csv");
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
