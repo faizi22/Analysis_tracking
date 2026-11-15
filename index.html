@@ -144,4 +144,1348 @@
                     <p id="statTotalNg" class="text-2xl font-bold text-zinc-900 mt-1">0</p>
                     <p id="statDateSpan" class="text-[11px] text-zinc-500 mt-0.5">-</p>
                 </div>
-                <div class="bg-white p-4 rounded-xl border border-zinc-200
+                <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Top NG Mode</p>
+                    <p id="statTopMode" class="text-lg font-bold text-red-600 mt-1 truncate">-</p>
+                    <p id="statTopModePct" class="text-[11px] text-zinc-500 mt-0.5">0% of total NGs</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Correlation (r)</p>
+                    <p id="statCorrelation" class="text-lg font-bold text-zinc-900 mt-1">-</p>
+                    <p id="statCorrelationDesc" class="text-[11px] text-zinc-500 mt-0.5">Select X & Y below</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Process Stability</p>
+                    <p id="statStability" class="text-sm font-bold text-zinc-800 mt-1 truncate">-</p>
+                    <p id="statOutSpecCount" class="text-[11px] text-zinc-500 mt-0.5">-</p>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                
+                <!-- Chart 1: Trend Chart -->
+                <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
+                        <div>
+                            <h3 class="text-sm font-bold text-zinc-900">1. Parameter Trend Over Time (Number Parameters)</h3>
+                            <p class="text-xs text-zinc-500">Pick one number parameter to see the Average line, Trend line, and test Min/Max limits.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <select id="trendParamSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
+                                <option value="__ALL__">Show All Number Parameters</option>
+                            </select>
+                            <div id="specLimitInputs" class="flex items-center gap-1.5">
+                                <input type="number" step="any" id="inputLSL" placeholder="Min (LSL)" class="w-20 border border-zinc-300 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500">
+                                <input type="number" step="any" id="inputUSL" placeholder="Max (USL)" class="w-20 border border-zinc-300 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-72">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Scatter Plot -->
+                <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-zinc-100">
+                        <div>
+                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Relationship (X vs Y)</h3>
+                            <p class="text-xs text-zinc-500">See how two number parameters interact for each NG Mode.</p>
+                        </div>
+                        <div class="flex items-center gap-1 text-xs">
+                            <select id="scatterXSelect" class="border border-zinc-300 rounded px-2 py-1 bg-zinc-50 font-medium"></select>
+                            <span class="text-zinc-400 font-bold">vs</span>
+                            <select id="scatterYSelect" class="border border-zinc-300 rounded px-2 py-1 bg-zinc-50 font-medium"></select>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="scatterChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Pareto Chart -->
+                <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm">
+                    <div class="mb-4 pb-2 border-b border-zinc-100">
+                        <h3 class="text-sm font-bold text-zinc-900">3. NG Mode Breakdown (Pareto 80/20)</h3>
+                        <p class="text-xs text-zinc-500">Bars show NG count; red line shows total percentage (%).</p>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="modeBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matrix Table: Average / Top Text per NG Mode -->
+            <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-zinc-200">
+                    <h3 class="text-sm font-bold text-zinc-900">4. Parameter Summary by NG Mode (Average Value / Most Common Text)</h3>
+                    <p class="text-xs text-zinc-500">Shows Average for Number parameters (red badge if shifted ≥5%) and Most Common value for Text parameters.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr id="matrixHeaderRow" class="bg-zinc-50 text-zinc-600 border-b border-zinc-200 font-semibold">
+                                <th class="p-3">NG Mode</th>
+                                <th class="p-3">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTableBody" class="divide-y divide-zinc-200">
+                            <tr><td colspan="2" class="p-4 text-center text-zinc-400">No data.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Raw Data Log -->
+            <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-zinc-900">Recent NG Logs</h3>
+                    <span class="text-xs text-zinc-500">Newest records on top</span>
+                </div>
+                <div class="overflow-x-auto max-h-80">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-white text-zinc-500 border-b border-zinc-200">
+                                <th class="p-3">Date & Time</th>
+                                <th class="p-3">Operator</th>
+                                <th class="p-3">NG Mode</th>
+                                <th class="p-3">Parameters</th>
+                                <th class="p-3">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody" class="divide-y divide-zinc-100">
+                            <tr><td colspan="5" class="p-4 text-center text-zinc-400">Select a project to view records.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 3: ADMIN PANEL ================= -->
+        <div id="sectionAdmin" class="hidden max-w-3xl mx-auto space-y-6 mt-2">
+            <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-6">
+                <div class="pb-4 mb-4 border-b border-zinc-100">
+                    <h1 id="adminFormTitle" class="text-lg font-bold text-zinc-900">Register & Manage Projects</h1>
+                    <p class="text-xs text-zinc-500">Create a new project or click <b>Edit</b> on an active project below to rename or add parameters/NG modes.</p>
+                </div>
+
+                <div id="adminLoginBox" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Admin Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter password (admin123)" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+                    </div>
+                    <button type="button" onclick="window.verifyAdminPass()" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-2.5 rounded-lg text-sm">
+                        Unlock Admin
+                    </button>
+                </div>
+
+                <div id="adminContentWrap" class="hidden space-y-6">
+                    
+                    <!-- Edit Mode Banner -->
+                    <div id="editModeBanner" class="hidden p-3.5 rounded-lg bg-amber-50 border border-amber-300 flex items-center justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200 text-amber-900">Edit Mode</span>
+                            <p id="editingProjectLabel" class="text-xs font-semibold text-amber-900 mt-1">Editing Project</p>
+                            <p class="text-[11px] text-amber-700">Renaming any parameter will automatically update existing NG records.</p>
+                        </div>
+                        <button type="button" onclick="window.cancelEditProject()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-amber-300 text-amber-900 hover:bg-amber-100 shrink-0">
+                            Cancel Edit
+                        </button>
+                    </div>
+
+                    <form id="adminForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1">Project / Machine Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="adminProjectTitle" required placeholder="e.g. Solder Machine 1" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1">NG Modes (Separate with commas ,) <span class="text-red-500">*</span></label>
+                            <input type="text" id="adminNgModes" required placeholder="e.g. solder ball, solder not rise up, solder overflow" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+                        </div>
+
+                        <div class="pt-2 border-t border-zinc-100">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Parameters (1 to 15 Options)</p>
+                                    <p class="text-xs text-zinc-400">Default is <b># Number</b>. Click the button on any parameter to switch between <b># Number</b> and <b>Abc Text</b>.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 15 Parameter Slots Generated Here -->
+                            <div id="adminParamsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="submit" id="adminSubmitBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition">
+                                Save New Project
+                            </button>
+                            <button type="button" id="adminCancelBtn" onclick="window.cancelEditProject()" class="hidden px-5 bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-semibold py-2.5 rounded-lg text-sm transition">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Registered Projects List with Edit & Delete Buttons -->
+                    <div class="pt-5 border-t border-zinc-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Active Projects (Click Edit to Modify)</h3>
+                            <span class="text-[11px] text-zinc-400">Live editable</span>
+                        </div>
+                        <div id="adminProjectList" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SCRIPT 1: TAB NAVIGATION & ADMIN 15-PARAMETER BUILDER -->
+    <script>
+        window.editingProjectId = null;
+
+        window.showAlert = function(message, type) {
+            var alertBox = document.getElementById('alertBox');
+            if (!alertBox) return;
+            alertBox.textContent = message;
+            alertBox.className = 'mb-4 p-3 rounded-lg text-sm font-medium ' + (
+                type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'
+            );
+            alertBox.classList.remove('hidden');
+            setTimeout(function() { alertBox.classList.add('hidden'); }, 4500);
+        };
+
+        window.setParamButtonStyle = function(btn, typeVal) {
+            if (!btn) return;
+            if (typeVal === 'text') {
+                btn.setAttribute('data-type', 'text');
+                btn.textContent = 'Abc Text';
+                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 transition cursor-pointer';
+            } else {
+                btn.setAttribute('data-type', 'number');
+                btn.textContent = '# Number';
+                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer';
+            }
+        };
+
+        window.initAdminParamSlots = function() {
+            var grid = document.getElementById('adminParamsGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            for (var i = 1; i <= 15; i++) {
+                var isReq = i === 1;
+                var defaultVal = i === 1 ? 'Motion 1' : (i === 2 ? 'Motion 2' : '');
+                var card = document.createElement('div');
+                card.className = 'p-2.5 rounded-lg border border-zinc-200 bg-zinc-50/60 space-y-1.5';
+                card.innerHTML =
+                    '<div class="flex items-center justify-between">' +
+                        '<label class="text-[11px] font-semibold text-zinc-700">Param ' + i + (isReq ? ' <span class="text-red-500">*</span>' : ' <span class="text-zinc-400 font-normal">(Opt)</span>') + '</label>' +
+                        '<button type="button" id="adminParamTypeBtn' + i + '" data-type="number" onclick="window.toggleParamType(' + i + ')" ' +
+                            'class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer" title="Click to switch between Number and Text">' +
+                            '# Number' +
+                        '</button>' +
+                    '</div>' +
+                    '<input type="text" id="adminParam' + i + '" data-original-label="" value="' + defaultVal + '" ' + (isReq ? 'required ' : '') +
+                        'placeholder="' + (isReq ? 'Required' : 'Optional label') + '" ' +
+                        'class="w-full border border-zinc-300 rounded-md p-1.5 text-xs bg-white focus:ring-2 focus:ring-zinc-900 outline-none">';
+                grid.appendChild(card);
+            }
+        };
+
+        window.toggleParamType = function(index) {
+            var btn = document.getElementById('adminParamTypeBtn' + index);
+            if (!btn) return;
+            var current = btn.getAttribute('data-type') || 'number';
+            window.setParamButtonStyle(btn, current === 'number' ? 'text' : 'number');
+        };
+
+        window.resetAdminParamSlots = function() {
+            for (var i = 1; i <= 15; i++) {
+                var input = document.getElementById('adminParam' + i);
+                var btn = document.getElementById('adminParamTypeBtn' + i);
+                if (input) {
+                    input.value = i === 1 ? 'Motion 1' : (i === 2 ? 'Motion 2' : '');
+                    input.setAttribute('data-original-label', '');
+                }
+                window.setParamButtonStyle(btn, 'number');
+            }
+        };
+
+        window.cancelEditProject = function() {
+            window.editingProjectId = null;
+            document.getElementById('adminProjectTitle').value = '';
+            document.getElementById('adminNgModes').value = '';
+            document.getElementById('editModeBanner').classList.add('hidden');
+            document.getElementById('adminCancelBtn').classList.add('hidden');
+            var submitBtn = document.getElementById('adminSubmitBtn');
+            submitBtn.textContent = 'Save New Project';
+            submitBtn.className = 'flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition';
+            window.resetAdminParamSlots();
+        };
+
+        window.switchAppTab = function(activeKey) {
+            var map = {
+                operator: { btn: 'tabOperator', sec: 'sectionOperator' },
+                dashboard: { btn: 'tabDashboard', sec: 'sectionDashboard' },
+                admin: { btn: 'tabAdmin', sec: 'sectionAdmin' }
+            };
+
+            Object.keys(map).forEach(function(key) {
+                var btnEl = document.getElementById(map[key].btn);
+                var secEl = document.getElementById(map[key].sec);
+                if (key === activeKey) {
+                    secEl.classList.remove('hidden');
+                    btnEl.className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-zinc-900 text-white transition";
+                } else {
+                    secEl.classList.add('hidden');
+                    btnEl.className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-zinc-500 hover:text-zinc-900 transition";
+                }
+            });
+
+            if (typeof window.refreshSupabaseProjects === 'function') {
+                window.refreshSupabaseProjects(activeKey === 'dashboard');
+            }
+        };
+
+        window.verifyAdminPass = function() {
+            var pass = document.getElementById('adminPassword').value;
+            if (pass === 'admin123') {
+                document.getElementById('adminLoginBox').classList.add('hidden');
+                document.getElementById('adminContentWrap').classList.remove('hidden');
+                window.showAlert('Admin unlocked.', 'success');
+            } else {
+                window.showAlert('Wrong password!', 'error');
+            }
+        };
+
+        window.setCurrentDateTime = function() {
+            var now = new Date();
+            var localDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+            var localTime = now.toTimeString().slice(0, 8);
+            var dEl = document.getElementById('recordedDate');
+            var tEl = document.getElementById('recordedTime');
+            if (dEl) dEl.value = localDate;
+            if (tEl) tEl.value = localTime;
+        };
+
+        window.initAdminParamSlots();
+        window.setCurrentDateTime();
+    </script>
+
+    <!-- SCRIPT 2: SUPABASE & DASHBOARD ANALYTICS -->
+    <script>
+        (function() {
+            var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
+            var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
+
+            var supabaseClient = null;
+            var projectsData = [];
+            var rawProjectRecords = [];
+            var filteredRecords = [];
+            var currentProject = null;
+            var currentModeCounts = {};
+
+            var trendChartInstance = null;
+            var scatterChartInstance = null;
+            var modeBarChartInstance = null;
+
+            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+
+            function getProjectParams(project) {
+                if (!project || !Array.isArray(project.parameter_labels)) return [];
+                return project.parameter_labels.map(function(item) {
+                    if (typeof item === 'string') {
+                        return { label: item.trim(), type: 'number' };
+                    } else if (item && typeof item === 'object' && item.label) {
+                        return {
+                            label: String(item.label).trim(),
+                            type: item.type === 'text' ? 'text' : 'number'
+                        };
+                    }
+                    return null;
+                }).filter(function(item) {
+                    return item && item.label.length > 0;
+                });
+            }
+
+            // RENDER OPERATOR FIELDS FOR SELECTED PROJECT
+            function renderOperatorFieldsForProject(selectedId, preserveEnteredValues) {
+                var ngModeSelect = document.getElementById('ngModeSelect');
+                var paramsContainer = document.getElementById('dynamicParamsContainer');
+                var dynamicFields = document.getElementById('dynamicFields');
+
+                var previousValues = {};
+                var prevMode = ngModeSelect.value;
+                if (preserveEnteredValues) {
+                    document.querySelectorAll('.dynamic-param-input').forEach(function(inp) {
+                        previousValues[inp.getAttribute('data-param-label')] = inp.value;
+                    });
+                }
+
+                dynamicFields.innerHTML = '';
+                if (!selectedId) {
+                    ngModeSelect.innerHTML = '<option value="">Select Project First</option>';
+                    ngModeSelect.disabled = true;
+                    paramsContainer.classList.add('hidden');
+                    return;
+                }
+
+                var project = projectsData.find(function(p) { return p.id === selectedId; });
+                if (!project) return;
+
+                ngModeSelect.disabled = false;
+                ngModeSelect.innerHTML = '<option value="">-- Select NG Mode --</option>';
+                (project.ng_modes || []).forEach(function(mode) {
+                    var opt = document.createElement('option');
+                    opt.value = mode;
+                    opt.textContent = mode;
+                    ngModeSelect.appendChild(opt);
+                });
+                if (preserveEnteredValues && prevMode && (project.ng_modes || []).indexOf(prevMode) !== -1) {
+                    ngModeSelect.value = prevMode;
+                }
+
+                var paramsList = getProjectParams(project);
+                if (paramsList.length > 0) {
+                    paramsContainer.classList.remove('hidden');
+                    paramsList.forEach(function(paramObj) {
+                        var isText = paramObj.type === 'text';
+                        var badgeHtml = isText
+                            ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Text</span>'
+                            : '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Number</span>';
+
+                        var savedVal = (preserveEnteredValues && previousValues[paramObj.label] !== undefined) ? previousValues[paramObj.label] : '';
+
+                        var inputHtml = isText
+                            ? '<input type="text" data-param-label="' + paramObj.label + '" data-param-type="text" value="' + savedVal + '" required placeholder="Enter text for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">'
+                            : '<input type="number" step="any" data-param-label="' + paramObj.label + '" data-param-type="number" value="' + savedVal + '" required placeholder="Enter number for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
+
+                        var wrapper = document.createElement('div');
+                        wrapper.innerHTML =
+                            '<div class="flex items-center justify-between mb-1">' +
+                                '<label class="block text-xs font-semibold text-zinc-700">' + paramObj.label + ' <span class="text-red-500">*</span></label>' +
+                                badgeHtml +
+                            '</div>' + inputHtml;
+                        dynamicFields.appendChild(wrapper);
+                    });
+                } else {
+                    paramsContainer.classList.add('hidden');
+                }
+            }
+
+            window.refreshSupabaseProjects = async function(loadDashboardAfter) {
+                if (!supabaseClient) return;
+                var projectSelect = document.getElementById('projectSelect');
+                var dashSelect = document.getElementById('dashboardProjectSelect');
+
+                var res = await supabaseClient
+                    .from('ng_projects')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                if (res.error) {
+                    window.showAlert('Database error: ' + res.error.message, 'error');
+                    return;
+                }
+
+                projectsData = res.data || [];
+                var prevOpVal = projectSelect.value;
+                var prevDashVal = dashSelect.value;
+
+                projectSelect.innerHTML = '<option value="">-- Select Machine / Project --</option>';
+                dashSelect.innerHTML = '<option value="">-- Select Project --</option>';
+
+                projectsData.forEach(function(proj) {
+                    var opt1 = document.createElement('option');
+                    opt1.value = proj.id;
+                    opt1.textContent = proj.project_title;
+                    projectSelect.appendChild(opt1);
+
+                    var opt2 = document.createElement('option');
+                    opt2.value = proj.id;
+                    opt2.textContent = proj.project_title;
+                    dashSelect.appendChild(opt2);
+                });
+
+                renderAdminProjectList();
+
+                if (prevOpVal && projectsData.some(function(p) { return p.id === prevOpVal; })) {
+                    projectSelect.value = prevOpVal;
+                    renderOperatorFieldsForProject(prevOpVal, true);
+                } else {
+                    renderOperatorFieldsForProject('', false);
+                }
+
+                if (prevDashVal && projectsData.some(function(p) { return p.id === prevDashVal; })) {
+                    dashSelect.value = prevDashVal;
+                } else if (projectsData.length > 0) {
+                    dashSelect.value = projectsData[0].id;
+                }
+
+                if (loadDashboardAfter && dashSelect.value) {
+                    loadDashboardData(dashSelect.value);
+                }
+            };
+
+            // LOAD PROJECT INTO ADMIN FORM FOR EDITING
+            window.startEditProject = function(projectId) {
+                var proj = projectsData.find(function(p) { return p.id === projectId; });
+                if (!proj) return;
+
+                window.editingProjectId = proj.id;
+                document.getElementById('adminProjectTitle').value = proj.project_title || '';
+                document.getElementById('adminNgModes').value = (proj.ng_modes || []).join(', ');
+
+                var normParams = getProjectParams(proj);
+                for (var i = 1; i <= 15; i++) {
+                    var input = document.getElementById('adminParam' + i);
+                    var btn = document.getElementById('adminParamTypeBtn' + i);
+                    var item = normParams[i - 1];
+                    if (item) {
+                        input.value = item.label;
+                        input.setAttribute('data-original-label', item.label);
+                        window.setParamButtonStyle(btn, item.type);
+                    } else {
+                        input.value = '';
+                        input.setAttribute('data-original-label', '');
+                        window.setParamButtonStyle(btn, 'number');
+                    }
+                }
+
+                document.getElementById('editingProjectLabel').textContent = 'Editing: ' + proj.project_title;
+                document.getElementById('editModeBanner').classList.remove('hidden');
+                document.getElementById('adminCancelBtn').classList.remove('hidden');
+
+                var submitBtn = document.getElementById('adminSubmitBtn');
+                submitBtn.textContent = 'Update Project Changes';
+                submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition';
+
+                document.getElementById('sectionAdmin').scrollIntoView({ behavior: 'smooth' });
+            };
+
+            window.deleteProjectById = async function(projectId, projectTitle) {
+                if (!supabaseClient) return;
+                var confirmed = window.confirm('Are you sure you want to delete "' + projectTitle + '" and all of its NG records?');
+                if (!confirmed) return;
+
+                var res = await supabaseClient
+                    .from('ng_projects')
+                    .delete()
+                    .eq('id', projectId);
+
+                if (res.error) {
+                    window.showAlert('Failed to delete project: ' + res.error.message, 'error');
+                } else {
+                    if (window.editingProjectId === projectId) {
+                        window.cancelEditProject();
+                    }
+                    window.showAlert('Project "' + projectTitle + '" deleted.', 'success');
+                    window.refreshSupabaseProjects(false);
+                }
+            };
+
+            function renderAdminProjectList() {
+                var container = document.getElementById('adminProjectList');
+                if (!container) return;
+                if (projectsData.length === 0) {
+                    container.innerHTML = '<p class="text-xs text-zinc-400">No active projects found.</p>';
+                    return;
+                }
+                container.innerHTML = '';
+                projectsData.forEach(function(p) {
+                    var normParams = getProjectParams(p);
+                    var paramsSummary = normParams.map(function(item) {
+                        return item.label + (item.type === 'text' ? ' [Text]' : ' [Num]');
+                    }).join(', ');
+                    var modes = (p.ng_modes || []).join(', ');
+
+                    var row = document.createElement('div');
+                    row.className = 'flex items-center justify-between gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200';
+
+                    var infoDiv = document.createElement('div');
+                    infoDiv.className = 'min-w-0 flex-1';
+                    infoDiv.innerHTML = '<p class="font-semibold text-zinc-900 truncate">' + p.project_title + '</p>' +
+                        '<p class="text-xs text-zinc-500 truncate">Params (' + normParams.length + '): ' + paramsSummary + '</p>' +
+                        '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + modes + '</p>';
+
+                    var btnGroup = document.createElement('div');
+                    btnGroup.className = 'flex items-center gap-1.5 shrink-0';
+
+                    var editBtn = document.createElement('button');
+                    editBtn.type = 'button';
+                    editBtn.className = 'px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition';
+                    editBtn.textContent = 'Edit';
+                    editBtn.addEventListener('click', function() {
+                        window.startEditProject(p.id);
+                    });
+
+                    var delBtn = document.createElement('button');
+                    delBtn.type = 'button';
+                    delBtn.className = 'px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition';
+                    delBtn.textContent = 'Delete';
+                    delBtn.addEventListener('click', function() {
+                        window.deleteProjectById(p.id, p.project_title);
+                    });
+
+                    btnGroup.appendChild(editBtn);
+                    btnGroup.appendChild(delBtn);
+
+                    row.appendChild(infoDiv);
+                    row.appendChild(btnGroup);
+                    container.appendChild(row);
+                });
+            }
+
+            document.getElementById('projectSelect').addEventListener('change', function() {
+                renderOperatorFieldsForProject(this.value, false);
+            });
+
+            // CREATE OR UPDATE PROJECT (ADMIN)
+            document.getElementById('adminForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!supabaseClient) return;
+
+                var title = document.getElementById('adminProjectTitle').value.trim();
+                var modesRaw = document.getElementById('adminNgModes').value;
+                var ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
+
+                var parameterConfigs = [];
+                var renamedMap = {}; // { oldLabel: newLabel }
+
+                for (var i = 1; i <= 15; i++) {
+                    var el = document.getElementById('adminParam' + i);
+                    var btn = document.getElementById('adminParamTypeBtn' + i);
+                    var labelVal = el && el.value ? el.value.trim() : '';
+                    var origLabel = el ? (el.getAttribute('data-original-label') || '').trim() : '';
+                    var typeVal = btn ? (btn.getAttribute('data-type') || 'number') : 'number';
+
+                    if (labelVal.length > 0) {
+                        parameterConfigs.push({
+                            label: labelVal,
+                            type: typeVal === 'text' ? 'text' : 'number'
+                        });
+                        if (window.editingProjectId && origLabel.length > 0 && origLabel !== labelVal) {
+                            renamedMap[origLabel] = labelVal;
+                        }
+                    }
+                }
+
+                if (window.editingProjectId) {
+                    // UPDATE EXISTING PROJECT
+                    var targetId = window.editingProjectId;
+                    var updateRes = await supabaseClient
+                        .from('ng_projects')
+                        .update({
+                            project_title: title,
+                            parameter_labels: parameterConfigs,
+                            ng_modes: ngModes
+                        })
+                        .eq('id', targetId);
+
+                    if (updateRes.error) {
+                        window.showAlert('Failed to update project: ' + updateRes.error.message, 'error');
+                        return;
+                    }
+
+                    // If any parameter was renamed, migrate old parameter keys in ng_records so historical data stays intact
+                    var oldKeys = Object.keys(renamedMap);
+                    if (oldKeys.length > 0) {
+                        var recRes = await supabaseClient
+                            .from('ng_records')
+                            .select('id, parameter_values')
+                            .eq('project_id', targetId);
+
+                        if (!recRes.error && Array.isArray(recRes.data)) {
+                            for (var rIdx = 0; rIdx < recRes.data.length; rIdx++) {
+                                var rec = recRes.data[rIdx];
+                                var vals = Object.assign({}, rec.parameter_values || {});
+                                var changed = false;
+                                oldKeys.forEach(function(oldK) {
+                                    var newK = renamedMap[oldK];
+                                    if (vals[oldK] !== undefined && vals[newK] === undefined) {
+                                        vals[newK] = vals[oldK];
+                                        delete vals[oldK];
+                                        changed = true;
+                                    }
+                                });
+                                if (changed) {
+                                    await supabaseClient
+                                        .from('ng_records')
+                                        .update({ parameter_values: vals })
+                                        .eq('id', rec.id);
+                                }
+                            }
+                        }
+                    }
+
+                    window.showAlert('Project "' + title + '" updated successfully!', 'success');
+                    window.cancelEditProject();
+                    window.refreshSupabaseProjects(false);
+                } else {
+                    // INSERT NEW PROJECT
+                    var res = await supabaseClient.from('ng_projects').insert([{
+                        project_title: title,
+                        parameter_labels: parameterConfigs,
+                        ng_modes: ngModes,
+                        is_active: true
+                    }]);
+
+                    if (res.error) {
+                        window.showAlert('Failed to save project: ' + res.error.message, 'error');
+                    } else {
+                        window.showAlert('New project saved with ' + parameterConfigs.length + ' parameters!', 'success');
+                        document.getElementById('adminProjectTitle').value = '';
+                        document.getElementById('adminNgModes').value = '';
+                        window.resetAdminParamSlots();
+                        window.refreshSupabaseProjects(false);
+                    }
+                }
+            });
+
+            // SAVE NG RECORD (OPERATOR)
+            document.getElementById('ngForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!supabaseClient) return;
+
+                var parameterValues = {};
+                document.querySelectorAll('.dynamic-param-input').forEach(function(input) {
+                    var label = input.getAttribute('data-param-label');
+                    var pType = input.getAttribute('data-param-type') || 'number';
+                    var rawVal = input.value.trim();
+                    parameterValues[label] = pType === 'text' ? rawVal : Number(rawVal);
+                });
+
+                var payload = {
+                    project_id: document.getElementById('projectSelect').value,
+                    recorded_date: document.getElementById('recordedDate').value,
+                    recorded_time: document.getElementById('recordedTime').value,
+                    operator_name: document.getElementById('operatorName').value.trim(),
+                    ng_mode: document.getElementById('ngModeSelect').value,
+                    parameter_values: parameterValues,
+                    remarks: document.getElementById('remarks').value.trim() || null
+                };
+
+                var res = await supabaseClient.from('ng_records').insert([payload]);
+
+                if (res.error) {
+                    window.showAlert('Error saving record: ' + res.error.message, 'error');
+                } else {
+                    window.showAlert('NG record saved!', 'success');
+                    document.getElementById('ngModeSelect').value = '';
+                    document.getElementById('remarks').value = '';
+                    document.querySelectorAll('.dynamic-param-input').forEach(function(input) { input.value = ''; });
+                    window.setCurrentDateTime();
+                }
+            });
+
+            // DASHBOARD CONTROLS
+            document.getElementById('dashboardProjectSelect').addEventListener('change', function() {
+                if (this.value) loadDashboardData(this.value);
+            });
+            document.getElementById('btnRefreshDashboard').addEventListener('click', function() {
+                var val = document.getElementById('dashboardProjectSelect').value;
+                if (val) loadDashboardData(val);
+            });
+            document.getElementById('dashboardDateFilter').addEventListener('change', applyFiltersAndRender);
+            document.getElementById('dashboardModeFilter').addEventListener('change', applyFiltersAndRender);
+            document.getElementById('trendParamSelect').addEventListener('change', renderTrendChart);
+            document.getElementById('inputLSL').addEventListener('input', renderTrendChart);
+            document.getElementById('inputUSL').addEventListener('input', renderTrendChart);
+            document.getElementById('scatterXSelect').addEventListener('change', renderScatterChart);
+            document.getElementById('scatterYSelect').addEventListener('change', renderScatterChart);
+
+            async function loadDashboardData(projectId) {
+                if (!supabaseClient) return;
+                currentProject = projectsData.find(function(p) { return p.id === projectId; });
+                if (!currentProject) return;
+
+                var modeFilter = document.getElementById('dashboardModeFilter');
+                modeFilter.innerHTML = '<option value="all">All NG Modes</option>';
+                (currentProject.ng_modes || []).forEach(function(m) {
+                    var opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = m;
+                    modeFilter.appendChild(opt);
+                });
+
+                var allParams = getProjectParams(currentProject);
+                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
+
+                var trendSel = document.getElementById('trendParamSelect');
+                var xSel = document.getElementById('scatterXSelect');
+                var ySel = document.getElementById('scatterYSelect');
+
+                trendSel.innerHTML = '<option value="__ALL__">Show All Number Parameters</option>';
+                xSel.innerHTML = '';
+                ySel.innerHTML = '';
+
+                numParams.forEach(function(p) {
+                    var oT = document.createElement('option');
+                    oT.value = p.label;
+                    oT.textContent = 'Focus: ' + p.label;
+                    trendSel.appendChild(oT);
+
+                    var oX = document.createElement('option');
+                    oX.value = p.label;
+                    oX.textContent = p.label;
+                    xSel.appendChild(oX);
+
+                    var oY = document.createElement('option');
+                    oY.value = p.label;
+                    oY.textContent = p.label;
+                    ySel.appendChild(oY);
+                });
+
+                if (numParams.length > 0) {
+                    trendSel.value = numParams[0].label;
+                    xSel.value = numParams[0].label;
+                    ySel.value = numParams.length > 1 ? numParams[1].label : numParams[0].label;
+                }
+
+                var res = await supabaseClient
+                    .from('ng_records')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .order('recorded_date', { ascending: true })
+                    .order('recorded_time', { ascending: true });
+
+                if (res.error) {
+                    window.showAlert('Failed to load records: ' + res.error.message, 'error');
+                    return;
+                }
+
+                rawProjectRecords = res.data || [];
+                applyFiltersAndRender();
+            }
+
+            function applyFiltersAndRender() {
+                if (!currentProject) return;
+                var dateFilter = document.getElementById('dashboardDateFilter').value;
+                var modeFilter = document.getElementById('dashboardModeFilter').value;
+
+                var now = new Date();
+                var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+                filteredRecords = rawProjectRecords.filter(function(r) {
+                    if (modeFilter !== 'all' && r.ng_mode !== modeFilter) return false;
+                    if (dateFilter === 'today') return r.recorded_date === todayStr;
+                    if (dateFilter === '7days' || dateFilter === '30days') {
+                        var days = dateFilter === '7days' ? 7 : 30;
+                        var recDate = new Date(r.recorded_date);
+                        var diff = (now - recDate) / (1000 * 60 * 60 * 24);
+                        return diff <= days;
+                    }
+                    return true;
+                });
+
+                updateDashboardAnalytics();
+            }
+
+            function calcStats(arr) {
+                var valid = arr.filter(function(v) { return v !== null && v !== undefined && v !== '' && !isNaN(v); }).map(Number);
+                var n = valid.length;
+                if (n === 0) return { mean: 0, std: 0, min: 0, max: 0, n: 0 };
+                var sum = valid.reduce(function(a, b) { return a + b; }, 0);
+                var mean = sum / n;
+                var variance = valid.reduce(function(a, b) { return a + Math.pow(b - mean, 2); }, 0) / n;
+                return {
+                    mean: mean,
+                    std: Math.sqrt(variance),
+                    min: Math.min.apply(null, valid),
+                    max: Math.max.apply(null, valid),
+                    n: n
+                };
+            }
+
+            function calcTopText(arr) {
+                var counts = {};
+                var total = 0;
+                arr.forEach(function(v) {
+                    if (v !== null && v !== undefined && String(v).trim() !== '') {
+                        var key = String(v).trim();
+                        counts[key] = (counts[key] || 0) + 1;
+                        total++;
+                    }
+                });
+                if (total === 0) return { top: '-', count: 0, pct: 0 };
+                var topKey = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; })[0];
+                return {
+                    top: topKey,
+                    count: counts[topKey],
+                    pct: Math.round((counts[topKey] / total) * 100)
+                };
+            }
+
+            function calcPearson(xArr, yArr) {
+                var n = Math.min(xArr.length, yArr.length);
+                if (n < 3) return null;
+                var sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+                for (var i = 0; i < n; i++) {
+                    var x = Number(xArr[i] || 0);
+                    var y = Number(yArr[i] || 0);
+                    sumX += x; sumY += y;
+                    sumXY += x * y;
+                    sumX2 += x * x; sumY2 += y * y;
+                }
+                var num = (n * sumXY) - (sumX * sumY);
+                var den = Math.sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
+                if (den === 0) return 0;
+                return num / den;
+            }
+
+            function updateDashboardAnalytics() {
+                var allParams = getProjectParams(currentProject);
+                var records = filteredRecords;
+
+                document.getElementById('statTotalNg').textContent = records.length;
+
+                if (records.length === 0) {
+                    document.getElementById('statDateSpan').textContent = 'No records in this range';
+                    document.getElementById('statTopMode').textContent = '-';
+                    document.getElementById('statTopModePct').textContent = '-';
+                    document.getElementById('statCorrelation').textContent = '-';
+                    document.getElementById('statStability').textContent = '-';
+                    document.getElementById('insightList').innerHTML = '<li>No NG records found for this filter.</li>';
+                    currentModeCounts = {};
+                    renderTrendChart();
+                    renderScatterChart();
+                    renderParetoChart();
+                    renderMatrixTable(allParams, [], {});
+                    renderRecordsTable(allParams, []);
+                    return;
+                }
+
+                document.getElementById('statDateSpan').textContent = records[0].recorded_date + ' to ' + records[records.length - 1].recorded_date;
+
+                var modeCounts = {};
+                records.forEach(function(r) {
+                    modeCounts[r.ng_mode] = (modeCounts[r.ng_mode] || 0) + 1;
+                });
+                currentModeCounts = modeCounts;
+
+                var sortedModes = Object.keys(modeCounts).sort(function(a, b) { return modeCounts[b] - modeCounts[a]; });
+                var topMode = sortedModes[0];
+                var topCount = modeCounts[topMode];
+                var topPct = ((topCount / records.length) * 100).toFixed(1);
+
+                document.getElementById('statTopMode').textContent = topMode + ' (' + topCount + ')';
+                document.getElementById('statTopModePct').textContent = topPct + '% of total NGs';
+
+                generateSmartInsights(allParams, records, sortedModes, modeCounts);
+                renderTrendChart();
+                renderScatterChart();
+                renderParetoChart();
+                renderMatrixTable(allParams, records, modeCounts);
+                renderRecordsTable(allParams, records);
+            }
+
+            function generateSmartInsights(allParams, records, sortedModes, modeCounts) {
+                var insights = [];
+                var topMode = sortedModes[0];
+                var topPct = ((modeCounts[topMode] / records.length) * 100).toFixed(0);
+
+                insights.push('<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects. Focus on fixing this mode first.');
+
+                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
+                var textParams = allParams.filter(function(p) { return p.type === 'text'; });
+                var topModeRecords = records.filter(function(r) { return r.ng_mode === topMode; });
+
+                var overallStats = {};
+                numParams.forEach(function(p) {
+                    overallStats[p.label] = calcStats(records.map(function(r) { return (r.parameter_values || {})[p.label]; }));
+                });
+
+                var maxShiftParam = null;
+                var maxShiftPct = 0;
+                var shiftDirection = '';
+                var topModeMeanVal = 0;
+
+                numParams.forEach(function(p) {
+                    var l = p.label;
+                    var st = calcStats(topModeRecords.map(function(r) { return (r.parameter_values || {})[l]; }));
+                    var baseMean = overallStats[l].mean;
+                    if (baseMean !== 0 && st.n > 0) {
+                        var diffPct = ((st.mean - baseMean) / Math.abs(baseMean)) * 100;
+                        if (Math.abs(diffPct) > Math.abs(maxShiftPct)) {
+                            maxShiftPct = diffPct;
+                            maxShiftParam = l;
+                            shiftDirection = diffPct > 0 ? 'higher' : 'lower';
+                            topModeMeanVal = st.mean;
+                        }
+                    }
+                });
+
+                if (maxShiftParam && Math.abs(maxShiftPct) >= 3) {
+                    insights.push('<b>Number Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than normal average ' + overallStats[maxShiftParam].mean.toFixed(2) + ').');
+                }
+
+                textParams.forEach(function(p) {
+                    var tStat = calcTopText(topModeRecords.map(function(r) { return (r.parameter_values || {})[p.label]; }));
+                    if (tStat.count >= 2 && tStat.pct >= 60) {
+                        insights.push('<b>Text Pattern Detected:</b> <b>' + tStat.pct + '%</b> of <b>' + topMode + '</b> cases happened with <b>' + p.label + ' = "' + tStat.top + '"</b>.');
+                    }
+                });
+
+                if (records.length >= 4 && numParams.length > 0) {
+                    var p0 = numParams[0].label;
+                    var last3 = records.slice(-3).map(function(r) { return Number((r.parameter_values || {})[p0]); });
+                    if (last3[0] < last3[1] && last3[1] < last3[2]) {
+                        insights.push('<b>Trend Alert:</b> <b>' + p0 + '</b> went up 3 times in a row (' + last3.join(' → ') + '). Check machine stability.');
+                    } else if (last3[0] > last3[1] && last3[1] > last3[2]) {
+                        insights.push('<b>Trend Alert:</b> <b>' + p0 + '</b> went down 3 times in a row (' + last3.join(' → ') + '). Check machine stability.');
+                    }
+                }
+
+                document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
+            }
+
+            function renderTrendChart() {
+                if (typeof Chart === 'undefined' || !currentProject) return;
+                if (trendChartInstance) trendChartInstance.destroy();
+
+                var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
+                var selectedParam = document.getElementById('trendParamSelect').value;
+                var timeLabels = filteredRecords.map(function(r) { return r.recorded_date.slice(5) + ' ' + r.recorded_time.slice(0, 5); });
+
+                var datasets = [];
+                var lineColors = [
+                    '#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea',
+                    '#0891b2', '#db2777', '#4f46e5', '#65a30d', '#ea580c',
+                    '#0d9488', '#7c3aed', '#be123c', '#0284c7', '#ca8a04'
+                ];
+
+                if (selectedParam === '__ALL__' || !selectedParam) {
+                    document.getElementById('specLimitInputs').classList.add('hidden');
+                    numParams.forEach(function(p, idx) {
+                        var c = lineColors[idx % lineColors.length];
+                        datasets.push({
+                            label: p.label,
+                            data: filteredRecords.map(function(r) { return (r.parameter_values || {})[p.label] ?? null; }),
+                            borderColor: c,
+                            backgroundColor: c,
+                            tension: 0.2,
+                            pointRadius: 3
+                        });
+                    });
+                    document.getElementById('statStability').textContent = 'All Number Parameters';
+                    document.getElementById('statOutSpecCount').textContent = 'Pick 1 parameter to test limits';
+                } else {
+                    document.getElementById('specLimitInputs').classList.remove('hidden');
+                    var rawVals = filteredRecords.map(function(r) {
+                        var v = (r.parameter_values || {})[selectedParam];
+                        return v !== undefined && v !== '' && !isNaN(v) ? Number(v) : null;
+                    });
+
+                    var st = calcStats(rawVals);
+
+                    var maVals = rawVals.map(function(v, idx, arr) {
+                        if (idx < 2) return null;
+                        var slice = [arr[idx - 2], arr[idx - 1], arr[idx]].filter(function(x) { return x !== null; });
+                        if (slice.length === 0) return null;
+                        return slice.reduce(function(a, b) { return a + b; }, 0) / slice.length;
+                    });
+
+                    var lslInput = document.getElementById('inputLSL').value;
+                    var uslInput = document.getElementById('inputUSL').value;
+                    var lslVal = lslInput !== '' ? Number(lslInput) : (st.n > 1 ? st.mean - (2 * st.std) : null);
+                    var uslVal = uslInput !== '' ? Number(uslInput) : (st.n > 1 ? st.mean + (2 * st.std) : null);
+
+                    var outCount = 0;
+                    rawVals.forEach(function(v) {
+                        if (v === null) return;
+                        if ((lslVal !== null && v < lslVal) || (uslVal !== null && v > uslVal)) outCount++;
+                    });
+
+                    document.getElementById('statStability').textContent = selectedParam + ' (Avg: ' + st.mean.toFixed(2) + ', SD: ' + st.std.toFixed(2) + ')';
+                    document.getElementById('statOutSpecCount').textContent = outCount + ' points outside ' + (lslInput !== '' || uslInput !== '' ? 'Min/Max' : '±2σ limits');
+
+                    datasets.push({
+                        label: selectedParam + ' (Actual)',
+                        data: rawVals,
+                        borderColor: '#18181b',
+                        backgroundColor: '#18181b',
+                        pointRadius: 4,
+                        borderWidth: 2,
+                        tension: 0.1
+                    });
+
+                    datasets.push({
+                        label: '3-Pt Moving Avg (Smooth Trend)',
+                        data: maVals,
+                        borderColor: '#2563eb',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.35
+                    });
+
+                    if (st.n > 0) {
+                        datasets.push({
+                            label: 'Average (' + st.mean.toFixed(2) + ')',
+                            data: rawVals.map(function() { return st.mean; }),
+                            borderColor: '#10b981',
+                            borderDash: [4, 4],
+                            borderWidth: 1.5,
+                            pointRadius: 0
+                        });
+                    }
+
+                    if (uslVal !== null && st.n > 1) {
+                        datasets.push({
+                            label: (uslInput !== '' ? 'Max Limit' : '+2σ Upper') + ' (' + uslVal.toFixed(2) + ')',
+                            data: rawVals.map(function() { return uslVal; }),
+                            borderColor: '#ef4444',
+                            borderDash: [6, 4],
+                            borderWidth: 1.5,
+                            pointRadius: 0
+                        });
+                    }
+
+                    if (lslVal !== null && st.n > 1) {
+                        datasets.push({
+                            label: (lslInput !== '' ? 'Min Limit' : '-2σ Lower') + ' (' + lslVal.toFixed(2) + ')',
+                            data: rawVals.map(function() { return lslVal; }),
+                            borderColor: '#f97316',
+                            borderDash: [6, 4],
+                            borderWidth: 1.5,
+                            pointRadius: 0
+                        });
+                    }
+                }
+
+                var ctx = document.getElementById('trendChart').getContext('2d');
+                trendChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: timeLabels, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } }
+                    }
+                });
+            }
+
+            function renderScatterChart() {
+                if (typeof Chart === 'undefined') return;
+                if (scatterChartInstance) scatterChartInstance.destroy();
+
+                var xLabel = document.getElementById('scatterXSelect').value || 'Param 1';
+                var yLabel = document.getElementById('scatterYSelect').value || 'Param 2';
+
+                var xArr = filteredRecords.map(function(r) { return (r.parameter_values || {})[xLabel]; });
+                var yArr = filteredRecords.map(function(r) { return (r.parameter_values || {})[yLabel]; });
+                var rVal = calcPearson(xArr, yArr);
+
+                if (rVal === null || isNaN(rVal)) {
+                    document.getElementById('statCorrelation').textContent = 'N/A';
+                    document.getElementById('statCorrelationDesc').textContent = 'Need at least 3 number records';
+                } else {
+                    var absR = Math.abs(rVal);
+                    var strength = absR > 0.7 ? 'Strong' : (absR > 0.4 ? 'Moderate' : 'Weak');
+                    document.getElementById('statCorrelation').textContent = 'r = ' + rVal.toFixed(2) + ' (' + strength + ')';
+                    document.getElementById('statCorrelationDesc').textContent = xLabel + ' vs ' + yLabel;
+                }
+
+                var palette = [
+                    '#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea',
+                    '#0891b2', '#db2777', '#4f46e5', '#65a30d', '#ea580c'
+                ];
+                var uniqueModes = Object.keys(currentModeCounts);
+                var scatterDatasets = uniqueModes.map(function(mode, idx) {
+                    var color = palette[idx % palette.length];
+                    var pts = filteredRecords
+                        .filter(function(r) { return r.ng_mode === mode; })
+                        .map(function(r) {
+                            var vals = r.parameter_values || {};
+                            return { x: Number(vals[xLabel] || 0), y: Number(vals[yLabel] || 0) };
+                        });
+                    return { label: mode, data: pts, backgroundColor: color, pointRadius: 6 };
+                });
+
+                var ctx = document.getElementById('scatterChart').getContext('2d');
+                scatterChartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets: scatterDatasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: xLabel } },
+                            y: { title: { display: true, text: yLabel } }
+                        }
+                    }
+                });
+            }
+
+            function renderParetoChart() {
+                if (typeof Chart === 'undefined') return;
+                if (modeBarChartInstance) modeBarChartInstance.destroy();
+
+                var sortedModes = Object.keys(currentModeCounts).sort(function(a, b) { return currentModeCounts[b] - currentModeCounts[a]; });
+                var counts = sortedModes.map(function(m) { return currentModeCounts[m]; });
+                var total = counts.reduce(function(a, b) { return a + b; }, 0);
+
+                var cumSum = 0;
+                var cumPct = counts.map(function(c) {
+                    cumSum += c;
+                    return total > 0 ? Number(((cumSum / total) * 100).toFixed(1)) : 0;
+                });
+
+                var ctx = document.getElementById('modeBarChart').getContext('2d');
+                modeBarChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedModes,
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'Cumulative (%)',
+                                data: cumPct,
+                                borderColor: '#dc2626',
+                                backgroundColor: '#dc2626',
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                yAxisID: 'y1'
+                            },
+                            {
+                                type: 'bar',
+                                label: 'NG Count',
+                                data: counts,
+                                backgroundColor: '#18181b',
+                                borderRadius: 4,
+                                yAxisID: 'y'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, position: 'left', ticks: { precision: 0 } },
+                            y1: { beginAtZero: true, max: 100, position: 'right', grid: { drawOnChartArea: false } }
+                        }
+                    }
+                });
+            }
+
+            function renderMatrixTable(allParams, records, modeCounts) {
+                var thead = document.getElementById('matrixHeaderRow');
+                var tbody = document.getElementById('matrixTableBody');
+
+                thead.innerHTML = '<th class="p-3 whitespace-nowrap">NG Mode</th><th class="p-3 whitespace-nowrap">Count</th>' +
+                    allParams.map(function(p) {
+                        var prefix = p.type === 'text' ? 'Top ' : 'Avg ';
+                        return '<th class="p-3 whitespace-nowrap">' + prefix + p.label + '</th>';
+                    }).join('');
+
+                var modes = Object.keys(modeCounts).sort(function(a, b) { return modeCounts[b] - modeCounts[a]; });
+                if (modes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="' + (allParams.length + 2) + '" class="p-4 text-center text-zinc-400">No data.</td></tr>';
+                    return;
+                }
+
+                var overallMeans = {};
+                allParams.forEach(function(p) {
+                    if (p.type === 'number') {
+                        overallMeans[p.label] = calcStats(records.map(function(r) { return (r.parameter_values || {})[p.label]; })).mean;
+                    }
+                });
+
+                tbody.innerHTML = '';
+                modes.forEach(function(mode) {
+                    var modeRecs = records.filter(function(r) { return r.ng_mode === mode; });
+                    var cells = allParams.map(function(p) {
+                        var l = p.label;
+                        if (p.type === 'text') {
+                            var tStat = calcTopText(modeRecs.map(function(r) { return (r.parameter_values || {})[l]; }));
+                            if (tStat.top === '-') return '<td class="p-3 text-zinc-400">-</td>';
+                            return '<td class="p-3 font-medium whitespace-nowrap">' + tStat.top + ' <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800">' + tStat.pct + '%</span></td>';
+                        } else {
+                            var st = calcStats(modeRecs.map(function(r) { return (r.parameter_values || {})[l]; }));
+                            var base = overallMeans[l];
+                            var diffPct = base !== 0 ? ((st.mean - base) / Math.abs(base)) * 100 : 0;
+                            var badge = '';
+                            if (Math.abs(diffPct) >= 5) {
+                                var sign = diffPct > 0 ? '+' : '';
+                                badge = ' <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-600">' + sign + diffPct.toFixed(0) + '%</span>';
+                            }
+                            return '<td class="p-3 font-medium whitespace-nowrap">' + st.mean.toFixed(2) + badge + '</td>';
+                        }
+                    }).join('');
+
+                    var tr = document.createElement('tr');
+                    tr.className = 'hover:bg-zinc-50';
+                    tr.innerHTML = '<td class="p-3 font-bold text-zinc-900 whitespace-nowrap">' + mode + '</td>' +
+                        '<td class="p-3 text-zinc-600 whitespace-nowrap">' + modeCounts[mode] + '</td>' + cells;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function renderRecordsTable(allParams, records) {
+                var tbody = document.getElementById('recordsTableBody');
+                if (records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-zinc-400">No records found.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                records.slice().reverse().forEach(function(r) {
+                    var vals = r.parameter_values || {};
+                    var paramStr = allParams.map(function(p) {
+                        var v = vals[p.label] !== undefined ? vals[p.label] : '-';
+                        var badgeStyle = p.type === 'text' ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-zinc-100 text-zinc-800';
+                        return '<span class="inline-block ' + badgeStyle + ' px-2 py-0.5 rounded text-xs mr-1 mb-1">' + p.label + ': <b>' + v + '</b></span>';
+                    }).join('');
+                    var tr = document.createElement('tr');
+                    tr.className = 'hover:bg-zinc-50';
+                    tr.innerHTML = '<td class="p-3 whitespace-nowrap text-zinc-600">' + r.recorded_date + ' ' + r.recorded_time.slice(0, 5) + '</td>' +
+                        '<td class="p-3 font-medium">' + r.operator_name + '</td>' +
+                        '<td class="p-3 font-semibold text-red-600">' + r.ng_mode + '</td>' +
+                        '<td class="p-3">' + paramStr + '</td>' +
+                        '<td class="p-3 text-zinc-500">' + (r.remarks || '-') + '</td>';
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('btnExportCsv').addEventListener('click', function() {
+                if (!currentProject || filteredRecords.length === 0) {
+                    window.showAlert('No data to export!', 'error');
+                    return;
+                }
+                var allParams = getProjectParams(currentProject);
+                var labels = allParams.map(function(p) { return p.label; });
+                var headers = ['Date', 'Time', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
+                var rows = [headers.join(',')];
+
+                filteredRecords.forEach(function(r) {
+                    var vals = r.parameter_values || {};
+                    var row = [
+                        r.recorded_date,
+                        r.recorded_time,
+                        '"' + (r.operator_name || '').replace(/"/g, '""') + '"',
+                        '"' + (r.ng_mode || '').replace(/"/g, '""') + '"'
+                    ];
+                    allParams.forEach(function(p) {
+                        var v = vals[p.label] !== undefined ? String(vals[p.label]).replace(/"/g, '""') : '';
+                        row.push(p.type === 'text' ? '"' + v + '"' : v);
+                    });
+                    row.push('"' + (r.remarks || '').replace(/"/g, '""') + '"');
+                    rows.push(row.join(','));
+                });
+
+                var csvContent = "data:text/csv;charset=utf-8," + rows.join("\n");
+                var link = document.createElement("a");
+                link.setAttribute("href", encodeURI(csvContent));
+                link.setAttribute("download", currentProject.project_title.replace(/\s+/g, '_') + "_NG_Report.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            window.refreshSupabaseProjects(false);
+        })();
+    </script>
+</body>
+</html>
