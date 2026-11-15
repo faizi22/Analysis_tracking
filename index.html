@@ -86,6 +86,24 @@
                     <div id="dynamicFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
 
+                <!-- Optional Trial / Shift Exposure Inputs -->
+                <div class="pt-3 border-t border-zinc-100">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Trial / Shift Exposure (Optional)</span>
+                        <span class="text-[11px] text-zinc-400">For exact NG/hr & Defect %</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-medium text-zinc-600 mb-1">Run Hours (Opt)</label>
+                            <input type="number" step="any" min="0" id="ngRunHours" placeholder="e.g. 1.5" class="w-full border border-zinc-300 rounded-lg p-2 text-sm bg-zinc-50/60 focus:bg-white focus:ring-2 focus:ring-zinc-900 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-zinc-600 mb-1">Total Output Units (Opt)</label>
+                            <input type="number" step="1" min="0" id="ngTotalOutput" placeholder="e.g. 500" class="w-full border border-zinc-300 rounded-lg p-2 text-sm bg-zinc-50/60 focus:bg-white focus:ring-2 focus:ring-zinc-900 outline-none">
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Remarks (Optional)</label>
                     <textarea id="remarks" rows="2" placeholder="Action taken or notes..." class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none"></textarea>
@@ -136,15 +154,15 @@
                         <span id="actionEditBadge" class="hidden px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-amber-200 text-amber-900">Edit Mode</span>
                         <div>
                             <h3 id="actionModalTitle" class="text-sm font-bold text-emerald-950">Log Engineering Action Taken</h3>
-                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">This action will be pinned with a number badge on the charts to track data changes before vs. after.</p>
+                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">Pin an action to the timeline and optionally log trial Run Hours / Total Output to measure exact Defect %.</p>
                         </div>
                     </div>
                     <button type="button" onclick="window.cancelEditAction(true)" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950 px-2.5 py-1 rounded bg-white border border-emerald-200">
                         Close
                     </button>
                 </div>
-                <form id="actionTakenForm" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div class="sm:col-span-2">
+                <form id="actionTakenForm" class="grid grid-cols-1 sm:grid-cols-6 gap-3">
+                    <div class="sm:col-span-3">
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Short Action Title <span class="text-red-500">*</span></label>
                         <input type="text" id="actionTitle" required maxlength="35" placeholder="e.g. Mechanical Alignment / Camera Optimization" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
                     </div>
@@ -152,7 +170,7 @@
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Date <span class="text-red-500">*</span></label>
                         <input type="date" id="actionDate" required class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none">
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Time & Status <span class="text-red-500">*</span></label>
                         <div class="flex gap-1.5">
                             <input type="time" id="actionTime" required class="w-1/2 border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none">
@@ -166,9 +184,17 @@
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Action Description (Details) <span class="text-red-500">*</span></label>
                         <input type="text" id="actionDesc" required placeholder="e.g. Adjusted clamp & guide pin to reduce variation." class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
                     </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Run Hours (Opt)</label>
+                        <input type="number" step="any" min="0" id="actionRunHours" placeholder="e.g. 2.0" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Total Output (Opt)</label>
+                        <input type="number" step="1" min="0" id="actionTotalOutput" placeholder="e.g. 800" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
                     <div class="flex items-end gap-1.5">
                         <button type="submit" id="actionSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition">
-                            Pin Action to Chart
+                            Pin Action
                         </button>
                         <button type="button" id="actionCancelEditBtn" onclick="window.cancelEditAction(true)" class="hidden bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-semibold py-2 px-3 rounded-lg text-xs transition">
                             Cancel
@@ -180,23 +206,28 @@
             <!-- Smart Suggestions Box -->
             <div class="bg-zinc-900 text-white rounded-xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-2">
-                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded">Time-Normalized Analysis</span>
+                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded">Time & Output Normalized</span>
                     <h2 class="text-sm font-bold">Key Findings, Trial Rate & Action Impact</h2>
                 </div>
                 <ul id="insightList" class="space-y-1.5 text-xs sm:text-sm text-zinc-200 list-disc list-inside">
-                    <li>Select a project with data to see automatic time-normalized suggestions.</li>
+                    <li>Select a project with data to see automatic rate & defect percentage insights.</li>
                 </ul>
             </div>
 
-            <!-- Summary Cards (Now Includes NG Rate / Hr & Mean Time Between NGs) -->
+            <!-- Summary Cards (Includes NG Qty, NG/hr, Defect Rate %, and MTBF) -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Total NG & Rate</p>
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Total NG & Hourly Rate</p>
                     <div class="flex items-baseline gap-2 mt-1">
                         <p id="statTotalNg" class="text-2xl font-bold text-zinc-900">0</p>
                         <span id="statNgPerHour" class="text-xs font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">0.00 NG/hr</span>
                     </div>
                     <p id="statDateSpan" class="text-[11px] text-zinc-500 mt-1 truncate">-</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Exact Defect Rate (%)</p>
+                    <p id="statDefectPct" class="text-2xl font-bold text-emerald-600 mt-1">-</p>
+                    <p id="statTotalOutputDesc" class="text-[11px] text-zinc-500 mt-0.5 truncate">Log Total Output for exact %</p>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
                     <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Time Between NGs (MTBF)</p>
@@ -208,19 +239,14 @@
                     <p id="statTopMode" class="text-lg font-bold text-red-600 mt-1 truncate">-</p>
                     <p id="statTopModePct" class="text-[11px] text-zinc-500 mt-0.5">0% of total NGs</p>
                 </div>
-                <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Process Stability</p>
-                    <p id="statStability" class="text-sm font-bold text-zinc-800 mt-1 truncate">-</p>
-                    <p id="statOutSpecCount" class="text-[11px] text-zinc-500 mt-0.5">-</p>
-                </div>
             </div>
 
-            <!-- CHART 1: Weekly / Daily NG Stacked Bar + NG/Hour Rate Line + Action Callouts -->
+            <!-- CHART 1: Weekly / Daily NG Stacked Bar + NG/Hour Rate + Defect % Line + Action Callouts -->
             <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm relative">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-zinc-100">
                     <div>
-                        <h3 class="text-sm font-bold text-zinc-900">1. NG Qty (Bars) vs. NG Rate per Hour (Purple Line) & Action Markers</h3>
-                        <p class="text-xs text-zinc-500">Comparing <b>NG Qty</b> with <b>NG / Active Hour</b> prevents short trials from looking falsely low.</p>
+                        <h3 class="text-sm font-bold text-zinc-900">1. NG Qty (Bars) vs. NG/Hr & Defect Rate % (Lines)</h3>
+                        <p class="text-xs text-zinc-500">Normalizes short trial runs using logged <b>Run Hours</b> & <b>Total Output</b> alongside Action markers.</p>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
@@ -266,8 +292,8 @@
                     <div class="flex items-center gap-2.5">
                         <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✔</div>
                         <div>
-                            <h3 class="text-base font-bold text-zinc-900">Action History & Before/After Rate Impact</h3>
-                            <p class="text-[11px] text-zinc-500">Evaluates both Parameter Shift and Time-Normalized NG Rate (NG/hr & MTBF) before vs. after each action.</p>
+                            <h3 class="text-base font-bold text-zinc-900">Action History & Before/After Impact</h3>
+                            <p class="text-[11px] text-zinc-500">Compares Parameter Avg, NG/hr Rate, Defect Rate (%), and MTBF before vs. after each action.</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -287,12 +313,12 @@
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 
-                <!-- Chart 2: Parameter Trend Over Time + Optional NG Rate / Interval Overlay -->
+                <!-- Chart 2: Parameter Trend Over Time + Optional NG Rate Overlay -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
                             <h3 class="text-sm font-bold text-zinc-900">2. Parameter Setting vs. NG Frequency Rate & Action Impact</h3>
-                            <p class="text-xs text-zinc-500">Purple dashed line shows <b>Instant NG Rate (NG/hr)</b> on the right axis so you can see if a parameter change truly slowed down defect frequency.</p>
+                            <p class="text-xs text-zinc-500">Purple dashed line shows <b>NG Rate (NG/hr)</b> on the right axis alongside your parameter trend.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <label class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 font-semibold cursor-pointer">
@@ -383,7 +409,7 @@
                                 <th class="p-3">Time Gap (Δt)</th>
                                 <th class="p-3">Operator</th>
                                 <th class="p-3">NG Mode</th>
-                                <th class="p-3">Parameters</th>
+                                <th class="p-3">Parameters & Trial Info</th>
                                 <th class="p-3">Remarks</th>
                             </tr>
                         </thead>
@@ -517,6 +543,10 @@
             document.getElementById('actionTitle').value = '';
             document.getElementById('actionDesc').value = '';
             document.getElementById('actionStatus').value = 'Completed';
+            var rhEl = document.getElementById('actionRunHours');
+            var toEl = document.getElementById('actionTotalOutput');
+            if (rhEl) rhEl.value = '';
+            if (toEl) toEl.value = '';
             window.setCurrentDateTime();
 
             var box = document.getElementById('actionModalBox');
@@ -529,8 +559,8 @@
             box.className = (closeBox ? 'hidden ' : '') + 'bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm';
             badge.classList.add('hidden');
             titleEl.textContent = 'Log Engineering Action Taken';
-            subEl.textContent = 'This action will be pinned with a number badge on the charts to track data changes before vs. after.';
-            submitBtn.textContent = 'Pin Action to Chart';
+            subEl.textContent = 'Pin an action to the timeline and optionally log trial Run Hours / Total Output to measure exact Defect %.';
+            submitBtn.textContent = 'Pin Action';
             submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
             cancelBtn.classList.add('hidden');
         };
@@ -674,7 +704,7 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, TIME-NORMALIZED NG RATE (NG/HR & MTBF) & ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, EXACT DEFECT RATE (%), RUN HOURS & ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -700,7 +730,6 @@
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
 
-            // Convert YYYY-MM-DD + HH:MM:SS into epoch milliseconds
             function toEpochMs(dateStr, timeStr) {
                 var t = (timeStr || '00:00:00').slice(0, 8);
                 if (t.length === 5) t += ':00';
@@ -708,46 +737,89 @@
                 return isNaN(d.getTime()) ? 0 : d.getTime();
             }
 
-            // Calculate Time-Normalized NG Rate (NG / Active Hour) & Mean Time Between NGs (MTBF in mins)
-            function calcTimeRateMetrics(records) {
+            // Calculate Time-Normalized NG Rate (NG/Hr), Exact Defect Rate (%), and Mean Time Between NGs (MTBF)
+            function calcTimeRateMetrics(records, actionLogs) {
                 var n = records.length;
-                if (n === 0) {
-                    return { ngPerHour: 0, avgGapMins: 0, activeHours: 0 };
+                var acts = actionLogs || [];
+                var totalOutput = 0;
+                var explicitHoursByDate = {};
+
+                records.forEach(function(r) {
+                    var pv = r.parameter_values || {};
+                    if (pv._total_output !== undefined && pv._total_output !== null && !isNaN(pv._total_output) && Number(pv._total_output) > 0) {
+                        totalOutput += Number(pv._total_output);
+                    }
+                    if (pv._run_hours !== undefined && pv._run_hours !== null && !isNaN(pv._run_hours) && Number(pv._run_hours) > 0) {
+                        explicitHoursByDate[r.recorded_date] = (explicitHoursByDate[r.recorded_date] || 0) + Number(pv._run_hours);
+                    }
+                });
+
+                acts.forEach(function(a) {
+                    if (a.totalOutput && Number(a.totalOutput) > 0) {
+                        totalOutput += Number(a.totalOutput);
+                    }
+                    if (a.runHours && Number(a.runHours) > 0) {
+                        explicitHoursByDate[a.date] = (explicitHoursByDate[a.date] || 0) + Number(a.runHours);
+                    }
+                });
+
+                var totalExplicitDates = Object.keys(explicitHoursByDate);
+                if (n === 0 && totalExplicitDates.length === 0) {
+                    return { ngPerHour: 0, avgGapMins: 0, activeHours: 0, totalOutput: totalOutput, defectRatePct: null, hasExplicitHours: false };
                 }
-                if (n === 1) {
-                    // Single defect in a short trial window: baseline 1 active hour
-                    return { ngPerHour: 1.0, avgGapMins: 60, activeHours: 1.0 };
-                }
+
+                var recsByDate = {};
+                records.forEach(function(r) {
+                    if (!recsByDate[r.recorded_date]) recsByDate[r.recorded_date] = [];
+                    recsByDate[r.recorded_date].push(r);
+                });
+
+                var allDates = {};
+                Object.keys(recsByDate).forEach(function(d) { allDates[d] = true; });
+                totalExplicitDates.forEach(function(d) { allDates[d] = true; });
+
+                var totalActiveHours = 0;
+                var hasAnyExplicitHours = totalExplicitDates.length > 0;
+
+                Object.keys(allDates).forEach(function(d) {
+                    if (explicitHoursByDate[d] && explicitHoursByDate[d] > 0) {
+                        totalActiveHours += explicitHoursByDate[d];
+                    } else {
+                        var dRecs = recsByDate[d] || [];
+                        if (dRecs.length === 1) {
+                            totalActiveHours += 1.0;
+                        } else if (dRecs.length > 1) {
+                            var tFirst = toEpochMs(dRecs[0].recorded_date, dRecs[0].recorded_time);
+                            var tLast = toEpochMs(dRecs[dRecs.length - 1].recorded_date, dRecs[dRecs.length - 1].recorded_time);
+                            var spanHrs = Math.max(0.5, (tLast - tFirst) / 3600000);
+                            totalActiveHours += spanHrs;
+                        }
+                    }
+                });
+
+                var effectiveHours = Math.max(0.1, totalActiveHours);
+                var ngPerHour = n / effectiveHours;
 
                 var gapsMins = [];
-                var activeHoursSum = 0;
-
                 for (var i = 1; i < n; i++) {
                     var t1 = toEpochMs(records[i - 1].recorded_date, records[i - 1].recorded_time);
                     var t2 = toEpochMs(records[i].recorded_date, records[i].recorded_time);
                     var diffMins = Math.max(1, (t2 - t1) / 60000);
-
-                    // Ignore overnight/weekend machine-off gaps (> 12 hours) when calculating active running hours
-                    if (diffMins <= 720) {
-                        gapsMins.push(diffMins);
-                        activeHoursSum += (diffMins / 60);
-                    } else {
-                        // Assume 1 hour of active run around an isolated shift start
-                        activeHoursSum += 1.0;
-                    }
+                    if (diffMins <= 720) gapsMins.push(diffMins);
                 }
-
-                // Ensure minimum 0.5 hr active window so ultra-short trials don't divide by near-zero
-                var effectiveHours = Math.max(0.5, activeHoursSum);
-                var ngPerHour = n / effectiveHours;
                 var avgGapMins = gapsMins.length > 0
                     ? (gapsMins.reduce(function(a, b) { return a + b; }, 0) / gapsMins.length)
-                    : (effectiveHours * 60) / n;
+                    : (n > 0 ? (effectiveHours * 60) / n : 0);
+
+                var defectRatePct = totalOutput > 0 ? (n / totalOutput) * 100 : null;
 
                 return {
                     ngPerHour: ngPerHour,
                     avgGapMins: avgGapMins,
-                    activeHours: effectiveHours
+                    activeHours: effectiveHours,
+                    totalOutput: totalOutput,
+                    defectRatePct: defectRatePct,
+                    hasExplicitHours: hasAnyExplicitHours
                 };
             }
 
@@ -759,7 +831,6 @@
                 return hrs + 'h ' + rem + 'm';
             }
 
-            // Returns ISO Calendar Week & Month info for any YYYY-MM-DD date
             function getWeekTimelineInfo(dateStr) {
                 var d = new Date(dateStr + 'T00:00:00');
                 if (isNaN(d.getTime())) {
@@ -836,7 +907,7 @@
                 });
             }
 
-            // Custom Chart.js Plugin using `afterDraw` so labels below the X-Axis are NEVER clipped or skipped by autoSkip
+            // Custom Chart.js Plugin: Draws Red Vertical New-Date Line + Date•CW Pill Below Axis + Numbered Action Badges
             var actionBadgesPlugin = {
                 id: 'actionBadgesPlugin',
                 afterDraw: function(chart, args, pluginOptions) {
@@ -850,7 +921,6 @@
 
                     ctx.save();
 
-                    // 1. Draw Red Vertical New-Date Line & Guaranteed "14 Nov • CW46" Label Below X-Axis
                     var lastDrawnRightEdge = -9999;
                     dateBoundaries.forEach(function(b) {
                         var xPos = xAxis.getPixelForValue(b.index);
@@ -905,7 +975,6 @@
                         ctx.fillText(b.label, pillX + 5, pillY + pillH / 2 + 0.5);
                     });
 
-                    // 2. Draw Numbered Action Taken Badges (① Title) & Pointers at the Top
                     markers.forEach(function(m, idx) {
                         if (m.xIndex === undefined || m.xIndex < 0) return;
                         var xPos = xAxis.getPixelForValue(m.xIndex);
@@ -1302,7 +1371,7 @@
                 }
             });
 
-            // SAVE OPERATOR NG RECORD
+            // SAVE OPERATOR NG RECORD (WITH OPTIONAL RUN HOURS & TOTAL OUTPUT)
             document.getElementById('ngForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -1314,6 +1383,15 @@
                     var rawVal = input.value.trim();
                     parameterValues[label] = pType === 'text' ? rawVal : Number(rawVal);
                 });
+
+                var runHrsVal = document.getElementById('ngRunHours').value.trim();
+                var totOutVal = document.getElementById('ngTotalOutput').value.trim();
+                if (runHrsVal !== '' && Number(runHrsVal) > 0) {
+                    parameterValues._run_hours = Number(runHrsVal);
+                }
+                if (totOutVal !== '' && Number(totOutVal) > 0) {
+                    parameterValues._total_output = Number(totOutVal);
+                }
 
                 var payload = {
                     project_id: document.getElementById('projectSelect').value,
@@ -1333,6 +1411,8 @@
                     window.showAlert('NG record saved!', 'success');
                     document.getElementById('ngModeSelect').value = '';
                     document.getElementById('remarks').value = '';
+                    document.getElementById('ngRunHours').value = '';
+                    document.getElementById('ngTotalOutput').value = '';
                     document.querySelectorAll('.dynamic-param-input').forEach(function(input) { input.value = ''; });
                     window.setCurrentDateTime();
                 }
@@ -1349,6 +1429,8 @@
                 document.getElementById('actionTime').value = (act.time || '08:00').slice(0, 5);
                 document.getElementById('actionStatus').value = act.status === 'Monitoring' ? 'Monitoring' : 'Completed';
                 document.getElementById('actionDesc').value = act.description || '';
+                document.getElementById('actionRunHours').value = act.runHours ? act.runHours : '';
+                document.getElementById('actionTotalOutput').value = act.totalOutput ? act.totalOutput : '';
 
                 var box = document.getElementById('actionModalBox');
                 var badge = document.getElementById('actionEditBadge');
@@ -1360,15 +1442,15 @@
                 box.className = 'bg-amber-50/80 border border-amber-300 rounded-xl p-5 shadow-sm';
                 badge.classList.remove('hidden');
                 titleEl.textContent = 'Edit Action Taken #' + act.num + ': ' + act.title;
-                subEl.textContent = 'Modify the Short Title, Date, Time, Status, or Description below and click Update.';
-                submitBtn.textContent = 'Update Action';
+                subEl.textContent = 'Modify Title, Date, Time, Status, Description, or Trial Run Hours / Output below.';
+                submitBtn.textContent = 'Update';
                 submitBtn.className = 'flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
                 cancelBtn.classList.remove('hidden');
 
                 box.scrollIntoView({ behavior: 'smooth', block: 'center' });
             };
 
-            // SAVE NEW OR UPDATE EXISTING ACTION TAKEN RECORD
+            // SAVE NEW OR UPDATE EXISTING ACTION TAKEN RECORD (WITH OPTIONAL RUN HOURS & TOTAL OUTPUT)
             document.getElementById('actionTakenForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient || !currentProject) {
@@ -1383,18 +1465,25 @@
                 if (aTime.length === 5) aTime = aTime + ':00';
                 var aStatus = document.getElementById('actionStatus').value;
 
+                var aRunHrs = document.getElementById('actionRunHours').value.trim();
+                var aTotOut = document.getElementById('actionTotalOutput').value.trim();
+
+                var pVals = {
+                    _is_action: true,
+                    title: title,
+                    description: desc,
+                    status: aStatus
+                };
+                if (aRunHrs !== '' && Number(aRunHrs) > 0) pVals._run_hours = Number(aRunHrs);
+                if (aTotOut !== '' && Number(aTotOut) > 0) pVals._total_output = Number(aTotOut);
+
                 var actionPayload = {
                     project_id: currentProject.id,
                     recorded_date: aDate,
                     recorded_time: aTime,
                     operator_name: aStatus,
                     ng_mode: ACTION_MARKER_MODE,
-                    parameter_values: {
-                        _is_action: true,
-                        title: title,
-                        description: desc,
-                        status: aStatus
-                    },
+                    parameter_values: pVals,
                     remarks: desc
                 };
 
@@ -1437,6 +1526,8 @@
                     description: act.description,
                     status: nextStatus
                 };
+                if (act.runHours) updatedVals._run_hours = act.runHours;
+                if (act.totalOutput) updatedVals._total_output = act.totalOutput;
 
                 var res = await supabaseClient
                     .from('ng_records')
@@ -1610,7 +1701,9 @@
                             dayAxisLabel: tInfo.dayAxisLabel,
                             title: pv.title || 'Action Taken',
                             description: pv.description || row.remarks || '',
-                            status: pv.status || row.operator_name || 'Completed'
+                            status: pv.status || row.operator_name || 'Completed',
+                            runHours: pv._run_hours || null,
+                            totalOutput: pv._total_output || null
                         });
                     } else {
                         rawProjectRecords.push(row);
@@ -1682,7 +1775,7 @@
                 };
             }
 
-            // Compute Time-Normalized Before vs After Impact (Parameter Avg + NG/Hr Rate + MTBF) for each Action Taken
+            // Compute Time-Normalized & Output-Normalized Before vs After Impact for each Action Taken
             function computeActionImpacts(allParams, records) {
                 var numParams = allParams.filter(function(p) { return p.type === 'number'; });
                 var selectedFocus = document.getElementById('trendParamSelect') ? document.getElementById('trendParamSelect').value : '__ALL__';
@@ -1695,8 +1788,11 @@
                     var beforeRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) < actStamp; });
                     var afterRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) >= actStamp; });
 
-                    var bRate = calcTimeRateMetrics(beforeRecs);
-                    var aRate = calcTimeRateMetrics(afterRecs);
+                    var beforeActs = projectActionLogs.filter(function(a) { return (a.date + ' ' + a.time) < actStamp; });
+                    var afterActs = projectActionLogs.filter(function(a) { return (a.date + ' ' + a.time) >= actStamp; });
+
+                    var bRate = calcTimeRateMetrics(beforeRecs, beforeActs);
+                    var aRate = calcTimeRateMetrics(afterRecs, afterActs);
 
                     var rateChangeBadge = '';
                     if (beforeRecs.length > 0 && afterRecs.length > 0 && bRate.ngPerHour > 0) {
@@ -1713,13 +1809,21 @@
                         paramLine = '<div>⚙️ <b>' + primaryParam + ':</b> ' + bStat.mean.toFixed(3) + ' (Before) → <b>' + aStat.mean.toFixed(3) + ' (After)</b></div>';
                     }
 
-                    var rateLine = '<div>⏱️ <b>NG Rate:</b> ' + bRate.ngPerHour.toFixed(2) + ' NG/hr (' + beforeRecs.length + ' NGs) → <b>' + aRate.ngPerHour.toFixed(2) + ' NG/hr</b> (' + afterRecs.length + ' NGs)' + rateChangeBadge + '</div>';
+                    var rateLine = '<div>⏱️ <b>NG Rate:</b> ' + bRate.ngPerHour.toFixed(2) + ' NG/hr (' + beforeRecs.length + ' NGs / ' + bRate.activeHours.toFixed(1) + 'h) → <b>' + aRate.ngPerHour.toFixed(2) + ' NG/hr</b> (' + afterRecs.length + ' NGs / ' + aRate.activeHours.toFixed(1) + 'h)' + rateChangeBadge + '</div>';
+
+                    var defectPctLine = '';
+                    if (bRate.defectRatePct !== null || aRate.defectRatePct !== null) {
+                        var bPctStr = bRate.defectRatePct !== null ? (bRate.defectRatePct.toFixed(2) + '% (' + beforeRecs.length + '/' + bRate.totalOutput + ')') : 'N/A';
+                        var aPctStr = aRate.defectRatePct !== null ? (aRate.defectRatePct.toFixed(2) + '% (' + afterRecs.length + '/' + aRate.totalOutput + ')') : 'N/A';
+                        defectPctLine = '<div>🎯 <b>Defect Rate (%):</b> ' + bPctStr + ' → <b>' + aPctStr + '</b></div>';
+                    }
+
                     var mtbfLine = '<div>⏳ <b>Time Between NGs:</b> ' + formatGapDuration(bRate.avgGapMins) + ' → <b>' + formatGapDuration(aRate.avgGapMins) + '</b></div>';
 
-                    act.impactHtml = paramLine + rateLine + mtbfLine;
-                    act.impactSummary = (primaryParam && beforeRecs.length > 0 && afterRecs.length > 0)
-                        ? (primaryParam + ': ' + bStat.mean.toFixed(2) + ' → ' + aStat.mean.toFixed(2) + ' | Rate: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' NG/hr')
-                        : ('Rate: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' NG/hr');
+                    act.impactHtml = paramLine + rateLine + defectPctLine + mtbfLine;
+                    act.impactSummary = (aRate.defectRatePct !== null)
+                        ? ('NG/hr: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' | Defect %: ' + (bRate.defectRatePct !== null ? bRate.defectRatePct.toFixed(2) + '%' : 'N/A') + ' → ' + aRate.defectRatePct.toFixed(2) + '%')
+                        : ('NG/hr: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' NG/hr');
                 });
             }
 
@@ -1729,7 +1833,7 @@
                 badge.textContent = projectActionLogs.length + (projectActionLogs.length === 1 ? ' Action Taken' : ' Actions Taken');
 
                 if (projectActionLogs.length === 0) {
-                    container.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No actions recorded yet. Click "+ Add Action Taken" when you adjust machine settings.</div>';
+                    container.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No actions recorded yet. Click "+ Add Action Taken" above when you adjust machine settings.</div>';
                     return;
                 }
 
@@ -1741,6 +1845,13 @@
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
                         : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100';
                     var pillLabel = isComp ? '✔ Completed' : '🕒 Monitoring';
+
+                    var trialTags = [];
+                    if (act.runHours) trialTags.push(act.runHours + 'h run');
+                    if (act.totalOutput) trialTags.push(act.totalOutput + ' pcs out');
+                    var trialTagHtml = trialTags.length > 0
+                        ? '<span class="inline-block mt-1 px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 text-[10px] font-semibold">' + trialTags.join(' • ') + '</span>'
+                        : '';
 
                     var row = document.createElement('div');
                     row.className = 'p-4 hover:bg-zinc-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer';
@@ -1755,6 +1866,7 @@
                             '<div class="sm:w-52 shrink-0">' +
                                 '<p class="font-bold text-zinc-900 text-sm truncate">' + act.title + '</p>' +
                                 '<p class="text-xs text-zinc-500">' + act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time) + '</p>' +
+                                trialTagHtml +
                             '</div>' +
                             '<div class="hidden sm:block w-px h-10 bg-zinc-200 shrink-0"></div>' +
                             '<div class="min-w-0 flex-1">' +
@@ -1788,10 +1900,11 @@
                 if (records.length === 0) {
                     document.getElementById('statNgPerHour').textContent = '0.00 NG/hr';
                     document.getElementById('statDateSpan').textContent = 'No records in this range';
+                    document.getElementById('statDefectPct').textContent = '-';
+                    document.getElementById('statTotalOutputDesc').textContent = 'Log Total Output for exact %';
                     document.getElementById('statMtbf').textContent = '-';
                     document.getElementById('statTopMode').textContent = '-';
                     document.getElementById('statTopModePct').textContent = '-';
-                    document.getElementById('statStability').textContent = '-';
                     document.getElementById('insightList').innerHTML = '<li>No NG records found for this filter.</li>';
                     currentModeCounts = {};
                     renderWeeklyStackChart();
@@ -1803,10 +1916,19 @@
                     return;
                 }
 
-                var rateStats = calcTimeRateMetrics(records);
+                var rateStats = calcTimeRateMetrics(records, projectActionLogs);
                 document.getElementById('statNgPerHour').textContent = rateStats.ngPerHour.toFixed(2) + ' NG/hr';
+
+                if (rateStats.defectRatePct !== null) {
+                    document.getElementById('statDefectPct').textContent = rateStats.defectRatePct.toFixed(2) + '%';
+                    document.getElementById('statTotalOutputDesc').textContent = records.length + ' NGs / ' + rateStats.totalOutput + ' Total Output';
+                } else {
+                    document.getElementById('statDefectPct').textContent = 'N/A';
+                    document.getElementById('statTotalOutputDesc').textContent = 'Add Total Output when logging';
+                }
+
                 document.getElementById('statMtbf').textContent = formatGapDuration(rateStats.avgGapMins);
-                document.getElementById('statMtbfDesc').textContent = 'Active span: ~' + rateStats.activeHours.toFixed(1) + ' hrs';
+                document.getElementById('statMtbfDesc').textContent = (rateStats.hasExplicitHours ? 'Logged run: ' : 'Est. span: ') + rateStats.activeHours.toFixed(1) + ' hrs';
 
                 var firstInfo = getWeekTimelineInfo(records[0].recorded_date);
                 var lastInfo = getWeekTimelineInfo(records[records.length - 1].recorded_date);
@@ -1826,7 +1948,7 @@
                 document.getElementById('statTopMode').textContent = topMode + ' (' + topCount + ')';
                 document.getElementById('statTopModePct').textContent = topPct + '% of total NGs';
 
-                generateSmartInsights(allParams, records, sortedModes, modeCounts);
+                generateSmartInsights(allParams, records, sortedModes, modeCounts, rateStats);
                 renderWeeklyStackChart();
                 renderTrendChart();
                 renderScatterChart();
@@ -1835,7 +1957,7 @@
                 renderRecordsTable(allParams, records);
             }
 
-            // CHART 1: STACKED NG BARS (LEFT AXIS) + NG RATE PER HOUR LINE (RIGHT AXIS)
+            // CHART 1: STACKED NG BARS (LEFT AXIS) + NG RATE (NG/HR) & DEFECT RATE (%) LINES (RIGHT AXIS)
             function renderWeeklyStackChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
@@ -1843,6 +1965,7 @@
                 var groupBy = document.getElementById('ngGroupSelect').value;
                 var bucketInfoMap = {};
                 var bucketRecsMap = {};
+                var bucketActsMap = {};
 
                 filteredRecords.forEach(function(r) {
                     var tInfo = getWeekTimelineInfo(r.recorded_date);
@@ -1857,6 +1980,8 @@
                     var sKey = groupBy === 'weekly' ? tInfo.weekSortKey : a.date;
                     bucketInfoMap[sKey] = tInfo;
                     if (!bucketRecsMap[sKey]) bucketRecsMap[sKey] = [];
+                    if (!bucketActsMap[sKey]) bucketActsMap[sKey] = [];
+                    bucketActsMap[sKey].push(a);
                 });
 
                 var sortedKeys = Object.keys(bucketInfoMap).sort();
@@ -1871,16 +1996,27 @@
                     '#06b6d4', '#f97316', '#ec4899', '#475569', '#14b8a6'
                 ];
 
-                // Compute NG Rate (NG / Active Hour) per bucket so short trials are normalized!
-                var rateLineData = sortedKeys.map(function(bKey) {
+                var hasAnyDefectPct = false;
+                var rateLineData = [];
+                var defectPctLineData = [];
+
+                sortedKeys.forEach(function(bKey) {
                     var recs = bucketRecsMap[bKey] || [];
-                    return Number(calcTimeRateMetrics(recs).ngPerHour.toFixed(2));
+                    var acts = bucketActsMap[bKey] || [];
+                    var m = calcTimeRateMetrics(recs, acts);
+                    rateLineData.push(Number(m.ngPerHour.toFixed(2)));
+                    if (m.defectRatePct !== null) {
+                        hasAnyDefectPct = true;
+                        defectPctLineData.push(Number(m.defectRatePct.toFixed(2)));
+                    } else {
+                        defectPctLineData.push(null);
+                    }
                 });
 
                 var datasets = [
                     {
                         type: 'line',
-                        label: 'NG Rate (NG / Active Hour)',
+                        label: 'NG Rate (NG / Hr)',
                         data: rateLineData,
                         borderColor: '#7c3aed',
                         backgroundColor: '#7c3aed',
@@ -1891,6 +2027,23 @@
                         order: 0
                     }
                 ];
+
+                if (hasAnyDefectPct) {
+                    datasets.push({
+                        type: 'line',
+                        label: 'Defect Rate (%)',
+                        data: defectPctLineData,
+                        borderColor: '#059669',
+                        backgroundColor: '#059669',
+                        borderDash: [4, 3],
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        spanGaps: true,
+                        tension: 0.25,
+                        yAxisID: 'yRate',
+                        order: 0
+                    });
+                }
 
                 modes.forEach(function(mode, idx) {
                     var dataCounts = sortedKeys.map(function(bKey) {
@@ -1944,7 +2097,7 @@
                                 beginAtZero: true,
                                 position: 'right',
                                 grid: { drawOnChartArea: false },
-                                title: { display: true, text: 'NG Rate (NG / Hr)' }
+                                title: { display: true, text: hasAnyDefectPct ? 'NG/Hr & Defect %' : 'NG Rate (NG / Hr)' }
                             }
                         },
                         plugins: {
@@ -1955,14 +2108,18 @@
                 });
             }
 
-            function generateSmartInsights(allParams, records, sortedModes, modeCounts) {
+            function generateSmartInsights(allParams, records, sortedModes, modeCounts, rateStats) {
                 var insights = [];
                 var topMode = sortedModes[0];
                 var topPct = ((modeCounts[topMode] / records.length) * 100).toFixed(0);
 
-                insights.push('<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects.');
+                var summaryHeadline = '<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects.';
+                if (rateStats.defectRatePct !== null) {
+                    summaryHeadline += ' Overall Defect Rate is <b>' + rateStats.defectRatePct.toFixed(2) + '%</b> (' + records.length + ' NGs out of ' + rateStats.totalOutput + ' units).';
+                }
+                insights.push(summaryHeadline);
 
-                // Check if any day had a short trial (low NG count, but high NG/hr rate)
+                // Compare latest 2 dates using both NG/hr and Defect Rate %
                 var byDate = {};
                 records.forEach(function(r) {
                     if (!byDate[r.recorded_date]) byDate[r.recorded_date] = [];
@@ -1974,19 +2131,27 @@
                     var prevDate = dates[dates.length - 2];
                     var lastRecs = byDate[lastDate];
                     var prevRecs = byDate[prevDate];
-                    var lastM = calcTimeRateMetrics(lastRecs);
-                    var prevM = calcTimeRateMetrics(prevRecs);
+                    var lastActs = projectActionLogs.filter(function(a) { return a.date === lastDate; });
+                    var prevActs = projectActionLogs.filter(function(a) { return a.date === prevDate; });
+                    var lastM = calcTimeRateMetrics(lastRecs, lastActs);
+                    var prevM = calcTimeRateMetrics(prevRecs, prevActs);
 
                     if (lastRecs.length < prevRecs.length && lastM.ngPerHour > prevM.ngPerHour) {
-                        insights.push('<b>Short Trial Warning (' + formatPrettyDate(lastDate) + '):</b> Raw NG Qty dropped from <b>' + prevRecs.length + '</b> to <b>' + lastRecs.length + '</b>, but because of the shorter running window (~' + lastM.activeHours.toFixed(1) + ' hrs), the actual defect rate increased from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b>.');
+                        var extraPct = (lastM.defectRatePct !== null && prevM.defectRatePct !== null)
+                            ? (' and Defect Rate went from <b>' + prevM.defectRatePct.toFixed(2) + '%</b> to <b>' + lastM.defectRatePct.toFixed(2) + '%</b>')
+                            : '';
+                        insights.push('<b>Short Trial Warning (' + formatPrettyDate(lastDate) + '):</b> Raw NG Qty dropped from <b>' + prevRecs.length + '</b> to <b>' + lastRecs.length + '</b>, but over the shorter run (' + lastM.activeHours.toFixed(1) + ' hrs), NG rate actually rose from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b>' + extraPct + '.');
                     } else if (lastM.ngPerHour < prevM.ngPerHour) {
-                        insights.push('<b>True Rate Improvement (' + formatPrettyDate(lastDate) + '):</b> Defect frequency improved from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> (every ' + formatGapDuration(prevM.avgGapMins) + ') down to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b> (every ' + formatGapDuration(lastM.avgGapMins) + ').');
+                        var impPct = (lastM.defectRatePct !== null && prevM.defectRatePct !== null)
+                            ? (' | Defect Rate: <b>' + prevM.defectRatePct.toFixed(2) + '% → ' + lastM.defectRatePct.toFixed(2) + '%</b>')
+                            : '';
+                        insights.push('<b>True Rate Improvement (' + formatPrettyDate(lastDate) + '):</b> Defect frequency improved from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> down to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b>' + impPct + '.');
                     }
                 }
 
                 if (projectActionLogs.length > 0) {
                     var latestAct = projectActionLogs[projectActionLogs.length - 1];
-                    insights.push('<b>Action Impact (#' + latestAct.num + ' ' + latestAct.title + '):</b> ' + (latestAct.impactSummary || ''));
+                    insights.push('<b>Latest Action Impact (#' + latestAct.num + ' ' + latestAct.title + '):</b> ' + (latestAct.impactSummary || ''));
                 }
 
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
@@ -1997,13 +2162,12 @@
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
 
-                // Recompute action impacts so the selected Focus Parameter is reflected in Action History
                 computeActionImpacts(getProjectParams(currentProject), filteredRecords);
                 renderActionHistoryList();
 
                 var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
                 var selectedParam = document.getElementById('trendParamSelect').value;
-                var trendGroup = document.getElementById('trendGroupSelect').value; // 'raw', 'daily', 'weekly'
+                var trendGroup = document.getElementById('trendGroupSelect').value;
                 var showRateOverlay = document.getElementById('toggleNgRateOverlay').checked;
 
                 var fullTooltipTitles = [];
@@ -2023,21 +2187,26 @@
                         bucketKeys.push(r.recorded_date + ' ' + r.recorded_time);
                         xAxisShortLabels.push(shortTime);
 
-                        // Calculate instantaneous NG rate (NG/hr) from rolling 3-defect window
                         var startIdx = Math.max(0, idx - 2);
                         var windowRecs = filteredRecords.slice(startIdx, idx + 1);
-                        var instRate = calcTimeRateMetrics(windowRecs);
+                        var instRate = calcTimeRateMetrics(windowRecs, []);
                         instantNgRateSeries.push(Number(instRate.ngPerHour.toFixed(2)));
 
                         var gapStr = 'First record';
                         if (idx > 0) {
                             var prevMs = toEpochMs(filteredRecords[idx - 1].recorded_date, filteredRecords[idx - 1].recorded_time);
                             var currMs = toEpochMs(r.recorded_date, r.recorded_time);
-                            gapStr = formatGapDuration(Math.max(1, (currMs - prevMs) / 60000)) + ' since previous NG';
+                            gapStr = formatGapDuration(Math.max(1, (currMs - prevMs) / 60000)) + ' since prev';
                         }
 
+                        var pv = r.parameter_values || {};
+                        var extraTrial = [];
+                        if (pv._run_hours) extraTrial.push('Run: ' + pv._run_hours + 'h');
+                        if (pv._total_output) extraTrial.push('Output: ' + pv._total_output);
+                        var trialSuffix = extraTrial.length > 0 ? (' | ' + extraTrial.join(', ')) : '';
+
                         fullTooltipTitles.push(tInfo.cw + ' • ' + formatPrettyDate(r.recorded_date) + ' • ' + shortTime + ' (' + r.ng_mode + ')');
-                        fullTooltipFooters.push('Time Gap: ' + gapStr + ' | Rolling Rate: ' + instRate.ngPerHour.toFixed(2) + ' NG/hr');
+                        fullTooltipFooters.push('Gap: ' + gapStr + ' | Rolling: ' + instRate.ngPerHour.toFixed(2) + ' NG/hr' + trialSuffix);
 
                         if (r.recorded_date !== lastSeenDate) {
                             dateBoundaries.push({
@@ -2064,7 +2233,11 @@
                     bucketKeys.forEach(function(k, idx) {
                         var info = bucketMetaMap[k];
                         var recs = bucketRecordsMap[k];
-                        var grpRate = calcTimeRateMetrics(recs);
+                        var actsInBucket = projectActionLogs.filter(function(a) {
+                            var aKey = trendGroup === 'weekly' ? a.weekSortKey : a.date;
+                            return aKey === k;
+                        });
+                        var grpRate = calcTimeRateMetrics(recs, actsInBucket);
                         instantNgRateSeries.push(Number(grpRate.ngPerHour.toFixed(2)));
 
                         if (trendGroup === 'weekly') {
@@ -2079,7 +2252,8 @@
                             });
                         }
 
-                        fullTooltipFooters.push('NG Qty: ' + recs.length + ' | Active Span: ~' + grpRate.activeHours.toFixed(1) + 'h | Rate: ' + grpRate.ngPerHour.toFixed(2) + ' NG/hr');
+                        var defectStr = grpRate.defectRatePct !== null ? (' | Defect: ' + grpRate.defectRatePct.toFixed(2) + '%') : '';
+                        fullTooltipFooters.push('NGs: ' + recs.length + ' | Run: ' + grpRate.activeHours.toFixed(1) + 'h | Rate: ' + grpRate.ngPerHour.toFixed(2) + ' NG/hr' + defectStr);
                     });
                 }
 
@@ -2121,8 +2295,6 @@
                             yAxisID: 'y'
                         });
                     });
-                    document.getElementById('statStability').textContent = 'All Number Parameters' + modeSuffix;
-                    document.getElementById('statOutSpecCount').textContent = 'Pick 1 parameter to test limits';
                 } else {
                     document.getElementById('specLimitInputs').classList.remove('hidden');
 
@@ -2144,15 +2316,6 @@
                     var uslInput = document.getElementById('inputUSL').value;
                     var lslVal = lslInput !== '' ? Number(lslInput) : (overallSt.n > 1 ? overallSt.mean - (2 * overallSt.std) : null);
                     var uslVal = uslInput !== '' ? Number(uslInput) : (overallSt.n > 1 ? overallSt.mean + (2 * overallSt.std) : null);
-
-                    var outCount = 0;
-                    allRawVals.forEach(function(v) {
-                        if (v === null) return;
-                        if ((lslVal !== null && v < lslVal) || (uslVal !== null && v > uslVal)) outCount++;
-                    });
-
-                    document.getElementById('statStability').textContent = selectedParam + ' (Avg: ' + overallSt.mean.toFixed(2) + ', SD: ' + overallSt.std.toFixed(2) + ')';
-                    document.getElementById('statOutSpecCount').textContent = outCount + ' raw points outside ' + (lslInput !== '' || uslInput !== '' ? 'Min/Max' : '±2σ limits');
 
                     datasets.push({
                         label: selectedParam + (trendGroup === 'raw' ? ' (Actual)' : modeSuffix),
@@ -2212,7 +2375,6 @@
                     }
                 }
 
-                // Overlay NG Rate (NG/hr) on Right Y-Axis to link Parameter Setting -> Defect Speed
                 if (showRateOverlay) {
                     datasets.push({
                         label: 'NG Rate (NG / Hr) [Right Axis]',
@@ -2460,7 +2622,6 @@
                 }
                 tbody.innerHTML = '';
 
-                // Pre-calculate time gap (Δt) between consecutive NGs
                 var enriched = records.map(function(r, idx) {
                     var gapLabel = '-';
                     if (idx > 0) {
@@ -2481,6 +2642,14 @@
                         var badgeStyle = p.type === 'text' ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-zinc-100 text-zinc-800';
                         return '<span class="inline-block ' + badgeStyle + ' px-2 py-0.5 rounded text-xs mr-1 mb-1">' + p.label + ': <b>' + v + '</b></span>';
                     }).join('');
+
+                    if (vals._run_hours) {
+                        paramStr += '<span class="inline-block bg-purple-50 text-purple-800 border border-purple-200 px-2 py-0.5 rounded text-xs mr-1 mb-1">Run: <b>' + vals._run_hours + 'h</b></span>';
+                    }
+                    if (vals._total_output) {
+                        paramStr += '<span class="inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-xs mr-1 mb-1">Out: <b>' + vals._total_output + '</b></span>';
+                    }
+
                     var tr = document.createElement('tr');
                     tr.className = 'hover:bg-zinc-50';
                     tr.innerHTML = '<td class="p-3 whitespace-nowrap text-zinc-600"><span class="font-semibold text-zinc-800">' + tInfo.cw + '</span> • ' + formatPrettyDate(r.recorded_date) + ' ' + r.recorded_time.slice(0, 5) + '</td>' +
@@ -2500,7 +2669,7 @@
                 }
                 var allParams = getProjectParams(currentProject);
                 var labels = allParams.map(function(p) { return p.label; });
-                var headers = ['Date', 'Time', 'CW', 'Month', 'Minutes_Since_Prev_NG', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
+                var headers = ['Date', 'Time', 'CW', 'Month', 'Minutes_Since_Prev_NG', 'Run_Hours', 'Total_Output', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
                 var rows = [headers.join(',')];
 
                 filteredRecords.forEach(function(r, idx) {
@@ -2518,6 +2687,8 @@
                         tInfo.cw,
                         tInfo.monthShort,
                         gapMins,
+                        vals._run_hours || '',
+                        vals._total_output || '',
                         '"' + (r.operator_name || '').replace(/"/g, '""') + '"',
                         '"' + (r.ng_mode || '').replace(/"/g, '""') + '"'
                     ];
