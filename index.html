@@ -265,15 +265,20 @@
         <!-- ================= SECTION 3: ADMIN PANEL ================= -->
         <div id="sectionAdmin" class="hidden max-w-3xl mx-auto space-y-6 mt-2">
             <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-6">
-                <div class="pb-4 mb-4 border-b border-zinc-100">
-                    <h1 id="adminFormTitle" class="text-lg font-bold text-zinc-900">Register & Manage Projects</h1>
-                    <p class="text-xs text-zinc-500">Create a new project or click <b>Edit</b> on an active project below to rename or add parameters/NG modes.</p>
+                <div class="pb-4 mb-4 border-b border-zinc-100 flex items-center justify-between">
+                    <div>
+                        <h1 id="adminFormTitle" class="text-lg font-bold text-zinc-900">Register & Manage Projects</h1>
+                        <p class="text-xs text-zinc-500">Create a new project or click <b>Edit</b> on an active project below to modify.</p>
+                    </div>
+                    <button type="button" id="btnLockAdmin" onclick="window.lockAdminPanel()" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition">
+                        Lock Admin
+                    </button>
                 </div>
 
                 <div id="adminLoginBox" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">Admin Password</label>
-                        <input type="password" id="adminPassword" placeholder="Enter password (admin123)" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
+                        <input type="password" id="adminPassword" placeholder="Enter admin password" onkeydown="if(event.key==='Enter'){event.preventDefault();window.verifyAdminPass();}" class="w-full border border-zinc-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-zinc-900">
                     </div>
                     <button type="button" onclick="window.verifyAdminPass()" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-2.5 rounded-lg text-sm">
                         Unlock Admin
@@ -340,8 +345,11 @@
         </div>
     </main>
 
-    <!-- SCRIPT 1: TAB NAVIGATION & ADMIN 15-PARAMETER BUILDER -->
+    <!-- SCRIPT 1: TAB NAVIGATION, SECURITY & ADMIN 15-PARAMETER BUILDER -->
     <script>
+        // TETAPAN KATA LALUAN ADMIN (Tukar di sini jika perlu)
+        var ADMIN_PASSWORD = 'mesin2026';
+
         window.editingProjectId = null;
 
         window.showAlert = function(message, type) {
@@ -423,6 +431,17 @@
             window.resetAdminParamSlots();
         };
 
+        window.lockAdminPanel = function() {
+            var passInput = document.getElementById('adminPassword');
+            if (passInput) passInput.value = '';
+            document.getElementById('adminLoginBox').classList.remove('hidden');
+            document.getElementById('adminContentWrap').classList.add('hidden');
+            document.getElementById('btnLockAdmin').classList.add('hidden');
+            if (window.editingProjectId) {
+                window.cancelEditProject();
+            }
+        };
+
         window.switchAppTab = function(activeKey) {
             var map = {
                 operator: { btn: 'tabOperator', sec: 'sectionOperator' },
@@ -442,18 +461,26 @@
                 }
             });
 
+            // Auto-lock Admin apabila beralih ke tab lain
+            if (activeKey !== 'admin') {
+                window.lockAdminPanel();
+            }
+
             if (typeof window.refreshSupabaseProjects === 'function') {
                 window.refreshSupabaseProjects(activeKey === 'dashboard');
             }
         };
 
         window.verifyAdminPass = function() {
-            var pass = document.getElementById('adminPassword').value;
-            if (pass === 'admin123') {
+            var passInput = document.getElementById('adminPassword');
+            if (passInput.value === ADMIN_PASSWORD) {
+                passInput.value = ''; // Kosongkan kotak password selepas berjaya
                 document.getElementById('adminLoginBox').classList.add('hidden');
                 document.getElementById('adminContentWrap').classList.remove('hidden');
+                document.getElementById('btnLockAdmin').classList.remove('hidden');
                 window.showAlert('Admin unlocked.', 'success');
             } else {
+                passInput.value = '';
                 window.showAlert('Wrong password!', 'error');
             }
         };
@@ -510,7 +537,6 @@
                 });
             }
 
-            // RENDER OPERATOR FIELDS FOR SELECTED PROJECT
             function renderOperatorFieldsForProject(selectedId, preserveEnteredValues) {
                 var ngModeSelect = document.getElementById('ngModeSelect');
                 var paramsContainer = document.getElementById('dynamicParamsContainer');
@@ -630,7 +656,6 @@
                 }
             };
 
-            // LOAD PROJECT INTO ADMIN FORM FOR EDITING
             window.startEditProject = function(projectId) {
                 var proj = projectsData.find(function(p) { return p.id === projectId; });
                 if (!proj) return;
@@ -743,7 +768,6 @@
                 renderOperatorFieldsForProject(this.value, false);
             });
 
-            // CREATE OR UPDATE PROJECT (ADMIN)
             document.getElementById('adminForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -753,7 +777,7 @@
                 var ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
 
                 var parameterConfigs = [];
-                var renamedMap = {}; // { oldLabel: newLabel }
+                var renamedMap = {};
 
                 for (var i = 1; i <= 15; i++) {
                     var el = document.getElementById('adminParam' + i);
@@ -774,7 +798,6 @@
                 }
 
                 if (window.editingProjectId) {
-                    // UPDATE EXISTING PROJECT
                     var targetId = window.editingProjectId;
                     var updateRes = await supabaseClient
                         .from('ng_projects')
@@ -790,7 +813,6 @@
                         return;
                     }
 
-                    // If any parameter was renamed, migrate old parameter keys in ng_records so historical data stays intact
                     var oldKeys = Object.keys(renamedMap);
                     if (oldKeys.length > 0) {
                         var recRes = await supabaseClient
@@ -825,7 +847,6 @@
                     window.cancelEditProject();
                     window.refreshSupabaseProjects(false);
                 } else {
-                    // INSERT NEW PROJECT
                     var res = await supabaseClient.from('ng_projects').insert([{
                         project_title: title,
                         parameter_labels: parameterConfigs,
@@ -845,7 +866,6 @@
                 }
             });
 
-            // SAVE NG RECORD (OPERATOR)
             document.getElementById('ngForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -881,7 +901,6 @@
                 }
             });
 
-            // DASHBOARD CONTROLS
             document.getElementById('dashboardProjectSelect').addEventListener('change', function() {
                 if (this.value) loadDashboardData(this.value);
             });
