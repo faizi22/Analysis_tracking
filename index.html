@@ -147,14 +147,14 @@
                 </div>
             </div>
 
-            <!-- Add / Edit Action Taken Form Box (With PNG Report Upload) -->
+            <!-- Add / Edit Action Taken Form Box (Collapsible, Now With PNG Report Upload) -->
             <div id="actionModalBox" class="hidden bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-200">
                     <div class="flex items-center gap-2">
                         <span id="actionEditBadge" class="hidden px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-amber-200 text-amber-900">Edit Mode</span>
                         <div>
                             <h3 id="actionModalTitle" class="text-sm font-bold text-emerald-950">Log Engineering Action Taken</h3>
-                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">Pin an action to the timeline and upload your PowerPoint PNG report (double-click #1, #2 to view).</p>
+                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">Pin an action to the timeline and optionally upload your PowerPoint PNG report slide.</p>
                         </div>
                     </div>
                     <button type="button" onclick="window.cancelEditAction(true)" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950 px-2.5 py-1 rounded bg-white border border-emerald-200">
@@ -195,18 +195,18 @@
 
                     <!-- PNG Report Upload Row -->
                     <div class="sm:col-span-4">
-                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Upload Detail Report (PNG / JPG from PowerPoint - Optional)</label>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <input type="file" id="actionReportFile" accept="image/png, image/jpeg, image/webp" class="text-xs text-emerald-900 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-emerald-300 file:text-xs file:font-semibold file:bg-white file:text-emerald-800 hover:file:bg-emerald-100 cursor-pointer">
-                            <div id="actionReportPreviewWrap" class="hidden flex items-center gap-2 bg-white px-2.5 py-1 rounded-lg border border-emerald-300">
-                                <img id="actionReportPreviewImg" src="" alt="Report Preview" class="h-8 w-12 object-cover rounded border border-zinc-200">
-                                <span class="text-[11px] font-semibold text-emerald-800">Report Attached</span>
-                                <button type="button" onclick="window.clearActionReportImage()" class="text-xs font-bold text-red-600 hover:text-red-800 px-1" title="Remove attached image">✕</button>
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">Upload Report Slide (PNG / JPG — Double-click Action # to view)</label>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <input type="file" id="actionReportFile" accept="image/png,image/jpeg,image/webp" class="text-xs text-zinc-700 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-emerald-300 file:text-xs file:font-semibold file:bg-white file:text-emerald-800 hover:file:bg-emerald-100 cursor-pointer">
+                            <div id="actionReportPreviewWrap" class="hidden flex items-center gap-2 bg-white px-2.5 py-1 rounded-lg border border-emerald-200">
+                                <img id="actionReportThumb" src="" alt="Report thumbnail" class="w-8 h-6 object-cover rounded border border-zinc-200">
+                                <span id="actionReportStatusText" class="text-[11px] font-semibold text-emerald-700">PNG Slide Attached</span>
+                                <button type="button" id="btnClearActionReport" onclick="window.clearActionReportImage()" class="text-[11px] text-red-600 hover:text-red-800 font-bold ml-1" title="Remove report image">Remove</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="sm:col-span-2 flex items-end gap-1.5">
+                    <div class="sm:col-span-2 flex items-end justify-end gap-1.5">
                         <button type="submit" id="actionSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition">
                             Pin Action
                         </button>
@@ -260,7 +260,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-zinc-100">
                     <div>
                         <h3 class="text-sm font-bold text-zinc-900">1. NG Qty (Bars) vs. NG/Hr & Defect Rate % (Lines)</h3>
-                        <p class="text-xs text-zinc-500">Double-click any numbered action badge (1, 2...) on the chart or Action History to open its PNG report.</p>
+                        <p class="text-xs text-zinc-500">Normalizes short trial runs using logged <b>Run Hours</b> & <b>Total Output</b> alongside Action markers.</p>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
@@ -274,7 +274,7 @@
                 <div id="floatingActionCard" class="hidden mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-md">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <span id="cardActionNum" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                            <span id="cardActionNum" title="Double-click to view PNG report" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0 cursor-pointer">1</span>
                             <h4 id="cardActionTitle" class="font-bold text-zinc-900 text-sm">Mechanical Alignment</h4>
                         </div>
                         <button type="button" onclick="document.getElementById('floatingActionCard').classList.add('hidden')" class="text-zinc-400 hover:text-zinc-700 text-xs font-bold">✕</button>
@@ -290,29 +290,29 @@
                             ✔ Completed
                         </span>
                         <div class="flex items-center gap-1.5">
-                            <button type="button" id="cardActionReportBtn" class="hidden px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
-                                🖼️ View PNG Report
+                            <button type="button" id="cardActionViewReportBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
+                                📄 View PNG Report
                             </button>
                             <button type="button" id="cardActionEditBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
-                                Edit Action
+                                Edit
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <div class="h-80">
-                    <canvas id="weeklyStackChart" title="Double-click a numbered action badge to view its uploaded PNG report"></canvas>
+                    <canvas id="weeklyStackChart"></canvas>
                 </div>
             </div>
 
             <!-- ACTION HISTORY LIST -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/60">
+                <div class="p-4 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-zinc-50/60">
                     <div class="flex items-center gap-2.5">
                         <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✔</div>
                         <div>
                             <h3 class="text-base font-bold text-zinc-900">Action History & Before/After Impact</h3>
-                            <p class="text-[11px] text-zinc-500"><b>Double-click</b> any row or numbered circle (1, 2...) to view its attached PowerPoint PNG report.</p>
+                            <p class="text-[11px] text-zinc-500"><b>Double-click</b> any Action number (<b>1</b>, <b>2</b>...) or row to open its full PowerPoint PNG report slide.</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -337,7 +337,7 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
                             <h3 class="text-sm font-bold text-zinc-900">2. Parameter Setting vs. NG Frequency Rate & Action Impact</h3>
-                            <p class="text-xs text-zinc-500">Purple dashed line shows <b>NG Rate (NG/hr)</b> on the right axis. Double-click any green action badge to open its PNG report.</p>
+                            <p class="text-xs text-zinc-500">Purple dashed line shows <b>NG Rate (NG/hr)</b> on the right axis alongside your parameter trend.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <label class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 font-semibold cursor-pointer">
@@ -359,7 +359,7 @@
                         </div>
                     </div>
                     <div class="h-80">
-                        <canvas id="trendChart" title="Double-click a numbered action badge to view its uploaded PNG report"></canvas>
+                        <canvas id="trendChart"></canvas>
                     </div>
                 </div>
 
@@ -523,59 +523,72 @@
         </div>
     </main>
 
-    <!-- FULL-SCREEN PNG REPORT LIGHTBOX MODAL (Triggered on Double-Click #1, #2...) -->
-    <div id="reportViewerModal" onclick="if(event.target===this)window.closeReportViewer();" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
-        <div class="bg-white rounded-2xl shadow-2xl border border-zinc-200 max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+    <!-- ================= FULL-SCREEN PNG REPORT LIGHTBOX MODAL ================= -->
+    <div id="reportLightboxModal" class="hidden fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" onclick="if(event.target===this){window.closeReportLightbox();}">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-zinc-200">
             <!-- Modal Header -->
             <div class="px-5 py-3.5 border-b border-zinc-200 flex items-center justify-between gap-3 bg-zinc-50">
                 <div class="flex items-center gap-3 min-w-0">
-                    <span id="modalReportNum" class="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                    <span id="lightboxActionNum" class="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
                     <div class="min-w-0">
-                        <h3 id="modalReportTitle" class="font-bold text-zinc-900 text-sm sm:text-base truncate">Action Title</h3>
-                        <p id="modalReportMeta" class="text-xs text-zinc-500 truncate">CW46 • 14 Nov 2026 • 02:03 PM</p>
+                        <div class="flex items-center gap-2">
+                            <h3 id="lightboxActionTitle" class="font-bold text-zinc-900 text-sm sm:text-base truncate">Action Title</h3>
+                            <span id="lightboxActionStatus" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 shrink-0">✔ Completed</span>
+                        </div>
+                        <p id="lightboxActionMeta" class="text-xs text-zinc-500 truncate">CW46 • 14 Nov 2026 • 02:03 PM</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <a id="modalReportDownloadBtn" href="#" download="Action_Report.png" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white transition">
+
+                <!-- Zoom & Action Controls -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <div id="lightboxZoomControls" class="hidden sm:flex items-center gap-1 bg-white border border-zinc-200 rounded-lg px-1.5 py-1">
+                        <button type="button" onclick="window.adjustReportZoom(-25)" class="px-2 py-0.5 text-xs font-bold text-zinc-700 hover:bg-zinc-100 rounded" title="Zoom Out">-</button>
+                        <span id="lightboxZoomLabel" class="text-[11px] font-semibold text-zinc-600 w-10 text-center">100%</span>
+                        <button type="button" onclick="window.adjustReportZoom(25)" class="px-2 py-0.5 text-xs font-bold text-zinc-700 hover:bg-zinc-100 rounded" title="Zoom In">+</button>
+                    </div>
+                    <a id="lightboxDownloadBtn" href="#" download="Action_Report.png" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white transition">
                         Download PNG
                     </a>
-                    <button type="button" id="modalReportEditBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition">
-                        Edit / Upload PNG
+                    <button type="button" id="lightboxEditBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition">
+                        Edit / Replace
                     </button>
-                    <button type="button" onclick="window.closeReportViewer()" class="w-8 h-8 rounded-lg bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-bold text-sm flex items-center justify-center transition" title="Close (Esc)">
+                    <button type="button" onclick="window.closeReportLightbox()" class="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/70 font-bold text-sm transition" title="Close (Esc)">
                         ✕
                     </button>
                 </div>
             </div>
 
-            <!-- Modal Image / Empty State Body -->
-            <div class="flex-1 overflow-auto bg-zinc-100 p-4 flex items-center justify-center min-h-[280px]">
-                <img id="modalReportImage" src="" alt="Uploaded PowerPoint PNG Report" class="hidden max-h-[68vh] w-auto object-contain rounded-lg shadow-md border border-zinc-300 bg-white">
-                <div id="modalReportEmptyState" class="hidden text-center p-8 max-w-md space-y-3">
-                    <div class="w-12 h-12 rounded-full bg-zinc-200 text-zinc-500 flex items-center justify-center mx-auto text-lg font-bold">🖼️</div>
-                    <h4 class="font-bold text-zinc-900 text-sm">No PNG Report Uploaded Yet</h4>
-                    <p class="text-xs text-zinc-500">Save your PowerPoint slide as a PNG file and upload it to this action so anyone double-clicking it can see the full report.</p>
-                    <button type="button" id="modalEmptyUploadBtn" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition">
+            <!-- Action Description & Impact Sub-bar -->
+            <div class="px-5 py-2.5 bg-white border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <p id="lightboxActionDesc" class="text-zinc-700 font-medium"></p>
+                <div id="lightboxActionImpact" class="text-[11px] text-blue-700 font-semibold shrink-0"></div>
+            </div>
+
+            <!-- Image Canvas Area -->
+            <div class="flex-1 overflow-auto bg-zinc-900/95 p-4 flex items-center justify-center min-h-[320px]">
+                <div id="lightboxImageWrap" class="hidden flex items-center justify-center">
+                    <img id="lightboxReportImg" src="" alt="Action Report Slide" style="width: 100%; max-width: 100%;" class="rounded-lg shadow-xl border border-zinc-700 transition-all duration-150">
+                </div>
+                <div id="lightboxEmptyState" class="hidden text-center max-w-sm p-6 bg-zinc-800/80 rounded-2xl border border-zinc-700 text-zinc-200 space-y-3">
+                    <div class="text-3xl">📄</div>
+                    <h4 class="font-bold text-sm text-white">No PNG Report Attached Yet</h4>
+                    <p class="text-xs text-zinc-400">Upload your team's PowerPoint slide (saved as PNG) for this action so anyone double-clicking it can inspect the full engineering details.</p>
+                    <button type="button" id="lightboxUploadNowBtn" class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition">
                         + Upload PNG Report Now
                     </button>
                 </div>
             </div>
-
-            <!-- Modal Footer (Description & Before/After Metrics) -->
-            <div class="px-5 py-3 border-t border-zinc-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <p id="modalReportDesc" class="text-zinc-700 font-medium"></p>
-                <div id="modalReportImpact" class="text-blue-700 font-semibold"></div>
-            </div>
         </div>
     </div>
 
-    <!-- SCRIPT 1: TAB NAVIGATION, SECURITY, IMAGE PROCESSOR & ADMIN BUILDER -->
+    <!-- SCRIPT 1: TAB NAVIGATION, SECURITY, PNG SLIDE COMPRESSOR & 15-PARAMETER BUILDER -->
     <script>
         var ADMIN_PASSWORD = 'mesin2026';
 
         window.editingProjectId = null;
         window.editingActionId = null;
-        window.currentActionReportData = null;
+        window.currentActionReportDataUrl = null;
+        window.currentLightboxZoom = 100;
 
         window.showAlert = function(message, type) {
             var alertBox = document.getElementById('alertBox');
@@ -588,53 +601,19 @@
             setTimeout(function() { alertBox.classList.add('hidden'); }, 4500);
         };
 
-        // Compress & optimize uploaded PowerPoint PNG/JPG while keeping slide text sharp
-        window.processReportImage = function(file) {
-            return new Promise(function(resolve, reject) {
-                if (!file) { resolve(null); return; }
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var img = new Image();
-                    img.onload = function() {
-                        var maxW = 1600;
-                        var maxH = 1200;
-                        var w = img.width;
-                        var h = img.height;
-                        if (w > maxW || h > maxH) {
-                            var ratio = Math.min(maxW / w, maxH / h);
-                            w = Math.round(w * ratio);
-                            h = Math.round(h * ratio);
-                        }
-                        var canvas = document.createElement('canvas');
-                        canvas.width = w;
-                        canvas.height = h;
-                        var ctx = canvas.getContext('2d');
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, w, h);
-                        ctx.drawImage(img, 0, 0, w, h);
-                        var dataUrl = canvas.toDataURL('image/webp', 0.88);
-                        if (!dataUrl || dataUrl.indexOf('data:image/webp') !== 0) {
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-                        }
-                        resolve(dataUrl);
-                    };
-                    img.onerror = function() { reject(new Error('Could not read image file.')); };
-                    img.src = e.target.result;
-                };
-                reader.onerror = function() { reject(new Error('Failed to load file.')); };
-                reader.readAsDataURL(file);
-            });
-        };
-
-        window.setActionReportPreview = function(dataUrl) {
-            window.currentActionReportData = dataUrl || null;
+        window.setActionReportPreview = function(dataUrl, labelText) {
+            window.currentActionReportDataUrl = dataUrl || null;
             var wrap = document.getElementById('actionReportPreviewWrap');
-            var img = document.getElementById('actionReportPreviewImg');
+            var thumb = document.getElementById('actionReportThumb');
+            var statusTxt = document.getElementById('actionReportStatusText');
+            if (!wrap || !thumb) return;
+
             if (dataUrl) {
-                img.src = dataUrl;
+                thumb.src = dataUrl;
+                statusTxt.textContent = labelText || 'PNG Slide Attached';
                 wrap.classList.remove('hidden');
             } else {
-                img.src = '';
+                thumb.src = '';
                 wrap.classList.add('hidden');
             }
         };
@@ -642,36 +621,79 @@
         window.clearActionReportImage = function() {
             var fileInput = document.getElementById('actionReportFile');
             if (fileInput) fileInput.value = '';
-            window.setActionReportPreview(null);
+            window.setActionReportPreview(null, '');
+        };
+
+        // Compress & resize uploaded PowerPoint PNG slide client-side so text stays sharp while keeping DB payload fast
+        window.handleActionReportUpload = function(file) {
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(evt) {
+                var img = new Image();
+                img.onload = function() {
+                    var maxW = 1600;
+                    var targetW = img.width;
+                    var targetH = img.height;
+                    if (targetW > maxW) {
+                        targetH = Math.round((targetH * maxW) / targetW);
+                        targetW = maxW;
+                    }
+                    var canvas = document.createElement('canvas');
+                    canvas.width = targetW;
+                    canvas.height = targetH;
+                    var ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, targetW, targetH);
+                    ctx.drawImage(img, 0, 0, targetW, targetH);
+
+                    // Use WebP (crisp text & small size) with JPEG fallback
+                    var optimizedUrl = canvas.toDataURL('image/webp', 0.86);
+                    if (optimizedUrl.indexOf('data:image/webp') !== 0 || optimizedUrl.length > 450000) {
+                        optimizedUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    }
+                    var kbSize = Math.round((optimizedUrl.length * 3) / 4 / 1024);
+                    window.setActionReportPreview(optimizedUrl, 'Slide Ready (' + kbSize + ' KB)');
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-            var fileInput = document.getElementById('actionReportFile');
-            if (fileInput) {
-                fileInput.addEventListener('change', async function(e) {
-                    var file = e.target.files && e.target.files[0];
-                    if (!file) return;
-                    try {
-                        var compressedDataUrl = await window.processReportImage(file);
-                        window.setActionReportPreview(compressedDataUrl);
-                        window.showAlert('PNG report attached and ready to save!', 'success');
-                    } catch (err) {
-                        window.showAlert(err.message, 'error');
+            var fInp = document.getElementById('actionReportFile');
+            if (fInp) {
+                fInp.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        window.handleActionReportUpload(this.files[0]);
                     }
                 });
             }
-
-            // Close lightbox modal with Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    window.closeReportViewer();
+                    window.closeReportLightbox();
                 }
             });
         });
 
-        window.closeReportViewer = function() {
-            var modal = document.getElementById('reportViewerModal');
+        window.closeReportLightbox = function() {
+            var modal = document.getElementById('reportLightboxModal');
             if (modal) modal.classList.add('hidden');
+        };
+
+        window.adjustReportZoom = function(delta) {
+            window.currentLightboxZoom = Math.max(75, Math.min(200, window.currentLightboxZoom + delta));
+            var img = document.getElementById('lightboxReportImg');
+            var lbl = document.getElementById('lightboxZoomLabel');
+            if (lbl) lbl.textContent = window.currentLightboxZoom + '%';
+            if (img) {
+                if (window.currentLightboxZoom === 100) {
+                    img.style.width = '100%';
+                    img.style.maxWidth = '100%';
+                } else {
+                    img.style.maxWidth = 'none';
+                    img.style.width = window.currentLightboxZoom + '%';
+                }
+            }
         };
 
         window.toggleActionModal = function(show) {
@@ -712,7 +734,7 @@
             box.className = (closeBox ? 'hidden ' : '') + 'bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm';
             badge.classList.add('hidden');
             titleEl.textContent = 'Log Engineering Action Taken';
-            subEl.textContent = 'Pin an action to the timeline and upload your PowerPoint PNG report (double-click #1, #2 to view).';
+            subEl.textContent = 'Pin an action to the timeline and optionally upload your PowerPoint PNG report slide.';
             submitBtn.textContent = 'Pin Action';
             submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
             cancelBtn.classList.add('hidden');
@@ -857,7 +879,7 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, DOUBLE-CLICK PNG VIEWER & ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, PNG REPORT VIEWER, RATE METRICS & ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -882,78 +904,6 @@
             if (window.supabase && typeof window.supabase.createClient === 'function') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
-
-            // Open Full-Screen PNG Report Viewer on Double-Click (#1, #2...)
-            window.openReportViewer = function(actionNum) {
-                var act = projectActionLogs.find(function(a) { return a.num === actionNum; });
-                if (!act) return;
-
-                var modal = document.getElementById('reportViewerModal');
-                var numBadge = document.getElementById('modalReportNum');
-                var titleEl = document.getElementById('modalReportTitle');
-                var metaEl = document.getElementById('modalReportMeta');
-                var imgEl = document.getElementById('modalReportImage');
-                var emptyEl = document.getElementById('modalReportEmptyState');
-                var dlBtn = document.getElementById('modalReportDownloadBtn');
-                var editBtn = document.getElementById('modalReportEditBtn');
-                var emptyUploadBtn = document.getElementById('modalEmptyUploadBtn');
-                var descEl = document.getElementById('modalReportDesc');
-                var impactEl = document.getElementById('modalReportImpact');
-
-                numBadge.textContent = act.num;
-                numBadge.className = 'w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' +
-                    (act.status === 'Completed' ? 'bg-emerald-600' : 'bg-amber-500');
-
-                titleEl.textContent = act.title;
-                metaEl.textContent = act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time) + ' • ' + act.status;
-                descEl.textContent = act.description;
-                impactEl.textContent = act.impactSummary || '';
-
-                var triggerEdit = function() {
-                    window.closeReportViewer();
-                    window.startEditAction(act.id);
-                };
-                editBtn.onclick = triggerEdit;
-                emptyUploadBtn.onclick = triggerEdit;
-
-                if (act.reportImage) {
-                    imgEl.src = act.reportImage;
-                    imgEl.classList.remove('hidden');
-                    emptyEl.classList.add('hidden');
-                    dlBtn.href = act.reportImage;
-                    dlBtn.download = 'Action_' + act.num + '_' + act.title.replace(/\s+/g, '_') + '_Report.png';
-                    dlBtn.classList.remove('hidden');
-                } else {
-                    imgEl.src = '';
-                    imgEl.classList.add('hidden');
-                    emptyEl.classList.remove('hidden');
-                    dlBtn.classList.add('hidden');
-                }
-
-                modal.classList.remove('hidden');
-            };
-
-            // Attach double-click listeners directly to Chart 1 & Chart 2 badges
-            function bindChartBadgeDoubleClicks() {
-                ['weeklyStackChart', 'trendChart'].forEach(function(canvasId) {
-                    var canvas = document.getElementById(canvasId);
-                    if (!canvas) return;
-                    canvas.addEventListener('dblclick', function(evt) {
-                        var chartInst = canvasId === 'weeklyStackChart' ? weeklyStackChartInstance : trendChartInstance;
-                        if (!chartInst || !chartInst._actionBadgeHitboxes) return;
-                        var rect = canvas.getBoundingClientRect();
-                        var clickX = evt.clientX - rect.left;
-                        var clickY = evt.clientY - rect.top;
-                        var hit = chartInst._actionBadgeHitboxes.find(function(b) {
-                            return clickX >= b.x - 4 && clickX <= b.x + b.w + 4 && clickY >= b.y - 4 && clickY <= b.y + b.h + 4;
-                        });
-                        if (hit) {
-                            window.openReportViewer(hit.num);
-                        }
-                    });
-                });
-            }
-            bindChartBadgeDoubleClicks();
 
             function toEpochMs(dateStr, timeStr) {
                 var t = (timeStr || '00:00:00').slice(0, 8);
@@ -1131,13 +1081,12 @@
                 });
             }
 
-            // Custom Chart.js Plugin: Draws Red Vertical New-Date Line + Date•CW Pill Below Axis + Numbered Action Badges (with Double-Click Hitboxes)
+            // Custom Chart.js Plugin: Red Vertical Date Dividers + Numbered Action Badges
             var actionBadgesPlugin = {
                 id: 'actionBadgesPlugin',
                 afterDraw: function(chart, args, pluginOptions) {
                     var markers = (pluginOptions && pluginOptions.markers) || [];
                     var dateBoundaries = (pluginOptions && pluginOptions.dateBoundaries) || [];
-                    chart._actionBadgeHitboxes = [];
 
                     var ctx = chart.ctx;
                     var xAxis = chart.scales.x;
@@ -1225,23 +1174,13 @@
                         ctx.fillStyle = mainColor;
                         ctx.fill();
 
-                        var prefixIcon = m.hasReport ? '📄 ' : '';
-                        var shortText = prefixIcon + (m.title.length > 16 ? m.title.slice(0, 15) + '…' : m.title);
+                        var shortText = m.title.length > 18 ? m.title.slice(0, 17) + '…' : m.title;
                         ctx.font = 'bold 10px Inter, sans-serif';
                         var textW = ctx.measureText(shortText).width;
                         var pillW = textW + 28;
                         var pillH = 22;
                         var pillX = Math.max(xAxis.left + 2, Math.min(xPos - pillW / 2, xAxis.right - pillW - 2));
                         var pillY = badgeY - pillH / 2;
-
-                        // Save bounding box so double-clicking this badge opens the PNG report!
-                        chart._actionBadgeHitboxes.push({
-                            num: m.num,
-                            x: pillX,
-                            y: pillY,
-                            w: pillW,
-                            h: pillH
-                        });
 
                         ctx.fillStyle = bgColor;
                         ctx.strokeStyle = mainColor;
@@ -1276,6 +1215,81 @@
             if (typeof Chart !== 'undefined') {
                 Chart.register(actionBadgesPlugin);
             }
+
+            // OPEN FULL-SCREEN PNG REPORT LIGHTBOX ON DOUBLE-CLICK
+            window.openActionReportModal = function(actionNum) {
+                var act = projectActionLogs.find(function(a) { return a.num === actionNum; });
+                if (!act) return;
+
+                var modal = document.getElementById('reportLightboxModal');
+                var numBadge = document.getElementById('lightboxActionNum');
+                var titleEl = document.getElementById('lightboxActionTitle');
+                var statusEl = document.getElementById('lightboxActionStatus');
+                var metaEl = document.getElementById('lightboxActionMeta');
+                var descEl = document.getElementById('lightboxActionDesc');
+                var impactEl = document.getElementById('lightboxActionImpact');
+
+                var imgWrap = document.getElementById('lightboxImageWrap');
+                var imgEl = document.getElementById('lightboxReportImg');
+                var emptyEl = document.getElementById('lightboxEmptyState');
+                var zoomCtrls = document.getElementById('lightboxZoomControls');
+                var dlBtn = document.getElementById('lightboxDownloadBtn');
+                var editBtn = document.getElementById('lightboxEditBtn');
+                var uploadNowBtn = document.getElementById('lightboxUploadNowBtn');
+
+                var isComp = act.status === 'Completed';
+                numBadge.textContent = act.num;
+                numBadge.className = 'w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' + (isComp ? 'bg-emerald-600' : 'bg-amber-500');
+
+                titleEl.textContent = act.title;
+                metaEl.textContent = act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time);
+                descEl.textContent = act.description;
+                impactEl.textContent = act.impactSummary || '';
+
+                if (isComp) {
+                    statusEl.textContent = '✔ Completed';
+                    statusEl.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 shrink-0';
+                } else {
+                    statusEl.textContent = '🕒 Monitoring';
+                    statusEl.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 shrink-0';
+                }
+
+                // Reset Zoom to 100%
+                window.currentLightboxZoom = 100;
+                window.adjustReportZoom(0);
+
+                if (act.reportImage) {
+                    imgEl.src = act.reportImage;
+                    imgWrap.classList.remove('hidden');
+                    emptyEl.classList.add('hidden');
+                    zoomCtrls.classList.remove('hidden');
+                    dlBtn.classList.remove('hidden');
+                    dlBtn.href = act.reportImage;
+                    dlBtn.download = 'Action_' + act.num + '_' + act.title.replace(/\s+/g, '_') + '_Report.png';
+                } else {
+                    imgEl.src = '';
+                    imgWrap.classList.add('hidden');
+                    emptyEl.classList.remove('hidden');
+                    zoomCtrls.classList.add('hidden');
+                    dlBtn.classList.add('hidden');
+                }
+
+                editBtn.onclick = function() {
+                    window.closeReportLightbox();
+                    window.startEditAction(act.id);
+                };
+
+                uploadNowBtn.onclick = function() {
+                    window.closeReportLightbox();
+                    window.startEditAction(act.id);
+                    setTimeout(function() {
+                        var fileInp = document.getElementById('actionReportFile');
+                        if (fileInp) fileInp.click();
+                    }, 200);
+                };
+
+                modal.classList.remove('hidden');
+            };
 
             function renderOperatorFieldsForProject(selectedId, preserveEnteredValues) {
                 var ngModeSelect = document.getElementById('ngModeSelect');
@@ -1320,285 +1334,4 @@
                         var isText = paramObj.type === 'text';
                         var badgeHtml = isText
                             ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Text</span>'
-                            : '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Number</span>';
-
-                        var savedVal = (preserveEnteredValues && previousValues[paramObj.label] !== undefined) ? previousValues[paramObj.label] : '';
-
-                        var inputHtml = isText
-                            ? '<input type="text" data-param-label="' + paramObj.label + '" data-param-type="text" value="' + savedVal + '" required placeholder="Enter text for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">'
-                            : '<input type="number" step="any" data-param-label="' + paramObj.label + '" data-param-type="number" value="' + savedVal + '" required placeholder="Enter number for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
-
-                        var wrapper = document.createElement('div');
-                        wrapper.innerHTML =
-                            '<div class="flex items-center justify-between mb-1">' +
-                                '<label class="block text-xs font-semibold text-zinc-700">' + paramObj.label + ' <span class="text-red-500">*</span></label>' +
-                                badgeHtml +
-                            '</div>' + inputHtml;
-                        dynamicFields.appendChild(wrapper);
-                    });
-                } else {
-                    paramsContainer.classList.add('hidden');
-                }
-            }
-
-            window.refreshSupabaseProjects = async function(loadDashboardAfter) {
-                if (!supabaseClient) return;
-                var projectSelect = document.getElementById('projectSelect');
-                var dashSelect = document.getElementById('dashboardProjectSelect');
-
-                var res = await supabaseClient
-                    .from('ng_projects')
-                    .select('*')
-                    .eq('is_active', true)
-                    .order('created_at', { ascending: false });
-
-                if (res.error) {
-                    window.showAlert('Database error: ' + res.error.message, 'error');
-                    return;
-                }
-
-                projectsData = res.data || [];
-                var prevOpVal = projectSelect.value;
-                var prevDashVal = dashSelect.value;
-
-                projectSelect.innerHTML = '<option value="">-- Select Machine / Project --</option>';
-                dashSelect.innerHTML = '<option value="">-- Select Project --</option>';
-
-                projectsData.forEach(function(proj) {
-                    var opt1 = document.createElement('option');
-                    opt1.value = proj.id;
-                    opt1.textContent = proj.project_title;
-                    projectSelect.appendChild(opt1);
-
-                    var opt2 = document.createElement('option');
-                    opt2.value = proj.id;
-                    opt2.textContent = proj.project_title;
-                    dashSelect.appendChild(opt2);
-                });
-
-                renderAdminProjectList();
-
-                if (prevOpVal && projectsData.some(function(p) { return p.id === prevOpVal; })) {
-                    projectSelect.value = prevOpVal;
-                    renderOperatorFieldsForProject(prevOpVal, true);
-                } else {
-                    renderOperatorFieldsForProject('', false);
-                }
-
-                if (prevDashVal && projectsData.some(function(p) { return p.id === prevDashVal; })) {
-                    dashSelect.value = prevDashVal;
-                } else if (projectsData.length > 0) {
-                    dashSelect.value = projectsData[0].id;
-                }
-
-                if (loadDashboardAfter && dashSelect.value) {
-                    loadDashboardData(dashSelect.value);
-                }
-            };
-
-            window.startEditProject = function(projectId) {
-                var proj = projectsData.find(function(p) { return p.id === projectId; });
-                if (!proj) return;
-
-                window.editingProjectId = proj.id;
-                document.getElementById('adminProjectTitle').value = proj.project_title || '';
-                document.getElementById('adminNgModes').value = (proj.ng_modes || []).join(', ');
-
-                var normParams = getProjectParams(proj);
-                for (var i = 1; i <= 15; i++) {
-                    var input = document.getElementById('adminParam' + i);
-                    var btn = document.getElementById('adminParamTypeBtn' + i);
-                    var item = normParams[i - 1];
-                    if (item) {
-                        input.value = item.label;
-                        input.setAttribute('data-original-label', item.label);
-                        window.setParamButtonStyle(btn, item.type);
-                    } else {
-                        input.value = '';
-                        input.setAttribute('data-original-label', '');
-                        window.setParamButtonStyle(btn, 'number');
-                    }
-                }
-
-                document.getElementById('editingProjectLabel').textContent = 'Editing: ' + proj.project_title;
-                document.getElementById('editModeBanner').classList.remove('hidden');
-                document.getElementById('adminCancelBtn').classList.remove('hidden');
-
-                var submitBtn = document.getElementById('adminSubmitBtn');
-                submitBtn.textContent = 'Update Project Changes';
-                submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition';
-
-                document.getElementById('sectionAdmin').scrollIntoView({ behavior: 'smooth' });
-            };
-
-            window.deleteProjectById = async function(projectId, projectTitle) {
-                if (!supabaseClient) return;
-                var confirmed = window.confirm('Are you sure you want to delete "' + projectTitle + '" and all of its NG records?');
-                if (!confirmed) return;
-
-                var res = await supabaseClient
-                    .from('ng_projects')
-                    .delete()
-                    .eq('id', projectId);
-
-                if (res.error) {
-                    window.showAlert('Failed to delete project: ' + res.error.message, 'error');
-                } else {
-                    if (window.editingProjectId === projectId) {
-                        window.cancelEditProject();
-                    }
-                    window.showAlert('Project "' + projectTitle + '" deleted.', 'success');
-                    window.refreshSupabaseProjects(false);
-                }
-            };
-
-            function renderAdminProjectList() {
-                var container = document.getElementById('adminProjectList');
-                if (!container) return;
-                if (projectsData.length === 0) {
-                    container.innerHTML = '<p class="text-xs text-zinc-400">No active projects found.</p>';
-                    return;
-                }
-                container.innerHTML = '';
-                projectsData.forEach(function(p) {
-                    var normParams = getProjectParams(p);
-                    var paramsSummary = normParams.map(function(item) {
-                        return item.label + (item.type === 'text' ? ' [Text]' : ' [Num]');
-                    }).join(', ');
-                    var modes = (p.ng_modes || []).join(', ');
-
-                    var row = document.createElement('div');
-                    row.className = 'flex items-center justify-between gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200';
-
-                    var infoDiv = document.createElement('div');
-                    infoDiv.className = 'min-w-0 flex-1';
-                    infoDiv.innerHTML = '<p class="font-semibold text-zinc-900 truncate">' + p.project_title + '</p>' +
-                        '<p class="text-xs text-zinc-500 truncate">Params (' + normParams.length + '): ' + paramsSummary + '</p>' +
-                        '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + modes + '</p>';
-
-                    var btnGroup = document.createElement('div');
-                    btnGroup.className = 'flex items-center gap-1.5 shrink-0';
-
-                    var editBtn = document.createElement('button');
-                    editBtn.type = 'button';
-                    editBtn.className = 'px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition';
-                    editBtn.textContent = 'Edit';
-                    editBtn.addEventListener('click', function() {
-                        window.startEditProject(p.id);
-                    });
-
-                    var delBtn = document.createElement('button');
-                    delBtn.type = 'button';
-                    delBtn.className = 'px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition';
-                    delBtn.textContent = 'Delete';
-                    delBtn.addEventListener('click', function() {
-                        window.deleteProjectById(p.id, p.project_title);
-                    });
-
-                    btnGroup.appendChild(editBtn);
-                    btnGroup.appendChild(delBtn);
-
-                    row.appendChild(infoDiv);
-                    row.appendChild(btnGroup);
-                    container.appendChild(row);
-                });
-            }
-
-            document.getElementById('projectSelect').addEventListener('change', function() {
-                renderOperatorFieldsForProject(this.value, false);
-            });
-
-            document.getElementById('adminForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                if (!supabaseClient) return;
-
-                var title = document.getElementById('adminProjectTitle').value.trim();
-                var modesRaw = document.getElementById('adminNgModes').value;
-                var ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
-
-                var parameterConfigs = [];
-                var renamedMap = {};
-
-                for (var i = 1; i <= 15; i++) {
-                    var el = document.getElementById('adminParam' + i);
-                    var btn = document.getElementById('adminParamTypeBtn' + i);
-                    var labelVal = el && el.value ? el.value.trim() : '';
-                    var origLabel = el ? (el.getAttribute('data-original-label') || '').trim() : '';
-                    var typeVal = btn ? (btn.getAttribute('data-type') || 'number') : 'number';
-
-                    if (labelVal.length > 0) {
-                        parameterConfigs.push({
-                            label: labelVal,
-                            type: typeVal === 'text' ? 'text' : 'number'
-                        });
-                        if (window.editingProjectId && origLabel.length > 0 && origLabel !== labelVal) {
-                            renamedMap[origLabel] = labelVal;
-                        }
-                    }
-                }
-
-                if (window.editingProjectId) {
-                    var targetId = window.editingProjectId;
-                    var updateRes = await supabaseClient
-                        .from('ng_projects')
-                        .update({
-                            project_title: title,
-                            parameter_labels: parameterConfigs,
-                            ng_modes: ngModes
-                        })
-                        .eq('id', targetId);
-
-                    if (updateRes.error) {
-                        window.showAlert('Failed to update project: ' + updateRes.error.message, 'error');
-                        return;
-                    }
-
-                    var oldKeys = Object.keys(renamedMap);
-                    if (oldKeys.length > 0) {
-                        var recRes = await supabaseClient
-                            .from('ng_records')
-                            .select('id, parameter_values')
-                            .eq('project_id', targetId);
-
-                        if (!recRes.error && Array.isArray(recRes.data)) {
-                            for (var rIdx = 0; rIdx < recRes.data.length; rIdx++) {
-                                var rec = recRes.data[rIdx];
-                                var vals = Object.assign({}, rec.parameter_values || {});
-                                var changed = false;
-                                oldKeys.forEach(function(oldK) {
-                                    var newK = renamedMap[oldK];
-                                    if (vals[oldK] !== undefined && vals[newK] === undefined) {
-                                        vals[newK] = vals[oldK];
-                                        delete vals[oldK];
-                                        changed = true;
-                                    }
-                                });
-                                if (changed) {
-                                    await supabaseClient
-                                        .from('ng_records')
-                                        .update({ parameter_values: vals })
-                                        .eq('id', rec.id);
-                                }
-                            }
-                        }
-                    }
-
-                    window.showAlert('Project "' + title + '" updated successfully!', 'success');
-                    window.cancelEditProject();
-                    window.refreshSupabaseProjects(false);
-                } else {
-                    var res = await supabaseClient.from('ng_projects').insert([{
-                        project_title: title,
-                        parameter_labels: parameterConfigs,
-                        ng_modes: ngModes,
-                        is_active: true
-                    }]);
-
-                    if (res.error) {
-                        window.showAlert('Failed to save project: ' + res.error.message, 'error');
-                    } else {
-                        window.showAlert('New project saved with ' + parameterConfigs.length + ' parameters!', 'success');
-                        document.getElementById('adminProjectTitle').value = '';
-                        document.getElementById('adminNgModes').value = '';
-                        window.resetAdminParamSlots();
-                        window.refreshSupabaseProjects(false
+                            : '<span class="text-[10px] font-semibold px-1.5 py
