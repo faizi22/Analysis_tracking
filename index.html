@@ -447,6 +447,14 @@
             }
         };
 
+
+if (activeKey !== 'admin') {
+    document.getElementById('adminLoginBox').classList.remove('hidden');
+    document.getElementById('adminContentWrap').classList.add('hidden');
+}
+
+
+        
        window.verifyAdminPass = function() {
     var passInput = document.getElementById('adminPassword');
     if (passInput.value === 'PE123') { // <-- Tukar password anda di sini
