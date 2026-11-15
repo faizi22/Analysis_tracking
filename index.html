@@ -81,7 +81,7 @@
                 <div id="dynamicParamsContainer" class="space-y-3 pt-3 border-t border-zinc-100 hidden">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Machine Parameters</span>
-                        <span class="text-[11px] text-zinc-400">Numbers Only</span>
+                        <span class="text-[11px] text-zinc-400">Follow input type shown</span>
                     </div>
                     <div id="dynamicFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </div>
@@ -168,12 +168,12 @@
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
-                            <h3 class="text-sm font-bold text-zinc-900">1. Parameter Trend Over Time</h3>
-                            <p class="text-xs text-zinc-500">Pick one parameter to see the Average line, Trend line, and test Min/Max limits.</p>
+                            <h3 class="text-sm font-bold text-zinc-900">1. Parameter Trend Over Time (Number Parameters)</h3>
+                            <p class="text-xs text-zinc-500">Pick one number parameter to see the Average line, Trend line, and test Min/Max limits.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <select id="trendParamSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
-                                <option value="__ALL__">Show All Parameters</option>
+                                <option value="__ALL__">Show All Number Parameters</option>
                             </select>
                             <div id="specLimitInputs" class="flex items-center gap-1.5">
                                 <input type="number" step="any" id="inputLSL" placeholder="Min (LSL)" class="w-20 border border-zinc-300 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500">
@@ -191,7 +191,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-zinc-100">
                         <div>
                             <h3 class="text-sm font-bold text-zinc-900">2. Parameter Relationship (X vs Y)</h3>
-                            <p class="text-xs text-zinc-500">See how two parameters interact for each NG Mode.</p>
+                            <p class="text-xs text-zinc-500">See how two number parameters interact for each NG Mode.</p>
                         </div>
                         <div class="flex items-center gap-1 text-xs">
                             <select id="scatterXSelect" class="border border-zinc-300 rounded px-2 py-1 bg-zinc-50 font-medium"></select>
@@ -216,11 +216,11 @@
                 </div>
             </div>
 
-            <!-- Matrix Table: Average Parameter per NG Mode -->
+            <!-- Matrix Table: Average / Top Text per NG Mode -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-zinc-200">
-                    <h3 class="text-sm font-bold text-zinc-900">4. Average Parameter Value by NG Mode</h3>
-                    <p class="text-xs text-zinc-500">Red badges show parameters that shifted 5% or more away from the overall average.</p>
+                    <h3 class="text-sm font-bold text-zinc-900">4. Parameter Summary by NG Mode (Average Value / Most Common Text)</h3>
+                    <p class="text-xs text-zinc-500">Shows Average for Number parameters (red badge if shifted ≥5%) and Most Common value for Text parameters.</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs sm:text-sm">
@@ -263,11 +263,11 @@
         </div>
 
         <!-- ================= SECTION 3: ADMIN PANEL ================= -->
-        <div id="sectionAdmin" class="hidden max-w-2xl mx-auto space-y-6 mt-2">
+        <div id="sectionAdmin" class="hidden max-w-3xl mx-auto space-y-6 mt-2">
             <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-6">
                 <div class="pb-4 mb-4 border-b border-zinc-100">
                     <h1 class="text-lg font-bold text-zinc-900">Register & Manage Projects</h1>
-                    <p class="text-xs text-zinc-500">Set up project name, NG modes, and up to 15 number parameters.</p>
+                    <p class="text-xs text-zinc-500">Set up project name, NG modes, and up to 15 parameters (default: Number, click button to switch to Text).</p>
                 </div>
 
                 <div id="adminLoginBox" class="space-y-4">
@@ -293,71 +293,15 @@
                         </div>
 
                         <div class="pt-2 border-t border-zinc-100">
-                            <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">Parameters (1 to 15 Options)</p>
-                            <p class="text-xs text-zinc-400 mb-3">Leave unused parameters blank. Operators will only see the ones you fill in.</p>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                                 <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 1 <span class="text-red-500">*</span></label>
-                                    <input type="text" id="adminParam1" value="Motion 1" required class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 2 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam2" value="Motion 2" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 3 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam3" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 4 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam4" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 5 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam5" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 6 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam6" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 7 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam7" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 8 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam8" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 9 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam9" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 10 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam10" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 11 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam11" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 12 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam12" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 13 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam13" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 14 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam14" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-semibold mb-1">Parameter 15 <span class="text-zinc-400 font-normal">(Opt)</span></label>
-                                    <input type="text" id="adminParam15" placeholder="Optional" class="w-full border border-zinc-300 rounded-lg p-2 text-xs">
+                                    <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Parameters (1 to 15 Options)</p>
+                                    <p class="text-xs text-zinc-400">Default is <b># Number</b>. Click the button on any parameter to switch between <b># Number</b> and <b>Abc Text</b>.</p>
                                 </div>
                             </div>
+                            
+                            <!-- 15 Parameter Slots Generated Here -->
+                            <div id="adminParamsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
                         </div>
 
                         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition">
@@ -378,7 +322,7 @@
         </div>
     </main>
 
-    <!-- SCRIPT 1: TAB NAVIGATION & BASIC UI -->
+    <!-- SCRIPT 1: TAB NAVIGATION & ADMIN 15-PARAMETER BUILDER -->
     <script>
         window.showAlert = function(message, type) {
             var alertBox = document.getElementById('alertBox');
@@ -389,6 +333,59 @@
             );
             alertBox.classList.remove('hidden');
             setTimeout(function() { alertBox.classList.add('hidden'); }, 4500);
+        };
+
+        // Build 15 Parameter Slots in Admin Panel with Number/Text Toggle Button (Default: Number)
+        window.initAdminParamSlots = function() {
+            var grid = document.getElementById('adminParamsGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            for (var i = 1; i <= 15; i++) {
+                var isReq = i === 1;
+                var defaultVal = i === 1 ? 'Motion 1' : (i === 2 ? 'Motion 2' : '');
+                var card = document.createElement('div');
+                card.className = 'p-2.5 rounded-lg border border-zinc-200 bg-zinc-50/60 space-y-1.5';
+                card.innerHTML =
+                    '<div class="flex items-center justify-between">' +
+                        '<label class="text-[11px] font-semibold text-zinc-700">Param ' + i + (isReq ? ' <span class="text-red-500">*</span>' : ' <span class="text-zinc-400 font-normal">(Opt)</span>') + '</label>' +
+                        '<button type="button" id="adminParamTypeBtn' + i + '" data-type="number" onclick="window.toggleParamType(' + i + ')" ' +
+                            'class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer" title="Click to switch between Number and Text">' +
+                            '# Number' +
+                        '</button>' +
+                    '</div>' +
+                    '<input type="text" id="adminParam' + i + '" value="' + defaultVal + '" ' + (isReq ? 'required ' : '') +
+                        'placeholder="' + (isReq ? 'Required' : 'Optional label') + '" ' +
+                        'class="w-full border border-zinc-300 rounded-md p-1.5 text-xs bg-white focus:ring-2 focus:ring-zinc-900 outline-none">';
+                grid.appendChild(card);
+            }
+        };
+
+        window.toggleParamType = function(index) {
+            var btn = document.getElementById('adminParamTypeBtn' + index);
+            if (!btn) return;
+            var current = btn.getAttribute('data-type') || 'number';
+            if (current === 'number') {
+                btn.setAttribute('data-type', 'text');
+                btn.textContent = 'Abc Text';
+                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 transition cursor-pointer';
+            } else {
+                btn.setAttribute('data-type', 'number');
+                btn.textContent = '# Number';
+                btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer';
+            }
+        };
+
+        window.resetAdminParamSlots = function() {
+            for (var i = 1; i <= 15; i++) {
+                var input = document.getElementById('adminParam' + i);
+                var btn = document.getElementById('adminParamTypeBtn' + i);
+                if (input && i >= 3) input.value = '';
+                if (btn) {
+                    btn.setAttribute('data-type', 'number');
+                    btn.textContent = '# Number';
+                    btn.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 transition cursor-pointer';
+                }
+            }
         };
 
         window.switchAppTab = function(activeKey) {
@@ -436,6 +433,7 @@
             if (tEl) tEl.value = localTime;
         };
 
+        window.initAdminParamSlots();
         window.setCurrentDateTime();
     </script>
 
@@ -458,6 +456,24 @@
 
             if (window.supabase && typeof window.supabase.createClient === 'function') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+
+            // Helper: Supports both old string arrays ["Motion 1"] and new object arrays [{label: "Motion 1", type: "number"}]
+            function getProjectParams(project) {
+                if (!project || !Array.isArray(project.parameter_labels)) return [];
+                return project.parameter_labels.map(function(item) {
+                    if (typeof item === 'string') {
+                        return { label: item.trim(), type: 'number' };
+                    } else if (item && typeof item === 'object' && item.label) {
+                        return {
+                            label: String(item.label).trim(),
+                            type: item.type === 'text' ? 'text' : 'number'
+                        };
+                    }
+                    return null;
+                }).filter(function(item) {
+                    return item && item.label.length > 0;
+                });
             }
 
             window.refreshSupabaseProjects = async function(loadDashboardAfter) {
@@ -516,7 +532,6 @@
                 }
             };
 
-            // DELETE PROJECT FUNCTION
             window.deleteProjectById = async function(projectId, projectTitle) {
                 if (!supabaseClient) return;
                 var confirmed = window.confirm('Are you sure you want to delete "' + projectTitle + '" and all of its NG records?');
@@ -544,15 +559,19 @@
                 }
                 container.innerHTML = '';
                 projectsData.forEach(function(p) {
-                    var params = (p.parameter_labels || []).join(', ');
+                    var normParams = getProjectParams(p);
+                    var paramsSummary = normParams.map(function(item) {
+                        return item.label + (item.type === 'text' ? ' [Text]' : ' [Num]');
+                    }).join(', ');
                     var modes = (p.ng_modes || []).join(', ');
+
                     var row = document.createElement('div');
                     row.className = 'flex items-center justify-between gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200';
 
                     var infoDiv = document.createElement('div');
                     infoDiv.className = 'min-w-0 flex-1';
                     infoDiv.innerHTML = '<p class="font-semibold text-zinc-900 truncate">' + p.project_title + '</p>' +
-                        '<p class="text-xs text-zinc-500 truncate">Params (' + (p.parameter_labels || []).length + '): ' + params + '</p>' +
+                        '<p class="text-xs text-zinc-500 truncate">Params (' + normParams.length + '): ' + paramsSummary + '</p>' +
                         '<p class="text-[11px] text-zinc-400 truncate">NG Modes: ' + modes + '</p>';
 
                     var delBtn = document.createElement('button');
@@ -569,7 +588,7 @@
                 });
             }
 
-            // DYNAMIC OPERATOR FORM (DISPLAYS ONLY FILLED PARAMETERS)
+            // DYNAMIC OPERATOR FORM (RENDERS NUMBER OR TEXT INPUT BASED ON ADMIN SELECTION)
             document.getElementById('projectSelect').addEventListener('change', function() {
                 var selectedId = this.value;
                 var ngModeSelect = document.getElementById('ngModeSelect');
@@ -596,13 +615,25 @@
                     ngModeSelect.appendChild(opt);
                 });
 
-                var labels = (project.parameter_labels || []).filter(function(l) { return l && String(l).trim().length > 0; });
-                if (labels.length > 0) {
+                var paramsList = getProjectParams(project);
+                if (paramsList.length > 0) {
                     paramsContainer.classList.remove('hidden');
-                    labels.forEach(function(label) {
+                    paramsList.forEach(function(paramObj) {
+                        var isText = paramObj.type === 'text';
+                        var badgeHtml = isText
+                            ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Text</span>'
+                            : '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">Number</span>';
+
+                        var inputHtml = isText
+                            ? '<input type="text" data-param-label="' + paramObj.label + '" data-param-type="text" required placeholder="Enter text for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">'
+                            : '<input type="number" step="any" data-param-label="' + paramObj.label + '" data-param-type="number" required placeholder="Enter number for ' + paramObj.label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
+
                         var wrapper = document.createElement('div');
-                        wrapper.innerHTML = '<label class="block text-xs font-semibold text-zinc-700 mb-1">' + label + ' <span class="text-red-500">*</span></label>' +
-                            '<input type="number" step="any" data-param-label="' + label + '" required placeholder="Enter ' + label + '" class="dynamic-param-input w-full border border-zinc-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-zinc-900 outline-none">';
+                        wrapper.innerHTML =
+                            '<div class="flex items-center justify-between mb-1">' +
+                                '<label class="block text-xs font-semibold text-zinc-700">' + paramObj.label + ' <span class="text-red-500">*</span></label>' +
+                                badgeHtml +
+                            '</div>' + inputHtml;
                         dynamicFields.appendChild(wrapper);
                     });
                 } else {
@@ -610,7 +641,7 @@
                 }
             });
 
-            // SAVE NEW PROJECT (UP TO 15 PARAMETERS)
+            // SAVE NEW PROJECT (UP TO 15 PARAMETERS WITH NUMBER OR TEXT TYPE)
             document.getElementById('adminForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -619,19 +650,23 @@
                 var modesRaw = document.getElementById('adminNgModes').value;
                 var ngModes = modesRaw.split(',').map(function(m) { return m.trim(); }).filter(function(m) { return m.length > 0; });
 
-                var rawParams = [];
+                var parameterConfigs = [];
                 for (var i = 1; i <= 15; i++) {
                     var el = document.getElementById('adminParam' + i);
-                    if (el) rawParams.push(el.value);
+                    var btn = document.getElementById('adminParamTypeBtn' + i);
+                    var labelVal = el && el.value ? el.value.trim() : '';
+                    var typeVal = btn ? (btn.getAttribute('data-type') || 'number') : 'number';
+                    if (labelVal.length > 0) {
+                        parameterConfigs.push({
+                            label: labelVal,
+                            type: typeVal === 'text' ? 'text' : 'number'
+                        });
+                    }
                 }
-
-                var parameterLabels = rawParams
-                    .map(function(p) { return p ? p.trim() : ''; })
-                    .filter(function(p) { return p.length > 0; });
 
                 var res = await supabaseClient.from('ng_projects').insert([{
                     project_title: title,
-                    parameter_labels: parameterLabels,
+                    parameter_labels: parameterConfigs,
                     ng_modes: ngModes,
                     is_active: true
                 }]);
@@ -639,13 +674,10 @@
                 if (res.error) {
                     window.showAlert('Failed to save project: ' + res.error.message, 'error');
                 } else {
-                    window.showAlert('New project saved with ' + parameterLabels.length + ' parameters!', 'success');
+                    window.showAlert('New project saved with ' + parameterConfigs.length + ' parameters!', 'success');
                     document.getElementById('adminProjectTitle').value = '';
                     document.getElementById('adminNgModes').value = '';
-                    for (var j = 3; j <= 15; j++) {
-                        var resetEl = document.getElementById('adminParam' + j);
-                        if (resetEl) resetEl.value = '';
-                    }
+                    window.resetAdminParamSlots();
                     window.refreshSupabaseProjects(false);
                 }
             });
@@ -658,7 +690,9 @@
                 var parameterValues = {};
                 document.querySelectorAll('.dynamic-param-input').forEach(function(input) {
                     var label = input.getAttribute('data-param-label');
-                    parameterValues[label] = Number(input.value.trim());
+                    var pType = input.getAttribute('data-param-type') || 'number';
+                    var rawVal = input.value.trim();
+                    parameterValues[label] = pType === 'text' ? rawVal : Number(rawVal);
                 });
 
                 var payload = {
@@ -714,36 +748,38 @@
                     modeFilter.appendChild(opt);
                 });
 
-                var labels = (currentProject.parameter_labels || []).filter(function(l) { return l && String(l).trim().length > 0; });
+                var allParams = getProjectParams(currentProject);
+                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
+
                 var trendSel = document.getElementById('trendParamSelect');
                 var xSel = document.getElementById('scatterXSelect');
                 var ySel = document.getElementById('scatterYSelect');
 
-                trendSel.innerHTML = '<option value="__ALL__">Show All Parameters</option>';
+                trendSel.innerHTML = '<option value="__ALL__">Show All Number Parameters</option>';
                 xSel.innerHTML = '';
                 ySel.innerHTML = '';
 
-                labels.forEach(function(lbl) {
+                numParams.forEach(function(p) {
                     var oT = document.createElement('option');
-                    oT.value = lbl;
-                    oT.textContent = 'Focus: ' + lbl;
+                    oT.value = p.label;
+                    oT.textContent = 'Focus: ' + p.label;
                     trendSel.appendChild(oT);
 
                     var oX = document.createElement('option');
-                    oX.value = lbl;
-                    oX.textContent = lbl;
+                    oX.value = p.label;
+                    oX.textContent = p.label;
                     xSel.appendChild(oX);
 
                     var oY = document.createElement('option');
-                    oY.value = lbl;
-                    oY.textContent = lbl;
+                    oY.value = p.label;
+                    oY.textContent = p.label;
                     ySel.appendChild(oY);
                 });
 
-                if (labels.length > 0) {
-                    trendSel.value = labels[0];
-                    xSel.value = labels[0];
-                    ySel.value = labels.length > 1 ? labels[1] : labels[0];
+                if (numParams.length > 0) {
+                    trendSel.value = numParams[0].label;
+                    xSel.value = numParams[0].label;
+                    ySel.value = numParams.length > 1 ? numParams[1].label : numParams[0].label;
                 }
 
                 var res = await supabaseClient
@@ -786,7 +822,7 @@
             }
 
             function calcStats(arr) {
-                var valid = arr.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); }).map(Number);
+                var valid = arr.filter(function(v) { return v !== null && v !== undefined && v !== '' && !isNaN(v); }).map(Number);
                 var n = valid.length;
                 if (n === 0) return { mean: 0, std: 0, min: 0, max: 0, n: 0 };
                 var sum = valid.reduce(function(a, b) { return a + b; }, 0);
@@ -798,6 +834,25 @@
                     min: Math.min.apply(null, valid),
                     max: Math.max.apply(null, valid),
                     n: n
+                };
+            }
+
+            function calcTopText(arr) {
+                var counts = {};
+                var total = 0;
+                arr.forEach(function(v) {
+                    if (v !== null && v !== undefined && String(v).trim() !== '') {
+                        var key = String(v).trim();
+                        counts[key] = (counts[key] || 0) + 1;
+                        total++;
+                    }
+                });
+                if (total === 0) return { top: '-', count: 0, pct: 0 };
+                var topKey = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; })[0];
+                return {
+                    top: topKey,
+                    count: counts[topKey],
+                    pct: Math.round((counts[topKey] / total) * 100)
                 };
             }
 
@@ -819,7 +874,7 @@
             }
 
             function updateDashboardAnalytics() {
-                var labels = (currentProject.parameter_labels || []).filter(function(l) { return l && String(l).trim().length > 0; });
+                var allParams = getProjectParams(currentProject);
                 var records = filteredRecords;
 
                 document.getElementById('statTotalNg').textContent = records.length;
@@ -835,8 +890,8 @@
                     renderTrendChart();
                     renderScatterChart();
                     renderParetoChart();
-                    renderMatrixTable(labels, [], {});
-                    renderRecordsTable(labels, []);
+                    renderMatrixTable(allParams, [], {});
+                    renderRecordsTable(allParams, []);
                     return;
                 }
 
@@ -856,33 +911,38 @@
                 document.getElementById('statTopMode').textContent = topMode + ' (' + topCount + ')';
                 document.getElementById('statTopModePct').textContent = topPct + '% of total NGs';
 
-                generateSmartInsights(labels, records, sortedModes, modeCounts);
+                generateSmartInsights(allParams, records, sortedModes, modeCounts);
                 renderTrendChart();
                 renderScatterChart();
                 renderParetoChart();
-                renderMatrixTable(labels, records, modeCounts);
-                renderRecordsTable(labels, records);
+                renderMatrixTable(allParams, records, modeCounts);
+                renderRecordsTable(allParams, records);
             }
 
-            function generateSmartInsights(labels, records, sortedModes, modeCounts) {
+            function generateSmartInsights(allParams, records, sortedModes, modeCounts) {
                 var insights = [];
                 var topMode = sortedModes[0];
                 var topPct = ((modeCounts[topMode] / records.length) * 100).toFixed(0);
 
                 insights.push('<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects. Focus on fixing this mode first.');
 
+                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
+                var textParams = allParams.filter(function(p) { return p.type === 'text'; });
+                var topModeRecords = records.filter(function(r) { return r.ng_mode === topMode; });
+
+                // Number parameter shift detection
                 var overallStats = {};
-                labels.forEach(function(l) {
-                    overallStats[l] = calcStats(records.map(function(r) { return (r.parameter_values || {})[l]; }));
+                numParams.forEach(function(p) {
+                    overallStats[p.label] = calcStats(records.map(function(r) { return (r.parameter_values || {})[p.label]; }));
                 });
 
-                var topModeRecords = records.filter(function(r) { return r.ng_mode === topMode; });
                 var maxShiftParam = null;
                 var maxShiftPct = 0;
                 var shiftDirection = '';
                 var topModeMeanVal = 0;
 
-                labels.forEach(function(l) {
+                numParams.forEach(function(p) {
+                    var l = p.label;
                     var st = calcStats(topModeRecords.map(function(r) { return (r.parameter_values || {})[l]; }));
                     var baseMean = overallStats[l].mean;
                     if (baseMean !== 0 && st.n > 0) {
@@ -897,11 +957,19 @@
                 });
 
                 if (maxShiftParam && Math.abs(maxShiftPct) >= 3) {
-                    insights.push('<b>Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than overall average ' + overallStats[maxShiftParam].mean.toFixed(2) + '). Suggestion: Check and tighten <b>' + maxShiftParam + '</b> settings.');
+                    insights.push('<b>Number Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than normal average ' + overallStats[maxShiftParam].mean.toFixed(2) + ').');
                 }
 
-                if (records.length >= 4 && labels.length > 0) {
-                    var p0 = labels[0];
+                // Text parameter pattern detection
+                textParams.forEach(function(p) {
+                    var tStat = calcTopText(topModeRecords.map(function(r) { return (r.parameter_values || {})[p.label]; }));
+                    if (tStat.count >= 2 && tStat.pct >= 60) {
+                        insights.push('<b>Text Pattern Detected:</b> <b>' + tStat.pct + '%</b> of <b>' + topMode + '</b> cases happened with <b>' + p.label + ' = "' + tStat.top + '"</b>.');
+                    }
+                });
+
+                if (records.length >= 4 && numParams.length > 0) {
+                    var p0 = numParams[0].label;
                     var last3 = records.slice(-3).map(function(r) { return Number((r.parameter_values || {})[p0]); });
                     if (last3[0] < last3[1] && last3[1] < last3[2]) {
                         insights.push('<b>Trend Alert:</b> <b>' + p0 + '</b> went up 3 times in a row (' + last3.join(' → ') + '). Check machine stability.');
@@ -917,7 +985,7 @@
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
 
-                var labels = (currentProject.parameter_labels || []).filter(function(l) { return l && String(l).trim().length > 0; });
+                var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
                 var selectedParam = document.getElementById('trendParamSelect').value;
                 var timeLabels = filteredRecords.map(function(r) { return r.recorded_date.slice(5) + ' ' + r.recorded_time.slice(0, 5); });
 
@@ -930,24 +998,24 @@
 
                 if (selectedParam === '__ALL__' || !selectedParam) {
                     document.getElementById('specLimitInputs').classList.add('hidden');
-                    labels.forEach(function(lbl, idx) {
+                    numParams.forEach(function(p, idx) {
                         var c = lineColors[idx % lineColors.length];
                         datasets.push({
-                            label: lbl,
-                            data: filteredRecords.map(function(r) { return (r.parameter_values || {})[lbl] ?? null; }),
+                            label: p.label,
+                            data: filteredRecords.map(function(r) { return (r.parameter_values || {})[p.label] ?? null; }),
                             borderColor: c,
                             backgroundColor: c,
                             tension: 0.2,
                             pointRadius: 3
                         });
                     });
-                    document.getElementById('statStability').textContent = 'All Parameters View';
+                    document.getElementById('statStability').textContent = 'All Number Parameters';
                     document.getElementById('statOutSpecCount').textContent = 'Pick 1 parameter to test limits';
                 } else {
                     document.getElementById('specLimitInputs').classList.remove('hidden');
                     var rawVals = filteredRecords.map(function(r) {
                         var v = (r.parameter_values || {})[selectedParam];
-                        return v !== undefined ? Number(v) : null;
+                        return v !== undefined && v !== '' && !isNaN(v) ? Number(v) : null;
                     });
 
                     var st = calcStats(rawVals);
@@ -1052,7 +1120,7 @@
 
                 if (rVal === null || isNaN(rVal)) {
                     document.getElementById('statCorrelation').textContent = 'N/A';
-                    document.getElementById('statCorrelationDesc').textContent = 'Need at least 3 records';
+                    document.getElementById('statCorrelationDesc').textContent = 'Need at least 3 number records';
                 } else {
                     var absR = Math.abs(rVal);
                     var strength = absR > 0.7 ? 'Strong' : (absR > 0.4 ? 'Moderate' : 'Weak');
@@ -1142,37 +1210,49 @@
                 });
             }
 
-            function renderMatrixTable(labels, records, modeCounts) {
+            function renderMatrixTable(allParams, records, modeCounts) {
                 var thead = document.getElementById('matrixHeaderRow');
                 var tbody = document.getElementById('matrixTableBody');
 
                 thead.innerHTML = '<th class="p-3 whitespace-nowrap">NG Mode</th><th class="p-3 whitespace-nowrap">Count</th>' +
-                    labels.map(function(l) { return '<th class="p-3 whitespace-nowrap">Avg ' + l + '</th>'; }).join('');
+                    allParams.map(function(p) {
+                        var prefix = p.type === 'text' ? 'Top ' : 'Avg ';
+                        return '<th class="p-3 whitespace-nowrap">' + prefix + p.label + '</th>';
+                    }).join('');
 
                 var modes = Object.keys(modeCounts).sort(function(a, b) { return modeCounts[b] - modeCounts[a]; });
                 if (modes.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="' + (labels.length + 2) + '" class="p-4 text-center text-zinc-400">No data.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="' + (allParams.length + 2) + '" class="p-4 text-center text-zinc-400">No data.</td></tr>';
                     return;
                 }
 
                 var overallMeans = {};
-                labels.forEach(function(l) {
-                    overallMeans[l] = calcStats(records.map(function(r) { return (r.parameter_values || {})[l]; })).mean;
+                allParams.forEach(function(p) {
+                    if (p.type === 'number') {
+                        overallMeans[p.label] = calcStats(records.map(function(r) { return (r.parameter_values || {})[p.label]; })).mean;
+                    }
                 });
 
                 tbody.innerHTML = '';
                 modes.forEach(function(mode) {
                     var modeRecs = records.filter(function(r) { return r.ng_mode === mode; });
-                    var cells = labels.map(function(l) {
-                        var st = calcStats(modeRecs.map(function(r) { return (r.parameter_values || {})[l]; }));
-                        var base = overallMeans[l];
-                        var diffPct = base !== 0 ? ((st.mean - base) / Math.abs(base)) * 100 : 0;
-                        var badge = '';
-                        if (Math.abs(diffPct) >= 5) {
-                            var sign = diffPct > 0 ? '+' : '';
-                            badge = ' <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-600">' + sign + diffPct.toFixed(0) + '%</span>';
+                    var cells = allParams.map(function(p) {
+                        var l = p.label;
+                        if (p.type === 'text') {
+                            var tStat = calcTopText(modeRecs.map(function(r) { return (r.parameter_values || {})[l]; }));
+                            if (tStat.top === '-') return '<td class="p-3 text-zinc-400">-</td>';
+                            return '<td class="p-3 font-medium whitespace-nowrap">' + tStat.top + ' <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800">' + tStat.pct + '%</span></td>';
+                        } else {
+                            var st = calcStats(modeRecs.map(function(r) { return (r.parameter_values || {})[l]; }));
+                            var base = overallMeans[l];
+                            var diffPct = base !== 0 ? ((st.mean - base) / Math.abs(base)) * 100 : 0;
+                            var badge = '';
+                            if (Math.abs(diffPct) >= 5) {
+                                var sign = diffPct > 0 ? '+' : '';
+                                badge = ' <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-600">' + sign + diffPct.toFixed(0) + '%</span>';
+                            }
+                            return '<td class="p-3 font-medium whitespace-nowrap">' + st.mean.toFixed(2) + badge + '</td>';
                         }
-                        return '<td class="p-3 font-medium whitespace-nowrap">' + st.mean.toFixed(2) + badge + '</td>';
                     }).join('');
 
                     var tr = document.createElement('tr');
@@ -1183,7 +1263,7 @@
                 });
             }
 
-            function renderRecordsTable(labels, records) {
+            function renderRecordsTable(allParams, records) {
                 var tbody = document.getElementById('recordsTableBody');
                 if (records.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-zinc-400">No records found.</td></tr>';
@@ -1192,9 +1272,10 @@
                 tbody.innerHTML = '';
                 records.slice().reverse().forEach(function(r) {
                     var vals = r.parameter_values || {};
-                    var paramStr = labels.map(function(l) {
-                        var v = vals[l] !== undefined ? vals[l] : '-';
-                        return '<span class="inline-block bg-zinc-100 px-2 py-0.5 rounded text-xs mr-1 mb-1">' + l + ': <b>' + v + '</b></span>';
+                    var paramStr = allParams.map(function(p) {
+                        var v = vals[p.label] !== undefined ? vals[p.label] : '-';
+                        var badgeStyle = p.type === 'text' ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-zinc-100 text-zinc-800';
+                        return '<span class="inline-block ' + badgeStyle + ' px-2 py-0.5 rounded text-xs mr-1 mb-1">' + p.label + ': <b>' + v + '</b></span>';
                     }).join('');
                     var tr = document.createElement('tr');
                     tr.className = 'hover:bg-zinc-50';
@@ -1212,7 +1293,8 @@
                     window.showAlert('No data to export!', 'error');
                     return;
                 }
-                var labels = (currentProject.parameter_labels || []).filter(function(l) { return l && String(l).trim().length > 0; });
+                var allParams = getProjectParams(currentProject);
+                var labels = allParams.map(function(p) { return p.label; });
                 var headers = ['Date', 'Time', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
                 var rows = [headers.join(',')];
 
@@ -1224,7 +1306,10 @@
                         '"' + (r.operator_name || '').replace(/"/g, '""') + '"',
                         '"' + (r.ng_mode || '').replace(/"/g, '""') + '"'
                     ];
-                    labels.forEach(function(l) { row.push(vals[l] !== undefined ? vals[l] : ''); });
+                    allParams.forEach(function(p) {
+                        var v = vals[p.label] !== undefined ? String(vals[p.label]).replace(/"/g, '""') : '';
+                        row.push(p.type === 'text' ? '"' + v + '"' : v);
+                    });
                     row.push('"' + (r.remarks || '').replace(/"/g, '""') + '"');
                     rows.push(row.join(','));
                 });
