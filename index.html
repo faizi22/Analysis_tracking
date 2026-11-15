@@ -216,7 +216,7 @@
                     <div class="flex items-center gap-2 text-xs">
                         <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
                             <option value="weekly">Weekly View (CW + Month)</option>
-                            <option value="daily">Daily View (Date + CW Once per Week)</option>
+                            <option value="daily">Daily View (Date + CW)</option>
                         </select>
                     </div>
                 </div>
@@ -272,12 +272,12 @@
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 
-                <!-- Chart 2: Parameter Trend Chart with Smart Visible-Tick Deduplication -->
+                <!-- Chart 2: Parameter Trend Chart with Red Vertical New-Date Line & Guaranteed Date • CW Label Below -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
                             <h3 class="text-sm font-bold text-zinc-900">2. Parameter Trend Over Time & Action Markers</h3>
-                            <p class="text-xs text-zinc-500">Every new date (e.g. 13 Nov, 14 Nov) is shown on its first visible point, and CW is shown once per week.</p>
+                            <p class="text-xs text-zinc-500">Red dashed line & <b>Date • CW</b> label appear right below the axis whenever a new date starts.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <select id="trendGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-100 font-semibold text-zinc-800 outline-none">
@@ -294,7 +294,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="h-72">
+                    <div class="h-80">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
@@ -625,7 +625,7 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, VISIBLE-TICK TIMELINE & DAILY/WEEKLY AGGREGATION -->
+    <!-- SCRIPT 2: SUPABASE, GUARANTEED BELOW-AXIS DATE•CW MARKERS & ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -690,7 +690,7 @@
                     weekMonthShort: weekMonthShort,
                     weekSortKey: isoYear + '-' + cwStr,
                     weekAxisLabel: [cwStr, weekMonthShort],
-                    dayAxisLabel: cwStr + ' • ' + dayMonthStr
+                    dayAxisLabel: dayMonthStr + ' • ' + cwStr
                 };
             }
 
@@ -728,12 +728,12 @@
                 });
             }
 
-            // Custom Chart.js Plugin to Draw Numbered Action Badges (① Title) & Pointers on Charts
+            // Custom Chart.js Plugin using `afterDraw` so labels below the X-Axis are NEVER clipped or skipped by autoSkip!
             var actionBadgesPlugin = {
                 id: 'actionBadgesPlugin',
-                afterDatasetsDraw: function(chart, args, pluginOptions) {
+                afterDraw: function(chart, args, pluginOptions) {
                     var markers = (pluginOptions && pluginOptions.markers) || [];
-                    if (markers.length === 0) return;
+                    var dateBoundaries = (pluginOptions && pluginOptions.dateBoundaries) || [];
 
                     var ctx = chart.ctx;
                     var xAxis = chart.scales.x;
@@ -741,6 +741,68 @@
                     if (!xAxis || !yAxis) return;
 
                     ctx.save();
+
+                    // 1. Draw Red Vertical New-Date Line & Guaranteed "14 Nov • CW46" Label Below X-Axis
+                    var lastDrawnRightEdge = -9999;
+                    dateBoundaries.forEach(function(b) {
+                        var xPos = xAxis.getPixelForValue(b.index);
+                        if (xPos < xAxis.left - 5 || xPos > xAxis.right + 5) return;
+
+                        // Draw vertical red dashed line right on the first record of every new date (b.index > 0)
+                        if (b.index > 0) {
+                            ctx.beginPath();
+                            ctx.setLineDash([4, 3]);
+                            ctx.strokeStyle = '#ef4444';
+                            ctx.lineWidth = 1.5;
+                            ctx.moveTo(xPos, yAxis.top);
+                            ctx.lineTo(xPos, yAxis.bottom + 18);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+
+                            // Small red marker dot on X-axis line
+                            ctx.beginPath();
+                            ctx.arc(xPos, yAxis.bottom, 3, 0, Math.PI * 2);
+                            ctx.fillStyle = '#ef4444';
+                            ctx.fill();
+                        }
+
+                        // Draw "13 Nov • CW46" / "14 Nov • CW46" directly underneath the time row (Row 2)
+                        ctx.font = 'bold 11px Inter, sans-serif';
+                        var textW = ctx.measureText(b.label).width;
+                        var pillW = textW + 10;
+                        var pillH = 18;
+
+                        var pillX;
+                        if (b.index === 0) {
+                            pillX = Math.max(xAxis.left, xPos - 4);
+                        } else {
+                            pillX = Math.max(xAxis.left, Math.min(xPos - pillW / 2, xAxis.right - pillW));
+                        }
+
+                        // Prevent overlap if two date boundaries are extremely close
+                        if (pillX < lastDrawnRightEdge + 6) {
+                            pillX = lastDrawnRightEdge + 6;
+                        }
+                        lastDrawnRightEdge = pillX + pillW;
+
+                        var pillY = yAxis.bottom + 20;
+
+                        // Subtle badge background below X-axis
+                        ctx.fillStyle = b.index === 0 ? '#f4f4f5' : '#fef2f2';
+                        ctx.strokeStyle = b.index === 0 ? '#d4d4d8' : '#fca5a5';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.roundRect(pillX, pillY, pillW, pillH, 4);
+                        ctx.fill();
+                        ctx.stroke();
+
+                        ctx.fillStyle = b.index === 0 ? '#3f3f46' : '#dc2626';
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(b.label, pillX + 5, pillY + pillH / 2 + 0.5);
+                    });
+
+                    // 2. Draw Numbered Action Taken Badges (① Title) & Pointers at the Top
                     markers.forEach(function(m, idx) {
                         if (m.xIndex === undefined || m.xIndex < 0) return;
                         var xPos = xAxis.getPixelForValue(m.xIndex);
@@ -1602,7 +1664,7 @@
                 renderRecordsTable(allParams, records);
             }
 
-            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART (USES VISIBLE-TICK CALLBACK)
+            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART
             function renderWeeklyStackChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
@@ -1623,7 +1685,14 @@
                 });
 
                 var sortedKeys = Object.keys(bucketInfoMap).sort();
-                var stackTickMeta = sortedKeys.map(function(k) { return bucketInfoMap[k]; });
+                var displayLabels = sortedKeys.map(function(k) {
+                    var info = bucketInfoMap[k];
+                    if (groupBy === 'weekly') {
+                        return [info.cw, info.weekMonthShort];
+                    } else {
+                        return [info.dayMonth, info.cw];
+                    }
+                });
 
                 var modes = Object.keys(currentModeCounts);
                 var stackColors = [
@@ -1659,7 +1728,7 @@
                 var ctx = document.getElementById('weeklyStackChart').getContext('2d');
                 weeklyStackChartInstance = new Chart(ctx, {
                     type: 'bar',
-                    data: { labels: sortedKeys, datasets: datasets },
+                    data: { labels: displayLabels, datasets: datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
@@ -1667,29 +1736,7 @@
                         scales: {
                             x: {
                                 stacked: true,
-                                ticks: {
-                                    maxRotation: 0,
-                                    autoSkip: true,
-                                    callback: function(val, index, ticks) {
-                                        var dataIdx = ticks[index] && ticks[index].value !== undefined ? ticks[index].value : index;
-                                        var curr = stackTickMeta[dataIdx];
-                                        if (!curr) return '';
-                                        var prevDataIdx = index > 0 && ticks[index - 1] ? ticks[index - 1].value : -1;
-                                        var prev = prevDataIdx >= 0 ? stackTickMeta[prevDataIdx] : null;
-
-                                        if (groupBy === 'weekly') {
-                                            if (!prev || curr.weekMonthShort !== prev.weekMonthShort) {
-                                                return [curr.cw, curr.weekMonthShort];
-                                            }
-                                            return curr.cw;
-                                        } else {
-                                            if (!prev || curr.cw !== prev.cw) {
-                                                return [curr.dayMonth, curr.cw];
-                                            }
-                                            return curr.dayMonth;
-                                        }
-                                    }
-                                }
+                                ticks: { maxRotation: 0, autoSkip: true }
                             },
                             y: {
                                 stacked: true,
@@ -1700,7 +1747,7 @@
                         },
                         plugins: {
                             legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                            actionBadgesPlugin: { markers: markers }
+                            actionBadgesPlugin: { markers: markers, dateBoundaries: [] }
                         }
                     }
                 });
@@ -1761,7 +1808,7 @@
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
-            // CHART 2: PARAMETER TREND OVER TIME (DYNAMIC VISIBLE-TICK CALLBACK GUARANTEES EVERY DATE SHOWS & CW SHOWS ONCE)
+            // CHART 2: PARAMETER TREND OVER TIME (RED VERTICAL LINE + "14 Nov • CW46" DRAWN DIRECTLY UNDER AXIS)
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
@@ -1774,23 +1821,29 @@
                 var fullTooltipFooters = [];
                 var bucketKeys = [];
                 var bucketRecordsMap = {};
-                var tickMetaList = []; // Stores { time, date, dayMonth, cw, weekMonthShort } for every data index
+                var xAxisShortLabels = [];
+                var dateBoundaries = [];
 
                 if (trendGroup === 'raw') {
-                    filteredRecords.forEach(function(r) {
+                    var lastSeenDate = '';
+
+                    filteredRecords.forEach(function(r, idx) {
                         var tInfo = getWeekTimelineInfo(r.recorded_date);
                         var shortTime = r.recorded_time.slice(0, 5);
                         bucketKeys.push(r.recorded_date + ' ' + r.recorded_time);
+                        xAxisShortLabels.push(shortTime);
+
                         fullTooltipTitles.push(tInfo.cw + ' • ' + formatPrettyDate(r.recorded_date) + ' • ' + shortTime + ' (' + r.ng_mode + ')');
                         fullTooltipFooters.push('Operator: ' + r.operator_name);
 
-                        tickMetaList.push({
-                            time: shortTime,
-                            date: r.recorded_date,
-                            dayMonth: tInfo.dayMonth,
-                            cw: tInfo.cw,
-                            weekMonthShort: tInfo.weekMonthShort
-                        });
+                        // Every time a new date starts (e.g. 13 Nov, 14 Nov), pin a Date • CW boundary marker!
+                        if (r.recorded_date !== lastSeenDate) {
+                            dateBoundaries.push({
+                                index: idx,
+                                label: tInfo.dayMonth + ' • ' + tInfo.cw
+                            });
+                            lastSeenDate = r.recorded_date;
+                        }
                     });
                 } else {
                     var bucketMetaMap = {};
@@ -1806,22 +1859,20 @@
 
                     bucketKeys = Object.keys(bucketRecordsMap).sort();
 
-                    bucketKeys.forEach(function(k) {
+                    bucketKeys.forEach(function(k, idx) {
                         var info = bucketMetaMap[k];
                         var recs = bucketRecordsMap[k];
                         if (trendGroup === 'weekly') {
+                            xAxisShortLabels.push(info.cw + ' • ' + info.weekMonthShort);
                             fullTooltipTitles.push(info.cw + ' (' + info.weekMonthShort + ') • Weekly Average');
                         } else {
+                            xAxisShortLabels.push(info.dayMonth);
                             fullTooltipTitles.push(info.cw + ' • ' + formatPrettyDate(k) + ' • Daily Average');
+                            dateBoundaries.push({
+                                index: idx,
+                                label: info.dayMonth + ' • ' + info.cw
+                            });
                         }
-
-                        tickMetaList.push({
-                            time: '',
-                            date: k,
-                            dayMonth: info.dayMonth,
-                            cw: info.cw,
-                            weekMonthShort: info.weekMonthShort
-                        });
 
                         if (selectedParam && selectedParam !== '__ALL__') {
                             var bStats = calcStats(recs.map(function(r) { return (r.parameter_values || {})[selectedParam]; }));
@@ -1976,51 +2027,25 @@
                 var ctx = document.getElementById('trendChart').getContext('2d');
                 trendChartInstance = new Chart(ctx, {
                     type: 'line',
-                    data: { labels: bucketKeys, datasets: datasets },
+                    data: { labels: xAxisShortLabels, datasets: datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        layout: { padding: { top: 38 } },
+                        layout: { padding: { top: 38, bottom: 6 } },
                         interaction: { mode: 'index', intersect: false },
                         scales: {
                             x: {
+                                afterFit: function(scale) {
+                                    // Reserve 22px below the time row so "13 Nov • CW46" and "14 Nov • CW46" fit cleanly above the legend
+                                    if (dateBoundaries.length > 0) {
+                                        scale.height += 22;
+                                    }
+                                },
                                 ticks: {
                                     maxRotation: 0,
                                     autoSkip: true,
                                     maxTicksLimit: 12,
-                                    font: { size: 11 },
-                                    callback: function(val, index, ticks) {
-                                        // Compare current visible tick against previous visible tick!
-                                        var dataIdx = ticks[index] && ticks[index].value !== undefined ? ticks[index].value : index;
-                                        var curr = tickMetaList[dataIdx];
-                                        if (!curr) return '';
-
-                                        var prevDataIdx = index > 0 && ticks[index - 1] ? ticks[index - 1].value : -1;
-                                        var prev = prevDataIdx >= 0 ? tickMetaList[prevDataIdx] : null;
-
-                                        if (trendGroup === 'raw') {
-                                            if (!prev || curr.cw !== prev.cw) {
-                                                // First visible point of a new Calendar Week: show Time + "13 Nov • CW46"
-                                                return [curr.time, curr.dayMonth + ' • ' + curr.cw];
-                                            } else if (curr.date !== prev.date) {
-                                                // First visible point of a new Date (e.g. 14 Nov): show Time + "14 Nov"
-                                                return [curr.time, curr.dayMonth];
-                                            } else {
-                                                // Same date & same week: only show Time ("20:15")
-                                                return curr.time;
-                                            }
-                                        } else if (trendGroup === 'daily') {
-                                            if (!prev || curr.cw !== prev.cw) {
-                                                return [curr.dayMonth, curr.cw];
-                                            }
-                                            return curr.dayMonth;
-                                        } else {
-                                            if (!prev || curr.weekMonthShort !== prev.weekMonthShort) {
-                                                return [curr.cw, curr.weekMonthShort];
-                                            }
-                                            return curr.cw;
-                                        }
-                                    }
+                                    font: { size: 11 }
                                 }
                             }
                         },
@@ -2040,7 +2065,10 @@
                                     }
                                 }
                             },
-                            actionBadgesPlugin: { markers: trendMarkers }
+                            actionBadgesPlugin: {
+                                markers: trendMarkers,
+                                dateBoundaries: dateBoundaries
+                            }
                         }
                     }
                 });
