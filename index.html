@@ -180,30 +180,33 @@
             <!-- Smart Suggestions Box -->
             <div class="bg-zinc-900 text-white rounded-xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-2">
-                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded">Auto Analysis</span>
-                    <h2 class="text-sm font-bold">Key Findings & Suggestions</h2>
+                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded">Time-Normalized Analysis</span>
+                    <h2 class="text-sm font-bold">Key Findings, Trial Rate & Action Impact</h2>
                 </div>
                 <ul id="insightList" class="space-y-1.5 text-xs sm:text-sm text-zinc-200 list-disc list-inside">
-                    <li>Select a project with data to see automatic suggestions.</li>
+                    <li>Select a project with data to see automatic time-normalized suggestions.</li>
                 </ul>
             </div>
 
-            <!-- Summary Cards -->
+            <!-- Summary Cards (Now Includes NG Rate / Hr & Mean Time Between NGs) -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Total NG Records</p>
-                    <p id="statTotalNg" class="text-2xl font-bold text-zinc-900 mt-1">0</p>
-                    <p id="statDateSpan" class="text-[11px] text-zinc-500 mt-0.5">-</p>
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Total NG & Rate</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <p id="statTotalNg" class="text-2xl font-bold text-zinc-900">0</p>
+                        <span id="statNgPerHour" class="text-xs font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">0.00 NG/hr</span>
+                    </div>
+                    <p id="statDateSpan" class="text-[11px] text-zinc-500 mt-1 truncate">-</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Time Between NGs (MTBF)</p>
+                    <p id="statMtbf" class="text-lg font-bold text-blue-600 mt-1 truncate">-</p>
+                    <p id="statMtbfDesc" class="text-[11px] text-zinc-500 mt-0.5">Higher = More stable process</p>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
                     <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Top NG Mode</p>
                     <p id="statTopMode" class="text-lg font-bold text-red-600 mt-1 truncate">-</p>
                     <p id="statTopModePct" class="text-[11px] text-zinc-500 mt-0.5">0% of total NGs</p>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                    <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Correlation (r)</p>
-                    <p id="statCorrelation" class="text-lg font-bold text-zinc-900 mt-1">-</p>
-                    <p id="statCorrelationDesc" class="text-[11px] text-zinc-500 mt-0.5">Select X & Y below</p>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
                     <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Process Stability</p>
@@ -212,12 +215,12 @@
                 </div>
             </div>
 
-            <!-- CHART 1: Weekly / Daily NG Stacked Bar Chart + Action Callouts + Floating Card -->
+            <!-- CHART 1: Weekly / Daily NG Stacked Bar + NG/Hour Rate Line + Action Callouts -->
             <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm relative">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-zinc-100">
                     <div>
-                        <h3 class="text-sm font-bold text-zinc-900">1. NG Total Trend by Mode & Action Taken Markers</h3>
-                        <p class="text-xs text-zinc-500">Clean timeline grouping by Calendar Week (CW) & Month. Click any action below to inspect or edit details.</p>
+                        <h3 class="text-sm font-bold text-zinc-900">1. NG Qty (Bars) vs. NG Rate per Hour (Purple Line) & Action Markers</h3>
+                        <p class="text-xs text-zinc-500">Comparing <b>NG Qty</b> with <b>NG / Active Hour</b> prevents short trials from looking falsely low.</p>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
@@ -228,7 +231,7 @@
                 </div>
 
                 <!-- Floating Action Callout Card -->
-                <div id="floatingActionCard" class="hidden mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-sm">
+                <div id="floatingActionCard" class="hidden mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-md">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex items-center gap-2">
                             <span id="cardActionNum" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
@@ -240,7 +243,7 @@
                         <p id="cardActionDate" class="font-medium">📅 CW41 • 26 Oct 2026</p>
                         <p id="cardActionTime" class="font-medium">🕒 10:30 AM</p>
                         <p id="cardActionDesc" class="text-zinc-700 pt-1 pb-1">Adjusted clamp & guide pin to reduce variation.</p>
-                        <p id="cardActionImpact" class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100"></p>
+                        <div id="cardActionImpact" class="text-[11px] font-semibold text-blue-800 bg-blue-50 p-2 rounded-lg border border-blue-200 space-y-0.5"></div>
                     </div>
                     <div class="mt-2.5 flex items-center justify-between gap-2">
                         <span id="cardActionStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
@@ -262,7 +265,10 @@
                 <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/60">
                     <div class="flex items-center gap-2.5">
                         <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✔</div>
-                        <h3 class="text-base font-bold text-zinc-900">Action History</h3>
+                        <div>
+                            <h3 class="text-base font-bold text-zinc-900">Action History & Before/After Rate Impact</h3>
+                            <p class="text-[11px] text-zinc-500">Evaluates both Parameter Shift and Time-Normalized NG Rate (NG/hr & MTBF) before vs. after each action.</p>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="actionCountBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -281,14 +287,18 @@
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 
-                <!-- Chart 2: Parameter Trend Chart with Red Vertical New-Date Line & Guaranteed Date • CW Label Below -->
+                <!-- Chart 2: Parameter Trend Over Time + Optional NG Rate / Interval Overlay -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
-                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Trend Over Time & Action Markers</h3>
-                            <p class="text-xs text-zinc-500">Red dashed line & <b>Date • CW</b> label appear right below the axis whenever a new date starts.</p>
+                            <h3 class="text-sm font-bold text-zinc-900">2. Parameter Setting vs. NG Frequency Rate & Action Impact</h3>
+                            <p class="text-xs text-zinc-500">Purple dashed line shows <b>Instant NG Rate (NG/hr)</b> on the right axis so you can see if a parameter change truly slowed down defect frequency.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <label class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 font-semibold cursor-pointer">
+                                <input type="checkbox" id="toggleNgRateOverlay" checked class="rounded text-purple-600">
+                                <span>Overlay NG/hr Rate</span>
+                            </label>
                             <select id="trendGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-100 font-semibold text-zinc-800 outline-none">
                                 <option value="raw">View: Every Record (Raw)</option>
                                 <option value="daily">View: Daily Average</option>
@@ -370,6 +380,7 @@
                         <thead>
                             <tr class="bg-white text-zinc-500 border-b border-zinc-200">
                                 <th class="p-3">CW • Date & Time</th>
+                                <th class="p-3">Time Gap (Δt)</th>
                                 <th class="p-3">Operator</th>
                                 <th class="p-3">NG Mode</th>
                                 <th class="p-3">Parameters</th>
@@ -377,7 +388,7 @@
                             </tr>
                         </thead>
                         <tbody id="recordsTableBody" class="divide-y divide-zinc-100">
-                            <tr><td colspan="5" class="p-4 text-center text-zinc-400">Select a project to view records.</td></tr>
+                            <tr><td colspan="6" class="p-4 text-center text-zinc-400">Select a project to view records.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -663,7 +674,7 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, ACTION TAKEN EDIT/CREATE & ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, TIME-NORMALIZED NG RATE (NG/HR & MTBF) & ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -687,6 +698,65 @@
 
             if (window.supabase && typeof window.supabase.createClient === 'function') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+
+            // Convert YYYY-MM-DD + HH:MM:SS into epoch milliseconds
+            function toEpochMs(dateStr, timeStr) {
+                var t = (timeStr || '00:00:00').slice(0, 8);
+                if (t.length === 5) t += ':00';
+                var d = new Date(dateStr + 'T' + t);
+                return isNaN(d.getTime()) ? 0 : d.getTime();
+            }
+
+            // Calculate Time-Normalized NG Rate (NG / Active Hour) & Mean Time Between NGs (MTBF in mins)
+            function calcTimeRateMetrics(records) {
+                var n = records.length;
+                if (n === 0) {
+                    return { ngPerHour: 0, avgGapMins: 0, activeHours: 0 };
+                }
+                if (n === 1) {
+                    // Single defect in a short trial window: baseline 1 active hour
+                    return { ngPerHour: 1.0, avgGapMins: 60, activeHours: 1.0 };
+                }
+
+                var gapsMins = [];
+                var activeHoursSum = 0;
+
+                for (var i = 1; i < n; i++) {
+                    var t1 = toEpochMs(records[i - 1].recorded_date, records[i - 1].recorded_time);
+                    var t2 = toEpochMs(records[i].recorded_date, records[i].recorded_time);
+                    var diffMins = Math.max(1, (t2 - t1) / 60000);
+
+                    // Ignore overnight/weekend machine-off gaps (> 12 hours) when calculating active running hours
+                    if (diffMins <= 720) {
+                        gapsMins.push(diffMins);
+                        activeHoursSum += (diffMins / 60);
+                    } else {
+                        // Assume 1 hour of active run around an isolated shift start
+                        activeHoursSum += 1.0;
+                    }
+                }
+
+                // Ensure minimum 0.5 hr active window so ultra-short trials don't divide by near-zero
+                var effectiveHours = Math.max(0.5, activeHoursSum);
+                var ngPerHour = n / effectiveHours;
+                var avgGapMins = gapsMins.length > 0
+                    ? (gapsMins.reduce(function(a, b) { return a + b; }, 0) / gapsMins.length)
+                    : (effectiveHours * 60) / n;
+
+                return {
+                    ngPerHour: ngPerHour,
+                    avgGapMins: avgGapMins,
+                    activeHours: effectiveHours
+                };
+            }
+
+            function formatGapDuration(mins) {
+                if (!mins || isNaN(mins) || mins <= 0) return '-';
+                if (mins < 60) return Math.round(mins) + ' mins';
+                var hrs = Math.floor(mins / 60);
+                var rem = Math.round(mins % 60);
+                return hrs + 'h ' + rem + 'm';
             }
 
             // Returns ISO Calendar Week & Month info for any YYYY-MM-DD date
@@ -1419,8 +1489,8 @@
                 document.getElementById('cardActionDesc').textContent = act.description;
 
                 var impactEl = document.getElementById('cardActionImpact');
-                if (act.impactText) {
-                    impactEl.textContent = act.impactText;
+                if (act.impactHtml) {
+                    impactEl.innerHTML = act.impactHtml;
                     impactEl.classList.remove('hidden');
                 } else {
                     impactEl.classList.add('hidden');
@@ -1429,11 +1499,11 @@
                 if (act.status === 'Completed') {
                     statusBadge.textContent = '✔ Completed';
                     statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
-                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-sm';
+                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-md max-w-md';
                 } else {
                     statusBadge.textContent = '🕒 Monitoring';
                     statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
-                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-amber-400 shadow-md max-w-sm';
+                    card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-amber-400 shadow-md max-w-md';
                 }
 
                 editBtn.onclick = function() {
@@ -1455,6 +1525,7 @@
             document.getElementById('dashboardDateFilter').addEventListener('change', applyFiltersAndRender);
             document.getElementById('dashboardModeFilter').addEventListener('change', applyFiltersAndRender);
             document.getElementById('ngGroupSelect').addEventListener('change', renderWeeklyStackChart);
+            document.getElementById('toggleNgRateOverlay').addEventListener('change', renderTrendChart);
             document.getElementById('trendGroupSelect').addEventListener('change', renderTrendChart);
             document.getElementById('trendParamSelect').addEventListener('change', renderTrendChart);
             document.getElementById('inputLSL').addEventListener('input', renderTrendChart);
@@ -1611,39 +1682,44 @@
                 };
             }
 
-            function calcPearson(xArr, yArr) {
-                var n = Math.min(xArr.length, yArr.length);
-                if (n < 3) return null;
-                var sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
-                for (var i = 0; i < n; i++) {
-                    var x = Number(xArr[i] || 0);
-                    var y = Number(yArr[i] || 0);
-                    sumX += x; sumY += y;
-                    sumXY += x * y;
-                    sumX2 += x * x; sumY2 += y * y;
-                }
-                var num = (n * sumXY) - (sumX * sumY);
-                var den = Math.sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
-                if (den === 0) return 0;
-                return num / den;
-            }
-
+            // Compute Time-Normalized Before vs After Impact (Parameter Avg + NG/Hr Rate + MTBF) for each Action Taken
             function computeActionImpacts(allParams, records) {
                 var numParams = allParams.filter(function(p) { return p.type === 'number'; });
-                var primaryParam = numParams.length > 0 ? numParams[0].label : null;
+                var selectedFocus = document.getElementById('trendParamSelect') ? document.getElementById('trendParamSelect').value : '__ALL__';
+                var primaryParam = (selectedFocus && selectedFocus !== '__ALL__')
+                    ? selectedFocus
+                    : (numParams.length > 0 ? numParams[0].label : null);
 
                 projectActionLogs.forEach(function(act) {
                     var actStamp = act.date + ' ' + act.time;
                     var beforeRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) < actStamp; });
                     var afterRecs = records.filter(function(r) { return (r.recorded_date + ' ' + r.recorded_time) >= actStamp; });
 
+                    var bRate = calcTimeRateMetrics(beforeRecs);
+                    var aRate = calcTimeRateMetrics(afterRecs);
+
+                    var rateChangeBadge = '';
+                    if (beforeRecs.length > 0 && afterRecs.length > 0 && bRate.ngPerHour > 0) {
+                        var pctDiff = ((aRate.ngPerHour - bRate.ngPerHour) / bRate.ngPerHour) * 100;
+                        var sign = pctDiff > 0 ? '+' : '';
+                        var colorCls = pctDiff <= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700';
+                        rateChangeBadge = ' <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ' + colorCls + '">' + sign + pctDiff.toFixed(0) + '% rate</span>';
+                    }
+
+                    var paramLine = '';
                     if (primaryParam && beforeRecs.length > 0 && afterRecs.length > 0) {
                         var bStat = calcStats(beforeRecs.map(function(r) { return (r.parameter_values || {})[primaryParam]; }));
                         var aStat = calcStats(afterRecs.map(function(r) { return (r.parameter_values || {})[primaryParam]; }));
-                        act.impactText = primaryParam + ' Avg: ' + bStat.mean.toFixed(2) + ' (Before) → ' + aStat.mean.toFixed(2) + ' (After)';
-                    } else {
-                        act.impactText = 'NGs Before: ' + beforeRecs.length + ' | NGs After: ' + afterRecs.length;
+                        paramLine = '<div>⚙️ <b>' + primaryParam + ':</b> ' + bStat.mean.toFixed(3) + ' (Before) → <b>' + aStat.mean.toFixed(3) + ' (After)</b></div>';
                     }
+
+                    var rateLine = '<div>⏱️ <b>NG Rate:</b> ' + bRate.ngPerHour.toFixed(2) + ' NG/hr (' + beforeRecs.length + ' NGs) → <b>' + aRate.ngPerHour.toFixed(2) + ' NG/hr</b> (' + afterRecs.length + ' NGs)' + rateChangeBadge + '</div>';
+                    var mtbfLine = '<div>⏳ <b>Time Between NGs:</b> ' + formatGapDuration(bRate.avgGapMins) + ' → <b>' + formatGapDuration(aRate.avgGapMins) + '</b></div>';
+
+                    act.impactHtml = paramLine + rateLine + mtbfLine;
+                    act.impactSummary = (primaryParam && beforeRecs.length > 0 && afterRecs.length > 0)
+                        ? (primaryParam + ': ' + bStat.mean.toFixed(2) + ' → ' + aStat.mean.toFixed(2) + ' | Rate: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' NG/hr')
+                        : ('Rate: ' + bRate.ngPerHour.toFixed(2) + ' → ' + aRate.ngPerHour.toFixed(2) + ' NG/hr');
                 });
             }
 
@@ -1676,14 +1752,14 @@
                     row.innerHTML =
                         '<div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">' +
                             '<span class="w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ' + circleClass + '">' + act.num + '</span>' +
-                            '<div class="sm:w-56 shrink-0">' +
+                            '<div class="sm:w-52 shrink-0">' +
                                 '<p class="font-bold text-zinc-900 text-sm truncate">' + act.title + '</p>' +
                                 '<p class="text-xs text-zinc-500">' + act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time) + '</p>' +
                             '</div>' +
-                            '<div class="hidden sm:block w-px h-8 bg-zinc-200 shrink-0"></div>' +
+                            '<div class="hidden sm:block w-px h-10 bg-zinc-200 shrink-0"></div>' +
                             '<div class="min-w-0 flex-1">' +
-                                '<p class="text-xs sm:text-sm text-zinc-700">' + act.description + '</p>' +
-                                '<p class="text-[11px] font-medium text-blue-600 mt-0.5">' + (act.impactText || '') + '</p>' +
+                                '<p class="text-xs sm:text-sm font-medium text-zinc-800">' + act.description + '</p>' +
+                                '<div class="text-[11px] text-zinc-600 mt-1 space-y-0.5">' + (act.impactHtml || '') + '</div>' +
                             '</div>' +
                         '</div>' +
                         '<div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">' +
@@ -1710,10 +1786,11 @@
                 document.getElementById('statTotalNg').textContent = records.length;
 
                 if (records.length === 0) {
+                    document.getElementById('statNgPerHour').textContent = '0.00 NG/hr';
                     document.getElementById('statDateSpan').textContent = 'No records in this range';
+                    document.getElementById('statMtbf').textContent = '-';
                     document.getElementById('statTopMode').textContent = '-';
                     document.getElementById('statTopModePct').textContent = '-';
-                    document.getElementById('statCorrelation').textContent = '-';
                     document.getElementById('statStability').textContent = '-';
                     document.getElementById('insightList').innerHTML = '<li>No NG records found for this filter.</li>';
                     currentModeCounts = {};
@@ -1725,6 +1802,11 @@
                     renderRecordsTable(allParams, []);
                     return;
                 }
+
+                var rateStats = calcTimeRateMetrics(records);
+                document.getElementById('statNgPerHour').textContent = rateStats.ngPerHour.toFixed(2) + ' NG/hr';
+                document.getElementById('statMtbf').textContent = formatGapDuration(rateStats.avgGapMins);
+                document.getElementById('statMtbfDesc').textContent = 'Active span: ~' + rateStats.activeHours.toFixed(1) + ' hrs';
 
                 var firstInfo = getWeekTimelineInfo(records[0].recorded_date);
                 var lastInfo = getWeekTimelineInfo(records[records.length - 1].recorded_date);
@@ -1753,34 +1835,34 @@
                 renderRecordsTable(allParams, records);
             }
 
-            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART
+            // CHART 1: STACKED NG BARS (LEFT AXIS) + NG RATE PER HOUR LINE (RIGHT AXIS)
             function renderWeeklyStackChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
 
                 var groupBy = document.getElementById('ngGroupSelect').value;
                 var bucketInfoMap = {};
+                var bucketRecsMap = {};
 
                 filteredRecords.forEach(function(r) {
                     var tInfo = getWeekTimelineInfo(r.recorded_date);
                     var sKey = groupBy === 'weekly' ? tInfo.weekSortKey : r.recorded_date;
                     bucketInfoMap[sKey] = tInfo;
+                    if (!bucketRecsMap[sKey]) bucketRecsMap[sKey] = [];
+                    bucketRecsMap[sKey].push(r);
                 });
 
                 projectActionLogs.forEach(function(a) {
                     var tInfo = getWeekTimelineInfo(a.date);
                     var sKey = groupBy === 'weekly' ? tInfo.weekSortKey : a.date;
                     bucketInfoMap[sKey] = tInfo;
+                    if (!bucketRecsMap[sKey]) bucketRecsMap[sKey] = [];
                 });
 
                 var sortedKeys = Object.keys(bucketInfoMap).sort();
                 var displayLabels = sortedKeys.map(function(k) {
                     var info = bucketInfoMap[k];
-                    if (groupBy === 'weekly') {
-                        return [info.cw, info.weekMonthShort];
-                    } else {
-                        return [info.dayMonth, info.cw];
-                    }
+                    return groupBy === 'weekly' ? [info.cw, info.weekMonthShort] : [info.dayMonth, info.cw];
                 });
 
                 var modes = Object.keys(currentModeCounts);
@@ -1789,19 +1871,42 @@
                     '#06b6d4', '#f97316', '#ec4899', '#475569', '#14b8a6'
                 ];
 
-                var datasets = modes.map(function(mode, idx) {
+                // Compute NG Rate (NG / Active Hour) per bucket so short trials are normalized!
+                var rateLineData = sortedKeys.map(function(bKey) {
+                    var recs = bucketRecsMap[bKey] || [];
+                    return Number(calcTimeRateMetrics(recs).ngPerHour.toFixed(2));
+                });
+
+                var datasets = [
+                    {
+                        type: 'line',
+                        label: 'NG Rate (NG / Active Hour)',
+                        data: rateLineData,
+                        borderColor: '#7c3aed',
+                        backgroundColor: '#7c3aed',
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        tension: 0.25,
+                        yAxisID: 'yRate',
+                        order: 0
+                    }
+                ];
+
+                modes.forEach(function(mode, idx) {
                     var dataCounts = sortedKeys.map(function(bKey) {
-                        return filteredRecords.filter(function(r) {
-                            var rKey = groupBy === 'weekly' ? getWeekTimelineInfo(r.recorded_date).weekSortKey : r.recorded_date;
-                            return rKey === bKey && r.ng_mode === mode;
+                        return (bucketRecsMap[bKey] || []).filter(function(r) {
+                            return r.ng_mode === mode;
                         }).length;
                     });
-                    return {
+                    datasets.push({
+                        type: 'bar',
                         label: mode,
                         data: dataCounts,
                         backgroundColor: stackColors[idx % stackColors.length],
-                        borderRadius: 3
-                    };
+                        borderRadius: 3,
+                        yAxisID: 'y',
+                        order: 1
+                    });
                 });
 
                 var markers = projectActionLogs.map(function(act) {
@@ -1822,6 +1927,7 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         layout: { padding: { top: 42 } },
+                        interaction: { mode: 'index', intersect: false },
                         scales: {
                             x: {
                                 stacked: true,
@@ -1830,8 +1936,15 @@
                             y: {
                                 stacked: true,
                                 beginAtZero: true,
+                                position: 'left',
                                 ticks: { precision: 0 },
-                                title: { display: true, text: 'NG Total (Unit)' }
+                                title: { display: true, text: 'NG Qty (Units)' }
+                            },
+                            yRate: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                title: { display: true, text: 'NG Rate (NG / Hr)' }
                             }
                         },
                         plugins: {
@@ -1847,64 +1960,51 @@
                 var topMode = sortedModes[0];
                 var topPct = ((modeCounts[topMode] / records.length) * 100).toFixed(0);
 
-                insights.push('<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects. Focus on fixing this mode first.');
+                insights.push('<b>Top Priority (80/20):</b> <b>' + topMode + '</b> causes <b>' + topPct + '%</b> of all defects.');
 
-                var numParams = allParams.filter(function(p) { return p.type === 'number'; });
-                var textParams = allParams.filter(function(p) { return p.type === 'text'; });
-                var topModeRecords = records.filter(function(r) { return r.ng_mode === topMode; });
-
-                var overallStats = {};
-                numParams.forEach(function(p) {
-                    overallStats[p.label] = calcStats(records.map(function(r) { return (r.parameter_values || {})[p.label]; }));
+                // Check if any day had a short trial (low NG count, but high NG/hr rate)
+                var byDate = {};
+                records.forEach(function(r) {
+                    if (!byDate[r.recorded_date]) byDate[r.recorded_date] = [];
+                    byDate[r.recorded_date].push(r);
                 });
+                var dates = Object.keys(byDate).sort();
+                if (dates.length >= 2) {
+                    var lastDate = dates[dates.length - 1];
+                    var prevDate = dates[dates.length - 2];
+                    var lastRecs = byDate[lastDate];
+                    var prevRecs = byDate[prevDate];
+                    var lastM = calcTimeRateMetrics(lastRecs);
+                    var prevM = calcTimeRateMetrics(prevRecs);
 
-                var maxShiftParam = null;
-                var maxShiftPct = 0;
-                var shiftDirection = '';
-                var topModeMeanVal = 0;
-
-                numParams.forEach(function(p) {
-                    var l = p.label;
-                    var st = calcStats(topModeRecords.map(function(r) { return (r.parameter_values || {})[l]; }));
-                    var baseMean = overallStats[l].mean;
-                    if (baseMean !== 0 && st.n > 0) {
-                        var diffPct = ((st.mean - baseMean) / Math.abs(baseMean)) * 100;
-                        if (Math.abs(diffPct) > Math.abs(maxShiftPct)) {
-                            maxShiftPct = diffPct;
-                            maxShiftParam = l;
-                            shiftDirection = diffPct > 0 ? 'higher' : 'lower';
-                            topModeMeanVal = st.mean;
-                        }
+                    if (lastRecs.length < prevRecs.length && lastM.ngPerHour > prevM.ngPerHour) {
+                        insights.push('<b>Short Trial Warning (' + formatPrettyDate(lastDate) + '):</b> Raw NG Qty dropped from <b>' + prevRecs.length + '</b> to <b>' + lastRecs.length + '</b>, but because of the shorter running window (~' + lastM.activeHours.toFixed(1) + ' hrs), the actual defect rate increased from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b>.');
+                    } else if (lastM.ngPerHour < prevM.ngPerHour) {
+                        insights.push('<b>True Rate Improvement (' + formatPrettyDate(lastDate) + '):</b> Defect frequency improved from <b>' + prevM.ngPerHour.toFixed(2) + ' NG/hr</b> (every ' + formatGapDuration(prevM.avgGapMins) + ') down to <b>' + lastM.ngPerHour.toFixed(2) + ' NG/hr</b> (every ' + formatGapDuration(lastM.avgGapMins) + ').');
                     }
-                });
-
-                if (maxShiftParam && Math.abs(maxShiftPct) >= 3) {
-                    insights.push('<b>Number Parameter Shift:</b> When <b>' + topMode + '</b> happens, <b>' + maxShiftParam + '</b> averages <b>' + topModeMeanVal.toFixed(2) + '</b> (' + Math.abs(maxShiftPct).toFixed(1) + '% ' + shiftDirection + ' than normal average ' + overallStats[maxShiftParam].mean.toFixed(2) + ').');
                 }
 
                 if (projectActionLogs.length > 0) {
                     var latestAct = projectActionLogs[projectActionLogs.length - 1];
-                    insights.push('<b>Latest Action Taken (#' + latestAct.num + ' ' + latestAct.title + ' - ' + latestAct.dayAxisLabel + '):</b> ' + latestAct.impactText + '.');
+                    insights.push('<b>Action Impact (#' + latestAct.num + ' ' + latestAct.title + '):</b> ' + (latestAct.impactSummary || ''));
                 }
-
-                textParams.forEach(function(p) {
-                    var tStat = calcTopText(topModeRecords.map(function(r) { return (r.parameter_values || {})[p.label]; }));
-                    if (tStat.count >= 2 && tStat.pct >= 60) {
-                        insights.push('<b>Text Pattern Detected:</b> <b>' + tStat.pct + '%</b> of <b>' + topMode + '</b> cases happened with <b>' + p.label + ' = "' + tStat.top + '"</b>.');
-                    }
-                });
 
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
-            // CHART 2: PARAMETER TREND OVER TIME (RED VERTICAL LINE + "14 Nov • CW46" DRAWN DIRECTLY UNDER AXIS)
+            // CHART 2: PARAMETER TREND OVER TIME + INSTANT NG RATE (NG/HR) OVERLAY
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
 
+                // Recompute action impacts so the selected Focus Parameter is reflected in Action History
+                computeActionImpacts(getProjectParams(currentProject), filteredRecords);
+                renderActionHistoryList();
+
                 var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
                 var selectedParam = document.getElementById('trendParamSelect').value;
-                var trendGroup = document.getElementById('trendGroupSelect').value;
+                var trendGroup = document.getElementById('trendGroupSelect').value; // 'raw', 'daily', 'weekly'
+                var showRateOverlay = document.getElementById('toggleNgRateOverlay').checked;
 
                 var fullTooltipTitles = [];
                 var fullTooltipFooters = [];
@@ -1912,6 +2012,7 @@
                 var bucketRecordsMap = {};
                 var xAxisShortLabels = [];
                 var dateBoundaries = [];
+                var instantNgRateSeries = [];
 
                 if (trendGroup === 'raw') {
                     var lastSeenDate = '';
@@ -1922,8 +2023,21 @@
                         bucketKeys.push(r.recorded_date + ' ' + r.recorded_time);
                         xAxisShortLabels.push(shortTime);
 
+                        // Calculate instantaneous NG rate (NG/hr) from rolling 3-defect window
+                        var startIdx = Math.max(0, idx - 2);
+                        var windowRecs = filteredRecords.slice(startIdx, idx + 1);
+                        var instRate = calcTimeRateMetrics(windowRecs);
+                        instantNgRateSeries.push(Number(instRate.ngPerHour.toFixed(2)));
+
+                        var gapStr = 'First record';
+                        if (idx > 0) {
+                            var prevMs = toEpochMs(filteredRecords[idx - 1].recorded_date, filteredRecords[idx - 1].recorded_time);
+                            var currMs = toEpochMs(r.recorded_date, r.recorded_time);
+                            gapStr = formatGapDuration(Math.max(1, (currMs - prevMs) / 60000)) + ' since previous NG';
+                        }
+
                         fullTooltipTitles.push(tInfo.cw + ' • ' + formatPrettyDate(r.recorded_date) + ' • ' + shortTime + ' (' + r.ng_mode + ')');
-                        fullTooltipFooters.push('Operator: ' + r.operator_name);
+                        fullTooltipFooters.push('Time Gap: ' + gapStr + ' | Rolling Rate: ' + instRate.ngPerHour.toFixed(2) + ' NG/hr');
 
                         if (r.recorded_date !== lastSeenDate) {
                             dateBoundaries.push({
@@ -1950,6 +2064,9 @@
                     bucketKeys.forEach(function(k, idx) {
                         var info = bucketMetaMap[k];
                         var recs = bucketRecordsMap[k];
+                        var grpRate = calcTimeRateMetrics(recs);
+                        instantNgRateSeries.push(Number(grpRate.ngPerHour.toFixed(2)));
+
                         if (trendGroup === 'weekly') {
                             xAxisShortLabels.push(info.cw + ' • ' + info.weekMonthShort);
                             fullTooltipTitles.push(info.cw + ' (' + info.weekMonthShort + ') • Weekly Average');
@@ -1962,12 +2079,7 @@
                             });
                         }
 
-                        if (selectedParam && selectedParam !== '__ALL__') {
-                            var bStats = calcStats(recs.map(function(r) { return (r.parameter_values || {})[selectedParam]; }));
-                            fullTooltipFooters.push('Samples: n = ' + bStats.n + ' | Min: ' + bStats.min.toFixed(2) + ' | Max: ' + bStats.max.toFixed(2));
-                        } else {
-                            fullTooltipFooters.push('Total Records in Group: n = ' + recs.length);
-                        }
+                        fullTooltipFooters.push('NG Qty: ' + recs.length + ' | Active Span: ~' + grpRate.activeHours.toFixed(1) + 'h | Rate: ' + grpRate.ngPerHour.toFixed(2) + ' NG/hr');
                     });
                 }
 
@@ -2005,7 +2117,8 @@
                             borderColor: c,
                             backgroundColor: c,
                             tension: 0.2,
-                            pointRadius: 3.5
+                            pointRadius: 3.5,
+                            yAxisID: 'y'
                         });
                     });
                     document.getElementById('statStability').textContent = 'All Number Parameters' + modeSuffix;
@@ -2048,7 +2161,8 @@
                         backgroundColor: '#18181b',
                         pointRadius: 4.5,
                         borderWidth: 2,
-                        tension: 0.15
+                        tension: 0.15,
+                        yAxisID: 'y'
                     });
 
                     datasets.push({
@@ -2057,7 +2171,8 @@
                         borderColor: '#2563eb',
                         borderWidth: 2,
                         pointRadius: 0,
-                        tension: 0.35
+                        tension: 0.35,
+                        yAxisID: 'y'
                     });
 
                     if (overallSt.n > 0) {
@@ -2067,7 +2182,8 @@
                             borderColor: '#10b981',
                             borderDash: [4, 4],
                             borderWidth: 1.5,
-                            pointRadius: 0
+                            pointRadius: 0,
+                            yAxisID: 'y'
                         });
                     }
 
@@ -2078,7 +2194,8 @@
                             borderColor: '#ef4444',
                             borderDash: [6, 4],
                             borderWidth: 1.5,
-                            pointRadius: 0
+                            pointRadius: 0,
+                            yAxisID: 'y'
                         });
                     }
 
@@ -2089,9 +2206,26 @@
                             borderColor: '#f97316',
                             borderDash: [6, 4],
                             borderWidth: 1.5,
-                            pointRadius: 0
+                            pointRadius: 0,
+                            yAxisID: 'y'
                         });
                     }
+                }
+
+                // Overlay NG Rate (NG/hr) on Right Y-Axis to link Parameter Setting -> Defect Speed
+                if (showRateOverlay) {
+                    datasets.push({
+                        label: 'NG Rate (NG / Hr) [Right Axis]',
+                        data: instantNgRateSeries,
+                        borderColor: '#9333ea',
+                        backgroundColor: 'rgba(147, 51, 234, 0.08)',
+                        borderDash: [3, 3],
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: true,
+                        yAxisID: 'yRate'
+                    });
                 }
 
                 var trendMarkers = [];
@@ -2112,6 +2246,35 @@
                     });
                 }
 
+                var scalesConfig = {
+                    x: {
+                        afterFit: function(scale) {
+                            if (dateBoundaries.length > 0) {
+                                scale.height += 22;
+                            }
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 12,
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        position: 'left',
+                        title: { display: true, text: selectedParam === '__ALL__' ? 'Parameter Value' : selectedParam }
+                    }
+                };
+
+                if (showRateOverlay) {
+                    scalesConfig.yRate = {
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'NG Rate (NG / Hr)' }
+                    };
+                }
+
                 var ctx = document.getElementById('trendChart').getContext('2d');
                 trendChartInstance = new Chart(ctx, {
                     type: 'line',
@@ -2121,21 +2284,7 @@
                         maintainAspectRatio: false,
                         layout: { padding: { top: 38, bottom: 6 } },
                         interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: {
-                                afterFit: function(scale) {
-                                    if (dateBoundaries.length > 0) {
-                                        scale.height += 22;
-                                    }
-                                },
-                                ticks: {
-                                    maxRotation: 0,
-                                    autoSkip: true,
-                                    maxTicksLimit: 12,
-                                    font: { size: 11 }
-                                }
-                            }
-                        },
+                        scales: scalesConfig,
                         plugins: {
                             legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
                             tooltip: {
@@ -2167,20 +2316,6 @@
 
                 var xLabel = document.getElementById('scatterXSelect').value || 'Param 1';
                 var yLabel = document.getElementById('scatterYSelect').value || 'Param 2';
-
-                var xArr = filteredRecords.map(function(r) { return (r.parameter_values || {})[xLabel]; });
-                var yArr = filteredRecords.map(function(r) { return (r.parameter_values || {})[yLabel]; });
-                var rVal = calcPearson(xArr, yArr);
-
-                if (rVal === null || isNaN(rVal)) {
-                    document.getElementById('statCorrelation').textContent = 'N/A';
-                    document.getElementById('statCorrelationDesc').textContent = 'Need at least 3 number records';
-                } else {
-                    var absR = Math.abs(rVal);
-                    var strength = absR > 0.7 ? 'Strong' : (absR > 0.4 ? 'Moderate' : 'Weak');
-                    document.getElementById('statCorrelation').textContent = 'r = ' + rVal.toFixed(2) + ' (' + strength + ')';
-                    document.getElementById('statCorrelationDesc').textContent = xLabel + ' vs ' + yLabel;
-                }
 
                 var palette = [
                     '#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea',
@@ -2320,11 +2455,25 @@
             function renderRecordsTable(allParams, records) {
                 var tbody = document.getElementById('recordsTableBody');
                 if (records.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-zinc-400">No records found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-zinc-400">No records found.</td></tr>';
                     return;
                 }
                 tbody.innerHTML = '';
-                records.slice().reverse().forEach(function(r) {
+
+                // Pre-calculate time gap (Δt) between consecutive NGs
+                var enriched = records.map(function(r, idx) {
+                    var gapLabel = '-';
+                    if (idx > 0) {
+                        var t1 = toEpochMs(records[idx - 1].recorded_date, records[idx - 1].recorded_time);
+                        var t2 = toEpochMs(r.recorded_date, r.recorded_time);
+                        var mins = Math.max(1, (t2 - t1) / 60000);
+                        gapLabel = formatGapDuration(mins);
+                    }
+                    return { rec: r, gap: gapLabel };
+                });
+
+                enriched.slice().reverse().forEach(function(item) {
+                    var r = item.rec;
                     var vals = r.parameter_values || {};
                     var tInfo = getWeekTimelineInfo(r.recorded_date);
                     var paramStr = allParams.map(function(p) {
@@ -2335,6 +2484,7 @@
                     var tr = document.createElement('tr');
                     tr.className = 'hover:bg-zinc-50';
                     tr.innerHTML = '<td class="p-3 whitespace-nowrap text-zinc-600"><span class="font-semibold text-zinc-800">' + tInfo.cw + '</span> • ' + formatPrettyDate(r.recorded_date) + ' ' + r.recorded_time.slice(0, 5) + '</td>' +
+                        '<td class="p-3 whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold text-xs">' + item.gap + '</span></td>' +
                         '<td class="p-3 font-medium">' + r.operator_name + '</td>' +
                         '<td class="p-3 font-semibold text-red-600">' + r.ng_mode + '</td>' +
                         '<td class="p-3">' + paramStr + '</td>' +
@@ -2350,17 +2500,24 @@
                 }
                 var allParams = getProjectParams(currentProject);
                 var labels = allParams.map(function(p) { return p.label; });
-                var headers = ['Date', 'Time', 'CW', 'Month', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
+                var headers = ['Date', 'Time', 'CW', 'Month', 'Minutes_Since_Prev_NG', 'Operator', 'NG_Mode'].concat(labels).concat(['Remarks']);
                 var rows = [headers.join(',')];
 
-                filteredRecords.forEach(function(r) {
+                filteredRecords.forEach(function(r, idx) {
                     var vals = r.parameter_values || {};
                     var tInfo = getWeekTimelineInfo(r.recorded_date);
+                    var gapMins = '';
+                    if (idx > 0) {
+                        var t1 = toEpochMs(filteredRecords[idx - 1].recorded_date, filteredRecords[idx - 1].recorded_time);
+                        var t2 = toEpochMs(r.recorded_date, r.recorded_time);
+                        gapMins = Math.round(Math.max(1, (t2 - t1) / 60000));
+                    }
                     var row = [
                         r.recorded_date,
                         r.recorded_time,
                         tInfo.cw,
                         tInfo.monthShort,
+                        gapMins,
                         '"' + (r.operator_name || '').replace(/"/g, '""') + '"',
                         '"' + (r.ng_mode || '').replace(/"/g, '""') + '"'
                     ];
