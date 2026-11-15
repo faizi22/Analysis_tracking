@@ -154,7 +154,7 @@
                         <span id="actionEditBadge" class="hidden px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-amber-200 text-amber-900">Edit Mode</span>
                         <div>
                             <h3 id="actionModalTitle" class="text-sm font-bold text-emerald-950">Log Engineering Action Taken</h3>
-                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">Pin an action to the timeline and optionally log trial Run Hours / Total Output to measure exact Defect %.</p>
+                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">Pin an action to the timeline, log trial metrics, and attach a PNG / PowerPoint report.</p>
                         </div>
                     </div>
                     <button type="button" onclick="window.cancelEditAction(true)" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950 px-2.5 py-1 rounded bg-white border border-emerald-200">
@@ -180,7 +180,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="sm:col-span-3">
+                    <div class="sm:col-span-4">
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Action Description (Details) <span class="text-red-500">*</span></label>
                         <input type="text" id="actionDesc" required placeholder="e.g. Adjusted clamp & guide pin to reduce variation." class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
                     </div>
@@ -192,7 +192,17 @@
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Total Output (Opt)</label>
                         <input type="number" step="1" min="0" id="actionTotalOutput" placeholder="e.g. 800" class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
                     </div>
-                    <div class="flex items-end gap-1.5">
+                    <div class="sm:col-span-4">
+                        <label class="block text-xs font-semibold text-emerald-900 mb-1">
+                            Attach Engineering Report (PNG, JPG, PDF, PPT / PPTX)
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="file" id="actionReportFile" accept=".png,.jpg,.jpeg,.pdf,.ppt,.pptx,image/png,image/jpeg,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                                class="w-full border border-emerald-300 rounded-lg p-1.5 text-xs bg-white file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer">
+                            <span id="existingReportLabel" class="hidden text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-200 whitespace-nowrap"></span>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2 flex items-end gap-1.5">
                         <button type="submit" id="actionSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition">
                             Pin Action
                         </button>
@@ -214,7 +224,7 @@
                 </ul>
             </div>
 
-            <!-- Summary Cards (Includes NG Qty, NG/hr, Defect Rate %, and MTBF) -->
+            <!-- Summary Cards -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
                     <p class="text-[11px] text-zinc-400 uppercase font-bold tracking-wider">Total NG & Hourly Rate</p>
@@ -275,9 +285,14 @@
                         <span id="cardActionStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
                             ✔ Completed
                         </span>
-                        <button type="button" id="cardActionEditBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
-                            Edit Action
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" id="cardActionReportBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition">
+                                📂 View Report
+                            </button>
+                            <button type="button" id="cardActionEditBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
+                                Edit Action
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -288,12 +303,12 @@
 
             <!-- ACTION HISTORY LIST -->
             <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-zinc-200 flex items-center justify-between bg-zinc-50/60">
+                <div class="p-4 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-zinc-50/60">
                     <div class="flex items-center gap-2.5">
                         <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✔</div>
                         <div>
                             <h3 class="text-base font-bold text-zinc-900">Action History & Before/After Impact</h3>
-                            <p class="text-[11px] text-zinc-500">Compares Parameter Avg, NG/hr Rate, Defect Rate (%), and MTBF before vs. after each action.</p>
+                            <p class="text-[11px] text-zinc-500"><b>Double-click</b> any row to view attached PNG / PowerPoint report. Single-click for quick summary.</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -504,6 +519,35 @@
         </div>
     </main>
 
+    <!-- ================= REPORT VIEWER MODAL (DOUBLE CLICK ACTION) ================= -->
+    <div id="reportViewerModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this) window.closeReportViewer();">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-zinc-200">
+            <!-- Modal Header -->
+            <div class="px-5 py-3.5 border-b border-zinc-200 flex items-center justify-between bg-zinc-50 gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span id="rvActionNum" class="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                    <div class="min-w-0">
+                        <h3 id="rvTitle" class="font-bold text-zinc-900 text-sm sm:text-base truncate">Action Report</h3>
+                        <p id="rvMeta" class="text-xs text-zinc-500 truncate">CW46 • Date • File Name</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a id="rvDownloadBtn" href="#" download target="_blank" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition">
+                        ⬇ Download Report
+                    </a>
+                    <button type="button" onclick="window.closeReportViewer()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-200 hover:bg-zinc-300 text-zinc-800 transition">
+                        ✕ Close
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body (Preview Area) -->
+            <div id="rvContentArea" class="p-5 overflow-auto flex-1 flex flex-col items-center justify-center bg-zinc-100 min-h-[320px]">
+                <!-- Kandungan PNG / PDF / PowerPoint akan dipaparkan di sini -->
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT 1: TAB NAVIGATION, SECURITY & ADMIN 15-PARAMETER BUILDER -->
     <script>
         var ADMIN_PASSWORD = 'mesin2026';
@@ -545,8 +589,15 @@
             document.getElementById('actionStatus').value = 'Completed';
             var rhEl = document.getElementById('actionRunHours');
             var toEl = document.getElementById('actionTotalOutput');
+            var fileEl = document.getElementById('actionReportFile');
+            var existLbl = document.getElementById('existingReportLabel');
             if (rhEl) rhEl.value = '';
             if (toEl) toEl.value = '';
+            if (fileEl) fileEl.value = '';
+            if (existLbl) {
+                existLbl.textContent = '';
+                existLbl.classList.add('hidden');
+            }
             window.setCurrentDateTime();
 
             var box = document.getElementById('actionModalBox');
@@ -559,7 +610,7 @@
             box.className = (closeBox ? 'hidden ' : '') + 'bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm';
             badge.classList.add('hidden');
             titleEl.textContent = 'Log Engineering Action Taken';
-            subEl.textContent = 'Pin an action to the timeline and optionally log trial Run Hours / Total Output to measure exact Defect %.';
+            subEl.textContent = 'Pin an action to the timeline, log trial metrics, and attach a PNG / PowerPoint report.';
             submitBtn.textContent = 'Pin Action';
             submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
             cancelBtn.classList.add('hidden');
@@ -704,13 +755,14 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, EXACT DEFECT RATE (%), RUN HOURS & ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, REPORT UPLOAD/VIEWER, EXACT DEFECT RATE (%) & ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
             var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGhxZG9mb2phdW91ampyc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2Njc2NjMsImV4cCI6MjExMDI0MzY2M30.6HwO-5MOsEALyArLdW50n50lIk0FcNRAXYT33i5gnzY';
 
             var ACTION_MARKER_MODE = '__ACTION_TAKEN__';
+            var REPORT_BUCKET = 'action-reports';
             var SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
             var supabaseClient = null;
@@ -729,6 +781,119 @@
             if (window.supabase && typeof window.supabase.createClient === 'function') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
+
+            // Helper: Upload report file to Supabase Storage (with automatic Base64 fallback <= 3MB)
+            async function uploadActionReportFile(file) {
+                if (!file) return null;
+
+                var cleanName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                var uploadRes = await supabaseClient.storage
+                    .from(REPORT_BUCKET)
+                    .upload(cleanName, file, { upsert: true });
+
+                if (!uploadRes.error) {
+                    var pubData = supabaseClient.storage.from(REPORT_BUCKET).getPublicUrl(cleanName);
+                    return {
+                        url: pubData.data.publicUrl,
+                        name: file.name,
+                        type: file.type || ''
+                    };
+                }
+
+                // Fallback: If Storage bucket is not created yet, store directly in parameter_values (limit ~3MB)
+                if (file.size <= 3 * 1024 * 1024) {
+                    return new Promise(function(resolve, reject) {
+                        var reader = new FileReader();
+                        reader.onload = function() {
+                            resolve({
+                                url: reader.result,
+                                name: file.name,
+                                type: file.type || ''
+                            });
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                } else {
+                    throw new Error('Fail melebihi 3MB. Sila buat public bucket bernama "action-reports" di Supabase Storage.');
+                }
+            }
+
+            // Open Report Viewer on DOUBLE-CLICK of Action Taken
+            window.openActionReportViewer = function(actionId) {
+                var act = projectActionLogs.find(function(a) { return a.id === actionId; });
+                if (!act) return;
+
+                var modal = document.getElementById('reportViewerModal');
+                var numEl = document.getElementById('rvActionNum');
+                var titleEl = document.getElementById('rvTitle');
+                var metaEl = document.getElementById('rvMeta');
+                var dlBtn = document.getElementById('rvDownloadBtn');
+                var contentArea = document.getElementById('rvContentArea');
+
+                numEl.textContent = act.num;
+                numEl.className = 'w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' +
+                    (act.status === 'Completed' ? 'bg-emerald-600' : 'bg-amber-500');
+                titleEl.textContent = 'Action #' + act.num + ': ' + act.title;
+                metaEl.textContent = act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + (act.reportName || 'Tiada fail dilampirkan');
+
+                if (!act.reportUrl) {
+                    dlBtn.classList.add('hidden');
+                    contentArea.innerHTML =
+                        '<div class="text-center max-w-md p-6 bg-white rounded-xl border border-zinc-200 shadow-xs">' +
+                            '<p class="text-2xl mb-2">📂</p>' +
+                            '<h4 class="font-bold text-zinc-900 text-sm">Tiada Fail Report Dilampirkan</h4>' +
+                            '<p class="text-xs text-zinc-500 mt-1 mb-4">Team member anda belum memuat naik fail PNG atau PowerPoint untuk Action #' + act.num + '.</p>' +
+                            '<button type="button" onclick="window.closeReportViewer(); window.startEditAction(\'' + act.id + '\');" ' +
+                                'class="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition">' +
+                                '+ Upload Report Sekarang (Edit Action)' +
+                            '</button>' +
+                        '</div>';
+                    modal.classList.remove('hidden');
+                    return;
+                }
+
+                dlBtn.classList.remove('hidden');
+                dlBtn.href = act.reportUrl;
+                dlBtn.setAttribute('download', act.reportName || ('Action_' + act.num + '_Report'));
+
+                var lowerName = (act.reportName || '').toLowerCase();
+                var isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(lowerName) || (act.reportType && act.reportType.startsWith('image/'));
+                var isPdf = /\.pdf$/i.test(lowerName) || act.reportType === 'application/pdf';
+                var isPpt = /\.(ppt|pptx)$/i.test(lowerName);
+
+                if (isImage) {
+                    contentArea.innerHTML =
+                        '<img src="' + act.reportUrl + '" alt="' + act.reportName + '" class="max-w-full max-h-[72vh] rounded-lg shadow-md border border-zinc-200 bg-white object-contain">';
+                } else if (isPdf) {
+                    contentArea.innerHTML =
+                        '<iframe src="' + act.reportUrl + '" class="w-full h-[72vh] rounded-lg border border-zinc-200 bg-white"></iframe>';
+                } else if (isPpt && act.reportUrl.startsWith('http')) {
+                    var officeViewerUrl = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(act.reportUrl);
+                    contentArea.innerHTML =
+                        '<div class="w-full space-y-2">' +
+                            '<iframe src="' + officeViewerUrl + '" class="w-full h-[68vh] rounded-lg border border-zinc-200 bg-white"></iframe>' +
+                            '<p class="text-[11px] text-center text-zinc-500">Jika pratonton PowerPoint tidak muncul, klik butang <b>Download Report</b> di penjuru atas kanan.</p>' +
+                        '</div>';
+                } else {
+                    contentArea.innerHTML =
+                        '<div class="text-center max-w-md p-6 bg-white rounded-xl border border-zinc-200 shadow-xs">' +
+                            '<div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 font-bold text-sm flex items-center justify-center mx-auto mb-3">PPT</div>' +
+                            '<h4 class="font-bold text-zinc-900 text-sm break-all">' + act.reportName + '</h4>' +
+                            '<p class="text-xs text-zinc-500 mt-1 mb-4">Fail PowerPoint sedia untuk dibuka atau dimuat turun.</p>' +
+                            '<a href="' + act.reportUrl + '" download="' + act.reportName + '" target="_blank" ' +
+                                'class="inline-block px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition">' +
+                                '⬇ Buka / Muat Turun PowerPoint' +
+                            '</a>' +
+                        '</div>';
+                }
+
+                modal.classList.remove('hidden');
+            };
+
+            window.closeReportViewer = function() {
+                document.getElementById('reportViewerModal').classList.add('hidden');
+            };
 
             function toEpochMs(dateStr, timeStr) {
                 var t = (timeStr || '00:00:00').slice(0, 8);
@@ -907,7 +1072,7 @@
                 });
             }
 
-            // Custom Chart.js Plugin: Draws Red Vertical New-Date Line + Date•CW Pill Below Axis + Numbered Action Badges
+            // Custom Chart.js Plugin
             var actionBadgesPlugin = {
                 id: 'actionBadgesPlugin',
                 afterDraw: function(chart, args, pluginOptions) {
@@ -1371,7 +1536,7 @@
                 }
             });
 
-            // SAVE OPERATOR NG RECORD (WITH OPTIONAL RUN HOURS & TOTAL OUTPUT)
+            // SAVE OPERATOR NG RECORD
             document.getElementById('ngForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient) return;
@@ -1432,6 +1597,19 @@
                 document.getElementById('actionRunHours').value = act.runHours ? act.runHours : '';
                 document.getElementById('actionTotalOutput').value = act.totalOutput ? act.totalOutput : '';
 
+                var fileEl = document.getElementById('actionReportFile');
+                var existLbl = document.getElementById('existingReportLabel');
+                if (fileEl) fileEl.value = '';
+                if (existLbl) {
+                    if (act.reportName) {
+                        existLbl.textContent = '📎 Current: ' + act.reportName;
+                        existLbl.classList.remove('hidden');
+                    } else {
+                        existLbl.textContent = '';
+                        existLbl.classList.add('hidden');
+                    }
+                }
+
                 var box = document.getElementById('actionModalBox');
                 var badge = document.getElementById('actionEditBadge');
                 var titleEl = document.getElementById('actionModalTitle');
@@ -1442,7 +1620,7 @@
                 box.className = 'bg-amber-50/80 border border-amber-300 rounded-xl p-5 shadow-sm';
                 badge.classList.remove('hidden');
                 titleEl.textContent = 'Edit Action Taken #' + act.num + ': ' + act.title;
-                subEl.textContent = 'Modify Title, Date, Time, Status, Description, or Trial Run Hours / Output below.';
+                subEl.textContent = 'Modify details or upload/replace PNG or PowerPoint report below.';
                 submitBtn.textContent = 'Update';
                 submitBtn.className = 'flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
                 cancelBtn.classList.remove('hidden');
@@ -1450,7 +1628,7 @@
                 box.scrollIntoView({ behavior: 'smooth', block: 'center' });
             };
 
-            // SAVE NEW OR UPDATE EXISTING ACTION TAKEN RECORD (WITH OPTIONAL RUN HOURS & TOTAL OUTPUT)
+            // SAVE NEW OR UPDATE EXISTING ACTION TAKEN RECORD (WITH REPORT ATTACHMENT)
             document.getElementById('actionTakenForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient || !currentProject) {
@@ -1458,59 +1636,86 @@
                     return;
                 }
 
-                var title = document.getElementById('actionTitle').value.trim();
-                var desc = document.getElementById('actionDesc').value.trim();
-                var aDate = document.getElementById('actionDate').value;
-                var aTime = document.getElementById('actionTime').value;
-                if (aTime.length === 5) aTime = aTime + ':00';
-                var aStatus = document.getElementById('actionStatus').value;
+                var submitBtn = document.getElementById('actionSubmitBtn');
+                var origBtnText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
 
-                var aRunHrs = document.getElementById('actionRunHours').value.trim();
-                var aTotOut = document.getElementById('actionTotalOutput').value.trim();
+                try {
+                    var title = document.getElementById('actionTitle').value.trim();
+                    var desc = document.getElementById('actionDesc').value.trim();
+                    var aDate = document.getElementById('actionDate').value;
+                    var aTime = document.getElementById('actionTime').value;
+                    if (aTime.length === 5) aTime = aTime + ':00';
+                    var aStatus = document.getElementById('actionStatus').value;
 
-                var pVals = {
-                    _is_action: true,
-                    title: title,
-                    description: desc,
-                    status: aStatus
-                };
-                if (aRunHrs !== '' && Number(aRunHrs) > 0) pVals._run_hours = Number(aRunHrs);
-                if (aTotOut !== '' && Number(aTotOut) > 0) pVals._total_output = Number(aTotOut);
+                    var aRunHrs = document.getElementById('actionRunHours').value.trim();
+                    var aTotOut = document.getElementById('actionTotalOutput').value.trim();
+                    var fileInput = document.getElementById('actionReportFile');
+                    var selectedFile = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
 
-                var actionPayload = {
-                    project_id: currentProject.id,
-                    recorded_date: aDate,
-                    recorded_time: aTime,
-                    operator_name: aStatus,
-                    ng_mode: ACTION_MARKER_MODE,
-                    parameter_values: pVals,
-                    remarks: desc
-                };
+                    var pVals = {
+                        _is_action: true,
+                        title: title,
+                        description: desc,
+                        status: aStatus
+                    };
+                    if (aRunHrs !== '' && Number(aRunHrs) > 0) pVals._run_hours = Number(aRunHrs);
+                    if (aTotOut !== '' && Number(aTotOut) > 0) pVals._total_output = Number(aTotOut);
 
-                if (window.editingActionId) {
-                    var targetActId = window.editingActionId;
-                    var updateRes = await supabaseClient
-                        .from('ng_records')
-                        .update(actionPayload)
-                        .eq('id', targetActId);
+                    var existingAct = window.editingActionId ? projectActionLogs.find(function(a) { return a.id === window.editingActionId; }) : null;
 
-                    if (updateRes.error) {
-                        window.showAlert('Failed to update Action Taken: ' + updateRes.error.message, 'error');
-                    } else {
-                        window.showAlert('Action "' + title + '" updated successfully!', 'success');
-                        document.getElementById('floatingActionCard').classList.add('hidden');
-                        window.cancelEditAction(true);
-                        loadDashboardData(currentProject.id);
+                    if (selectedFile) {
+                        var uploadedMeta = await uploadActionReportFile(selectedFile);
+                        pVals._report_url = uploadedMeta.url;
+                        pVals._report_name = uploadedMeta.name;
+                        pVals._report_type = uploadedMeta.type;
+                    } else if (existingAct && existingAct.reportUrl) {
+                        pVals._report_url = existingAct.reportUrl;
+                        pVals._report_name = existingAct.reportName;
+                        pVals._report_type = existingAct.reportType;
                     }
-                } else {
-                    var res = await supabaseClient.from('ng_records').insert([actionPayload]);
-                    if (res.error) {
-                        window.showAlert('Failed to save Action Taken: ' + res.error.message, 'error');
+
+                    var actionPayload = {
+                        project_id: currentProject.id,
+                        recorded_date: aDate,
+                        recorded_time: aTime,
+                        operator_name: aStatus,
+                        ng_mode: ACTION_MARKER_MODE,
+                        parameter_values: pVals,
+                        remarks: desc
+                    };
+
+                    if (window.editingActionId) {
+                        var targetActId = window.editingActionId;
+                        var updateRes = await supabaseClient
+                            .from('ng_records')
+                            .update(actionPayload)
+                            .eq('id', targetActId);
+
+                        if (updateRes.error) {
+                            window.showAlert('Failed to update Action Taken: ' + updateRes.error.message, 'error');
+                        } else {
+                            window.showAlert('Action "' + title + '" updated successfully!', 'success');
+                            document.getElementById('floatingActionCard').classList.add('hidden');
+                            window.cancelEditAction(true);
+                            loadDashboardData(currentProject.id);
+                        }
                     } else {
-                        window.showAlert('Action "' + title + '" pinned to chart!', 'success');
-                        window.cancelEditAction(true);
-                        loadDashboardData(currentProject.id);
+                        var res = await supabaseClient.from('ng_records').insert([actionPayload]);
+                        if (res.error) {
+                            window.showAlert('Failed to save Action Taken: ' + res.error.message, 'error');
+                        } else {
+                            window.showAlert('Action "' + title + '" pinned to chart!', 'success');
+                            window.cancelEditAction(true);
+                            loadDashboardData(currentProject.id);
+                        }
                     }
+                } catch (err) {
+                    window.showAlert(err.message || 'Error uploading report.', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = origBtnText;
                 }
             });
 
@@ -1528,6 +1733,11 @@
                 };
                 if (act.runHours) updatedVals._run_hours = act.runHours;
                 if (act.totalOutput) updatedVals._total_output = act.totalOutput;
+                if (act.reportUrl) {
+                    updatedVals._report_url = act.reportUrl;
+                    updatedVals._report_name = act.reportName;
+                    updatedVals._report_type = act.reportType;
+                }
 
                 var res = await supabaseClient
                     .from('ng_records')
@@ -1569,6 +1779,7 @@
                 var numBadge = document.getElementById('cardActionNum');
                 var statusBadge = document.getElementById('cardActionStatus');
                 var editBtn = document.getElementById('cardActionEditBtn');
+                var reportBtn = document.getElementById('cardActionReportBtn');
 
                 numBadge.textContent = act.num;
                 numBadge.className = 'w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' +
@@ -1596,6 +1807,11 @@
                     statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
                     card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-amber-400 shadow-md max-w-md';
                 }
+
+                reportBtn.textContent = act.reportUrl ? '📂 View Report' : '+ Upload Report';
+                reportBtn.onclick = function() {
+                    window.openActionReportViewer(act.id);
+                };
 
                 editBtn.onclick = function() {
                     window.startEditAction(act.id);
@@ -1703,7 +1919,10 @@
                             description: pv.description || row.remarks || '',
                             status: pv.status || row.operator_name || 'Completed',
                             runHours: pv._run_hours || null,
-                            totalOutput: pv._total_output || null
+                            totalOutput: pv._total_output || null,
+                            reportUrl: pv._report_url || null,
+                            reportName: pv._report_name || null,
+                            reportType: pv._report_type || null
                         });
                     } else {
                         rawProjectRecords.push(row);
@@ -1775,7 +1994,6 @@
                 };
             }
 
-            // Compute Time-Normalized & Output-Normalized Before vs After Impact for each Action Taken
             function computeActionImpacts(allParams, records) {
                 var numParams = allParams.filter(function(p) { return p.type === 'number'; });
                 var selectedFocus = document.getElementById('trendParamSelect') ? document.getElementById('trendParamSelect').value : '__ALL__';
@@ -1827,6 +2045,7 @@
                 });
             }
 
+            // RENDER ACTION HISTORY LIST (SUPPORTS SINGLE-CLICK INSPECT & DOUBLE-CLICK REPORT VIEWER)
             function renderActionHistoryList() {
                 var badge = document.getElementById('actionCountBadge');
                 var container = document.getElementById('actionHistoryContainer');
@@ -1846,6 +2065,10 @@
                         : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100';
                     var pillLabel = isComp ? '✔ Completed' : '🕒 Monitoring';
 
+                    var reportBadge = act.reportUrl
+                        ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200" title="Double-click row to open report">📎 Report</span>'
+                        : '';
+
                     var trialTags = [];
                     if (act.runHours) trialTags.push(act.runHours + 'h run');
                     if (act.totalOutput) trialTags.push(act.totalOutput + ' pcs out');
@@ -1854,17 +2077,29 @@
                         : '';
 
                     var row = document.createElement('div');
-                    row.className = 'p-4 hover:bg-zinc-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer';
+                    row.className = 'p-4 hover:bg-zinc-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none';
+                    row.title = 'Double-klik untuk lihat Report (PNG / PowerPoint)';
+
+                    // Single click: inspect quick card
                     row.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'BUTTON') return;
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
                         window.inspectActionCard(act.num);
+                    });
+
+                    // Double click: open uploaded PNG / PowerPoint Report Viewer
+                    row.addEventListener('dblclick', function(e) {
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
+                        window.openActionReportViewer(act.id);
                     });
 
                     row.innerHTML =
                         '<div class="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">' +
                             '<span class="w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ' + circleClass + '">' + act.num + '</span>' +
-                            '<div class="sm:w-52 shrink-0">' +
-                                '<p class="font-bold text-zinc-900 text-sm truncate">' + act.title + '</p>' +
+                            '<div class="sm:w-56 shrink-0">' +
+                                '<div class="flex items-center gap-1.5 flex-wrap">' +
+                                    '<p class="font-bold text-zinc-900 text-sm truncate">' + act.title + '</p>' +
+                                    reportBadge +
+                                '</div>' +
                                 '<p class="text-xs text-zinc-500">' + act.cw + ' • ' + formatPrettyDate(act.date) + ' • ' + formatPrettyTime(act.time) + '</p>' +
                                 trialTagHtml +
                             '</div>' +
@@ -1875,6 +2110,9 @@
                             '</div>' +
                         '</div>' +
                         '<div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">' +
+                            '<button type="button" onclick="window.openActionReportViewer(\'' + act.id + '\')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition" title="View or Upload Report">' +
+                                (act.reportUrl ? '📂 Report' : '+ Report') +
+                            '</button>' +
                             '<button type="button" onclick="window.toggleActionStatus(\'' + act.id + '\')" title="Click to switch status" class="px-3 py-1 rounded-full text-xs font-semibold transition ' + pillClass + '">' +
                                 pillLabel +
                             '</button>' +
@@ -1957,7 +2195,7 @@
                 renderRecordsTable(allParams, records);
             }
 
-            // CHART 1: STACKED NG BARS (LEFT AXIS) + NG RATE (NG/HR) & DEFECT RATE (%) LINES (RIGHT AXIS)
+            // CHART 1
             function renderWeeklyStackChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
@@ -2119,7 +2357,6 @@
                 }
                 insights.push(summaryHeadline);
 
-                // Compare latest 2 dates using both NG/hr and Defect Rate %
                 var byDate = {};
                 records.forEach(function(r) {
                     if (!byDate[r.recorded_date]) byDate[r.recorded_date] = [];
@@ -2157,7 +2394,7 @@
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
-            // CHART 2: PARAMETER TREND OVER TIME + INSTANT NG RATE (NG/HR) OVERLAY
+            // CHART 2
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
@@ -2700,7 +2937,8 @@
                     rows.push(row.join(','));
                 });
 
-                var csvContent = "data:text/csv;charset=utf-8," + rows.join("\n");
+                var csvContent = "data:text/csv;charset=utf-8," + rows.join("
+");
                 var link = document.createElement("a");
                 link.setAttribute("href", encodeURI(csvContent));
                 link.setAttribute("download", currentProject.project_title.replace(/\s+/g, '_') + "_NG_Report.csv");
