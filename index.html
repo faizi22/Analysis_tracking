@@ -117,7 +117,7 @@
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="window.toggleActionModal(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                    <button type="button" onclick="window.openNewActionModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
                         <span>+ Add Action Taken</span>
                     </button>
                     <button type="button" id="btnRefreshDashboard" class="border border-zinc-300 hover:bg-zinc-100 text-zinc-700 px-3 py-2 rounded-lg text-xs font-semibold transition">
@@ -129,14 +129,17 @@
                 </div>
             </div>
 
-            <!-- Add Action Taken Form Box (Collapsible) -->
+            <!-- Add / Edit Action Taken Form Box (Collapsible) -->
             <div id="actionModalBox" class="hidden bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-200">
-                    <div>
-                        <h3 class="text-sm font-bold text-emerald-950">Log Engineering Action Taken</h3>
-                        <p class="text-xs text-emerald-700">This action will be pinned with a number badge on the charts to track data changes before vs. after.</p>
+                    <div class="flex items-center gap-2">
+                        <span id="actionEditBadge" class="hidden px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-amber-200 text-amber-900">Edit Mode</span>
+                        <div>
+                            <h3 id="actionModalTitle" class="text-sm font-bold text-emerald-950">Log Engineering Action Taken</h3>
+                            <p id="actionModalSubtitle" class="text-xs text-emerald-700">This action will be pinned with a number badge on the charts to track data changes before vs. after.</p>
+                        </div>
                     </div>
-                    <button type="button" onclick="window.toggleActionModal(false)" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950 px-2.5 py-1 rounded bg-white border border-emerald-200">
+                    <button type="button" onclick="window.cancelEditAction(true)" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950 px-2.5 py-1 rounded bg-white border border-emerald-200">
                         Close
                     </button>
                 </div>
@@ -163,9 +166,12 @@
                         <label class="block text-xs font-semibold text-emerald-900 mb-1">Action Description (Details) <span class="text-red-500">*</span></label>
                         <input type="text" id="actionDesc" required placeholder="e.g. Adjusted clamp & guide pin to reduce variation." class="w-full border border-emerald-300 rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-emerald-600">
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg text-xs shadow-sm transition">
+                    <div class="flex items-end gap-1.5">
+                        <button type="submit" id="actionSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition">
                             Pin Action to Chart
+                        </button>
+                        <button type="button" id="actionCancelEditBtn" onclick="window.cancelEditAction(true)" class="hidden bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-semibold py-2 px-3 rounded-lg text-xs transition">
+                            Cancel
                         </button>
                     </div>
                 </form>
@@ -211,7 +217,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-zinc-100">
                     <div>
                         <h3 class="text-sm font-bold text-zinc-900">1. NG Total Trend by Mode & Action Taken Markers</h3>
-                        <p class="text-xs text-zinc-500">Clean timeline grouping by Calendar Week (CW) & Month. Click any action below to inspect details.</p>
+                        <p class="text-xs text-zinc-500">Clean timeline grouping by Calendar Week (CW) & Month. Click any action below to inspect or edit details.</p>
                     </div>
                     <div class="flex items-center gap-2 text-xs">
                         <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
@@ -236,10 +242,13 @@
                         <p id="cardActionDesc" class="text-zinc-700 pt-1 pb-1">Adjusted clamp & guide pin to reduce variation.</p>
                         <p id="cardActionImpact" class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100"></p>
                     </div>
-                    <div class="mt-2.5">
+                    <div class="mt-2.5 flex items-center justify-between gap-2">
                         <span id="cardActionStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
                             ✔ Completed
                         </span>
+                        <button type="button" id="cardActionEditBtn" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
+                            Edit Action
+                        </button>
                     </div>
                 </div>
 
@@ -259,7 +268,7 @@
                         <span id="actionCountBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             0 Actions Taken
                         </span>
-                        <button type="button" onclick="window.toggleActionModal(true)" class="px-3 py-1 rounded-full text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition">
+                        <button type="button" onclick="window.openNewActionModal()" class="px-3 py-1 rounded-full text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition">
                             + Add Action
                         </button>
                     </div>
@@ -463,6 +472,7 @@
         var ADMIN_PASSWORD = 'mesin2026';
 
         window.editingProjectId = null;
+        window.editingActionId = null;
 
         window.showAlert = function(message, type) {
             var alertBox = document.getElementById('alertBox');
@@ -484,6 +494,34 @@
             } else {
                 box.classList.add('hidden');
             }
+        };
+
+        window.openNewActionModal = function() {
+            window.cancelEditAction(false);
+            window.toggleActionModal(true);
+        };
+
+        window.cancelEditAction = function(closeBox) {
+            window.editingActionId = null;
+            document.getElementById('actionTitle').value = '';
+            document.getElementById('actionDesc').value = '';
+            document.getElementById('actionStatus').value = 'Completed';
+            window.setCurrentDateTime();
+
+            var box = document.getElementById('actionModalBox');
+            var badge = document.getElementById('actionEditBadge');
+            var titleEl = document.getElementById('actionModalTitle');
+            var subEl = document.getElementById('actionModalSubtitle');
+            var submitBtn = document.getElementById('actionSubmitBtn');
+            var cancelBtn = document.getElementById('actionCancelEditBtn');
+
+            box.className = (closeBox ? 'hidden ' : '') + 'bg-emerald-50/70 border border-emerald-200 rounded-xl p-5 shadow-sm';
+            badge.classList.add('hidden');
+            titleEl.textContent = 'Log Engineering Action Taken';
+            subEl.textContent = 'This action will be pinned with a number badge on the charts to track data changes before vs. after.';
+            submitBtn.textContent = 'Pin Action to Chart';
+            submitBtn.className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
+            cancelBtn.classList.add('hidden');
         };
 
         window.setParamButtonStyle = function(btn, typeVal) {
@@ -617,15 +655,15 @@
             var atEl = document.getElementById('actionTime');
             if (dEl) dEl.value = localDate;
             if (tEl) tEl.value = localTime;
-            if (adEl) adEl.value = localDate;
-            if (atEl) atEl.value = localTime.slice(0, 5);
+            if (adEl && !window.editingActionId) adEl.value = localDate;
+            if (atEl && !window.editingActionId) atEl.value = localTime.slice(0, 5);
         };
 
         window.initAdminParamSlots();
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, GUARANTEED BELOW-AXIS DATE•CW MARKERS & ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, ACTION TAKEN EDIT/CREATE & ANALYTICS -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -728,7 +766,7 @@
                 });
             }
 
-            // Custom Chart.js Plugin using `afterDraw` so labels below the X-Axis are NEVER clipped or skipped by autoSkip!
+            // Custom Chart.js Plugin using `afterDraw` so labels below the X-Axis are NEVER clipped or skipped by autoSkip
             var actionBadgesPlugin = {
                 id: 'actionBadgesPlugin',
                 afterDraw: function(chart, args, pluginOptions) {
@@ -748,7 +786,6 @@
                         var xPos = xAxis.getPixelForValue(b.index);
                         if (xPos < xAxis.left - 5 || xPos > xAxis.right + 5) return;
 
-                        // Draw vertical red dashed line right on the first record of every new date (b.index > 0)
                         if (b.index > 0) {
                             ctx.beginPath();
                             ctx.setLineDash([4, 3]);
@@ -759,14 +796,12 @@
                             ctx.stroke();
                             ctx.setLineDash([]);
 
-                            // Small red marker dot on X-axis line
                             ctx.beginPath();
                             ctx.arc(xPos, yAxis.bottom, 3, 0, Math.PI * 2);
                             ctx.fillStyle = '#ef4444';
                             ctx.fill();
                         }
 
-                        // Draw "13 Nov • CW46" / "14 Nov • CW46" directly underneath the time row (Row 2)
                         ctx.font = 'bold 11px Inter, sans-serif';
                         var textW = ctx.measureText(b.label).width;
                         var pillW = textW + 10;
@@ -779,7 +814,6 @@
                             pillX = Math.max(xAxis.left, Math.min(xPos - pillW / 2, xAxis.right - pillW));
                         }
 
-                        // Prevent overlap if two date boundaries are extremely close
                         if (pillX < lastDrawnRightEdge + 6) {
                             pillX = lastDrawnRightEdge + 6;
                         }
@@ -787,7 +821,6 @@
 
                         var pillY = yAxis.bottom + 20;
 
-                        // Subtle badge background below X-axis
                         ctx.fillStyle = b.index === 0 ? '#f4f4f5' : '#fef2f2';
                         ctx.strokeStyle = b.index === 0 ? '#d4d4d8' : '#fca5a5';
                         ctx.lineWidth = 1;
@@ -1235,7 +1268,37 @@
                 }
             });
 
-            // SAVE ACTION TAKEN RECORD (ON DASHBOARD)
+            // START EDITING AN EXISTING ACTION TAKEN RECORD
+            window.startEditAction = function(actionId) {
+                var act = projectActionLogs.find(function(a) { return a.id === actionId; });
+                if (!act) return;
+
+                window.editingActionId = act.id;
+                document.getElementById('actionTitle').value = act.title || '';
+                document.getElementById('actionDate').value = act.date || '';
+                document.getElementById('actionTime').value = (act.time || '08:00').slice(0, 5);
+                document.getElementById('actionStatus').value = act.status === 'Monitoring' ? 'Monitoring' : 'Completed';
+                document.getElementById('actionDesc').value = act.description || '';
+
+                var box = document.getElementById('actionModalBox');
+                var badge = document.getElementById('actionEditBadge');
+                var titleEl = document.getElementById('actionModalTitle');
+                var subEl = document.getElementById('actionModalSubtitle');
+                var submitBtn = document.getElementById('actionSubmitBtn');
+                var cancelBtn = document.getElementById('actionCancelEditBtn');
+
+                box.className = 'bg-amber-50/80 border border-amber-300 rounded-xl p-5 shadow-sm';
+                badge.classList.remove('hidden');
+                titleEl.textContent = 'Edit Action Taken #' + act.num + ': ' + act.title;
+                subEl.textContent = 'Modify the Short Title, Date, Time, Status, or Description below and click Update.';
+                submitBtn.textContent = 'Update Action';
+                submitBtn.className = 'flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-lg text-xs shadow-sm transition';
+                cancelBtn.classList.remove('hidden');
+
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            };
+
+            // SAVE NEW OR UPDATE EXISTING ACTION TAKEN RECORD
             document.getElementById('actionTakenForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!supabaseClient || !currentProject) {
@@ -1265,15 +1328,30 @@
                     remarks: desc
                 };
 
-                var res = await supabaseClient.from('ng_records').insert([actionPayload]);
-                if (res.error) {
-                    window.showAlert('Failed to save Action Taken: ' + res.error.message, 'error');
+                if (window.editingActionId) {
+                    var targetActId = window.editingActionId;
+                    var updateRes = await supabaseClient
+                        .from('ng_records')
+                        .update(actionPayload)
+                        .eq('id', targetActId);
+
+                    if (updateRes.error) {
+                        window.showAlert('Failed to update Action Taken: ' + updateRes.error.message, 'error');
+                    } else {
+                        window.showAlert('Action "' + title + '" updated successfully!', 'success');
+                        document.getElementById('floatingActionCard').classList.add('hidden');
+                        window.cancelEditAction(true);
+                        loadDashboardData(currentProject.id);
+                    }
                 } else {
-                    window.showAlert('Action "' + title + '" pinned to chart!', 'success');
-                    document.getElementById('actionTitle').value = '';
-                    document.getElementById('actionDesc').value = '';
-                    window.toggleActionModal(false);
-                    loadDashboardData(currentProject.id);
+                    var res = await supabaseClient.from('ng_records').insert([actionPayload]);
+                    if (res.error) {
+                        window.showAlert('Failed to save Action Taken: ' + res.error.message, 'error');
+                    } else {
+                        window.showAlert('Action "' + title + '" pinned to chart!', 'success');
+                        window.cancelEditAction(true);
+                        loadDashboardData(currentProject.id);
+                    }
                 }
             });
 
@@ -1314,6 +1392,9 @@
                 if (res.error) {
                     window.showAlert('Need DELETE policy on ng_records in Supabase: ' + res.error.message, 'error');
                 } else {
+                    if (window.editingActionId === actionId) {
+                        window.cancelEditAction(true);
+                    }
                     document.getElementById('floatingActionCard').classList.add('hidden');
                     loadDashboardData(currentProject.id);
                 }
@@ -1326,6 +1407,7 @@
                 var card = document.getElementById('floatingActionCard');
                 var numBadge = document.getElementById('cardActionNum');
                 var statusBadge = document.getElementById('cardActionStatus');
+                var editBtn = document.getElementById('cardActionEditBtn');
 
                 numBadge.textContent = act.num;
                 numBadge.className = 'w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ' +
@@ -1353,6 +1435,10 @@
                     statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800';
                     card.className = 'mb-4 p-4 rounded-xl bg-white border-2 border-amber-400 shadow-md max-w-sm';
                 }
+
+                editBtn.onclick = function() {
+                    window.startEditAction(act.id);
+                };
 
                 card.classList.remove('hidden');
                 card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1600,9 +1686,12 @@
                                 '<p class="text-[11px] font-medium text-blue-600 mt-0.5">' + (act.impactText || '') + '</p>' +
                             '</div>' +
                         '</div>' +
-                        '<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">' +
+                        '<div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">' +
                             '<button type="button" onclick="window.toggleActionStatus(\'' + act.id + '\')" title="Click to switch status" class="px-3 py-1 rounded-full text-xs font-semibold transition ' + pillClass + '">' +
                                 pillLabel +
+                            '</button>' +
+                            '<button type="button" onclick="window.startEditAction(\'' + act.id + '\')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition" title="Edit Action">' +
+                                'Edit' +
                             '</button>' +
                             '<button type="button" onclick="window.deleteActionLog(\'' + act.id + '\', \'' + act.title.replace(/'/g, "\\'") + '\')" class="px-2 py-1 text-xs text-zinc-400 hover:text-red-600 font-bold" title="Delete Action">✕</button>' +
                         '</div>';
@@ -1815,7 +1904,7 @@
 
                 var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
                 var selectedParam = document.getElementById('trendParamSelect').value;
-                var trendGroup = document.getElementById('trendGroupSelect').value; // 'raw', 'daily', 'weekly'
+                var trendGroup = document.getElementById('trendGroupSelect').value;
 
                 var fullTooltipTitles = [];
                 var fullTooltipFooters = [];
@@ -1836,7 +1925,6 @@
                         fullTooltipTitles.push(tInfo.cw + ' • ' + formatPrettyDate(r.recorded_date) + ' • ' + shortTime + ' (' + r.ng_mode + ')');
                         fullTooltipFooters.push('Operator: ' + r.operator_name);
 
-                        // Every time a new date starts (e.g. 13 Nov, 14 Nov), pin a Date • CW boundary marker!
                         if (r.recorded_date !== lastSeenDate) {
                             dateBoundaries.push({
                                 index: idx,
@@ -2036,7 +2124,6 @@
                         scales: {
                             x: {
                                 afterFit: function(scale) {
-                                    // Reserve 22px below the time row so "13 Nov • CW46" and "14 Nov • CW46" fit cleanly above the legend
                                     if (dateBoundaries.length > 0) {
                                         scale.height += 22;
                                     }
