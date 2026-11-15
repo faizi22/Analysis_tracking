@@ -216,7 +216,7 @@
                     <div class="flex items-center gap-2 text-xs">
                         <select id="ngGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
                             <option value="weekly">Weekly View (CW + Month)</option>
-                            <option value="daily">Daily View (Date + CW on Week Start)</option>
+                            <option value="daily">Daily View (Date + CW Once per Week)</option>
                         </select>
                     </div>
                 </div>
@@ -272,14 +272,19 @@
             <!-- Charts Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 
-                <!-- Chart 2: Parameter Trend Chart with Smart Non-Repeating CW/Date Axis -->
+                <!-- Chart 2: Parameter Trend Chart with Smart Visible-Tick Deduplication -->
                 <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm lg:col-span-2">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
                         <div>
                             <h3 class="text-sm font-bold text-zinc-900">2. Parameter Trend Over Time & Action Markers</h3>
-                            <p class="text-xs text-zinc-500">Smart Timeline: CW & Date only appear when the day/week changes. Hover any point for full timestamp.</p>
+                            <p class="text-xs text-zinc-500">Every new date (e.g. 13 Nov, 14 Nov) is shown on its first visible point, and CW is shown once per week.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <select id="trendGroupSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-100 font-semibold text-zinc-800 outline-none">
+                                <option value="raw">View: Every Record (Raw)</option>
+                                <option value="daily">View: Daily Average</option>
+                                <option value="weekly">View: Weekly Average (CW)</option>
+                            </select>
                             <select id="trendParamSelect" class="border border-zinc-300 rounded-lg px-2.5 py-1.5 bg-zinc-50 font-semibold text-zinc-800 outline-none">
                                 <option value="__ALL__">Show All Number Parameters</option>
                             </select>
@@ -620,7 +625,7 @@
         window.setCurrentDateTime();
     </script>
 
-    <!-- SCRIPT 2: SUPABASE, SMART TIMELINE (NON-REPEATING CW) & DASHBOARD ANALYTICS -->
+    <!-- SCRIPT 2: SUPABASE, VISIBLE-TICK TIMELINE & DAILY/WEEKLY AGGREGATION -->
     <script>
         (function() {
             var SUPABASE_URL = 'https://wihhqdofojauoujjrscp.supabase.co';
@@ -654,6 +659,7 @@
                         cw: 'CW--',
                         dayMonth: dateStr,
                         monthShort: '',
+                        weekMonthShort: '',
                         weekSortKey: dateStr,
                         weekAxisLabel: ['CW--'],
                         dayAxisLabel: dateStr
@@ -1301,6 +1307,7 @@
             document.getElementById('dashboardDateFilter').addEventListener('change', applyFiltersAndRender);
             document.getElementById('dashboardModeFilter').addEventListener('change', applyFiltersAndRender);
             document.getElementById('ngGroupSelect').addEventListener('change', renderWeeklyStackChart);
+            document.getElementById('trendGroupSelect').addEventListener('change', renderTrendChart);
             document.getElementById('trendParamSelect').addEventListener('change', renderTrendChart);
             document.getElementById('inputLSL').addEventListener('input', renderTrendChart);
             document.getElementById('inputUSL').addEventListener('input', renderTrendChart);
@@ -1595,12 +1602,12 @@
                 renderRecordsTable(allParams, records);
             }
 
-            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART (SMART NON-REPEATING CW LABELS)
+            // CHART 1: WEEKLY / DAILY STACKED NG BAR CHART (USES VISIBLE-TICK CALLBACK)
             function renderWeeklyStackChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (weeklyStackChartInstance) weeklyStackChartInstance.destroy();
 
-                var groupBy = document.getElementById('ngGroupSelect').value; // 'weekly' or 'daily'
+                var groupBy = document.getElementById('ngGroupSelect').value;
                 var bucketInfoMap = {};
 
                 filteredRecords.forEach(function(r) {
@@ -1616,28 +1623,7 @@
                 });
 
                 var sortedKeys = Object.keys(bucketInfoMap).sort();
-
-                // Build clean, non-repeating X-Axis labels
-                var prevCw = '';
-                var prevMonth = '';
-                var displayLabels = sortedKeys.map(function(k) {
-                    var info = bucketInfoMap[k];
-                    if (groupBy === 'weekly') {
-                        // Show Month name only when the month changes, otherwise just "CW46"
-                        if (info.weekMonthShort !== prevMonth) {
-                            prevMonth = info.weekMonthShort;
-                            return [info.cw, info.weekMonthShort];
-                        }
-                        return info.cw;
-                    } else {
-                        // Daily View: Show CW only on the first day of that Calendar Week
-                        if (info.cw !== prevCw) {
-                            prevCw = info.cw;
-                            return [info.dayMonth, info.cw];
-                        }
-                        return info.dayMonth;
-                    }
-                });
+                var stackTickMeta = sortedKeys.map(function(k) { return bucketInfoMap[k]; });
 
                 var modes = Object.keys(currentModeCounts);
                 var stackColors = [
@@ -1673,7 +1659,7 @@
                 var ctx = document.getElementById('weeklyStackChart').getContext('2d');
                 weeklyStackChartInstance = new Chart(ctx, {
                     type: 'bar',
-                    data: { labels: displayLabels, datasets: datasets },
+                    data: { labels: sortedKeys, datasets: datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
@@ -1681,7 +1667,29 @@
                         scales: {
                             x: {
                                 stacked: true,
-                                ticks: { maxRotation: 0, autoSkip: true }
+                                ticks: {
+                                    maxRotation: 0,
+                                    autoSkip: true,
+                                    callback: function(val, index, ticks) {
+                                        var dataIdx = ticks[index] && ticks[index].value !== undefined ? ticks[index].value : index;
+                                        var curr = stackTickMeta[dataIdx];
+                                        if (!curr) return '';
+                                        var prevDataIdx = index > 0 && ticks[index - 1] ? ticks[index - 1].value : -1;
+                                        var prev = prevDataIdx >= 0 ? stackTickMeta[prevDataIdx] : null;
+
+                                        if (groupBy === 'weekly') {
+                                            if (!prev || curr.weekMonthShort !== prev.weekMonthShort) {
+                                                return [curr.cw, curr.weekMonthShort];
+                                            }
+                                            return curr.cw;
+                                        } else {
+                                            if (!prev || curr.cw !== prev.cw) {
+                                                return [curr.dayMonth, curr.cw];
+                                            }
+                                            return curr.dayMonth;
+                                        }
+                                    }
+                                }
                             },
                             y: {
                                 stacked: true,
@@ -1753,37 +1761,91 @@
                 document.getElementById('insightList').innerHTML = insights.map(function(i) { return '<li>' + i + '</li>'; }).join('');
             }
 
-            // CHART 2: PARAMETER TREND OVER TIME (DE-CLUTTERED NON-REPEATING CW & DATE LABELS)
+            // CHART 2: PARAMETER TREND OVER TIME (DYNAMIC VISIBLE-TICK CALLBACK GUARANTEES EVERY DATE SHOWS & CW SHOWS ONCE)
             function renderTrendChart() {
                 if (typeof Chart === 'undefined' || !currentProject) return;
                 if (trendChartInstance) trendChartInstance.destroy();
 
                 var numParams = getProjectParams(currentProject).filter(function(p) { return p.type === 'number'; });
                 var selectedParam = document.getElementById('trendParamSelect').value;
+                var trendGroup = document.getElementById('trendGroupSelect').value; // 'raw', 'daily', 'weekly'
 
-                // Build Smart Deduplicated X-Axis Labels (Only show CW / Date when they change!)
-                var prevCw = '';
-                var prevDate = '';
                 var fullTooltipTitles = [];
+                var fullTooltipFooters = [];
+                var bucketKeys = [];
+                var bucketRecordsMap = {};
+                var tickMetaList = []; // Stores { time, date, dayMonth, cw, weekMonthShort } for every data index
 
-                var smartTimeLabels = filteredRecords.map(function(r) {
-                    var tInfo = getWeekTimelineInfo(r.recorded_date);
-                    var shortTime = r.recorded_time.slice(0, 5);
+                if (trendGroup === 'raw') {
+                    filteredRecords.forEach(function(r) {
+                        var tInfo = getWeekTimelineInfo(r.recorded_date);
+                        var shortTime = r.recorded_time.slice(0, 5);
+                        bucketKeys.push(r.recorded_date + ' ' + r.recorded_time);
+                        fullTooltipTitles.push(tInfo.cw + ' • ' + formatPrettyDate(r.recorded_date) + ' • ' + shortTime + ' (' + r.ng_mode + ')');
+                        fullTooltipFooters.push('Operator: ' + r.operator_name);
 
-                    // Save full timestamp for hover tooltip
-                    fullTooltipTitles.push(tInfo.cw + ' • ' + formatPrettyDate(r.recorded_date) + ' • ' + shortTime + ' (' + r.ng_mode + ')');
+                        tickMetaList.push({
+                            time: shortTime,
+                            date: r.recorded_date,
+                            dayMonth: tInfo.dayMonth,
+                            cw: tInfo.cw,
+                            weekMonthShort: tInfo.weekMonthShort
+                        });
+                    });
+                } else {
+                    var bucketMetaMap = {};
+                    filteredRecords.forEach(function(r) {
+                        var tInfo = getWeekTimelineInfo(r.recorded_date);
+                        var key = trendGroup === 'weekly' ? tInfo.weekSortKey : r.recorded_date;
+                        if (!bucketRecordsMap[key]) {
+                            bucketRecordsMap[key] = [];
+                            bucketMetaMap[key] = tInfo;
+                        }
+                        bucketRecordsMap[key].push(r);
+                    });
 
-                    if (tInfo.cw !== prevCw) {
-                        prevCw = tInfo.cw;
-                        prevDate = r.recorded_date;
-                        return [shortTime, tInfo.dayMonth + ' • ' + tInfo.cw];
-                    } else if (r.recorded_date !== prevDate) {
-                        prevDate = r.recorded_date;
-                        return [shortTime, tInfo.dayMonth];
+                    bucketKeys = Object.keys(bucketRecordsMap).sort();
+
+                    bucketKeys.forEach(function(k) {
+                        var info = bucketMetaMap[k];
+                        var recs = bucketRecordsMap[k];
+                        if (trendGroup === 'weekly') {
+                            fullTooltipTitles.push(info.cw + ' (' + info.weekMonthShort + ') • Weekly Average');
+                        } else {
+                            fullTooltipTitles.push(info.cw + ' • ' + formatPrettyDate(k) + ' • Daily Average');
+                        }
+
+                        tickMetaList.push({
+                            time: '',
+                            date: k,
+                            dayMonth: info.dayMonth,
+                            cw: info.cw,
+                            weekMonthShort: info.weekMonthShort
+                        });
+
+                        if (selectedParam && selectedParam !== '__ALL__') {
+                            var bStats = calcStats(recs.map(function(r) { return (r.parameter_values || {})[selectedParam]; }));
+                            fullTooltipFooters.push('Samples: n = ' + bStats.n + ' | Min: ' + bStats.min.toFixed(2) + ' | Max: ' + bStats.max.toFixed(2));
+                        } else {
+                            fullTooltipFooters.push('Total Records in Group: n = ' + recs.length);
+                        }
+                    });
+                }
+
+                function getSeriesForParam(paramLabel) {
+                    if (trendGroup === 'raw') {
+                        return filteredRecords.map(function(r) {
+                            var v = (r.parameter_values || {})[paramLabel];
+                            return v !== undefined && v !== '' && !isNaN(v) ? Number(v) : null;
+                        });
                     } else {
-                        return shortTime;
+                        return bucketKeys.map(function(k) {
+                            var recs = bucketRecordsMap[k] || [];
+                            var st = calcStats(recs.map(function(r) { return (r.parameter_values || {})[paramLabel]; }));
+                            return st.n > 0 ? Number(st.mean.toFixed(3)) : null;
+                        });
                     }
-                });
+                }
 
                 var datasets = [];
                 var lineColors = [
@@ -1792,59 +1854,62 @@
                     '#0d9488', '#7c3aed', '#be123c', '#0284c7', '#ca8a04'
                 ];
 
+                var modeSuffix = trendGroup === 'weekly' ? ' (Weekly Avg)' : (trendGroup === 'daily' ? ' (Daily Avg)' : '');
+
                 if (selectedParam === '__ALL__' || !selectedParam) {
                     document.getElementById('specLimitInputs').classList.add('hidden');
                     numParams.forEach(function(p, idx) {
                         var c = lineColors[idx % lineColors.length];
                         datasets.push({
-                            label: p.label,
-                            data: filteredRecords.map(function(r) { return (r.parameter_values || {})[p.label] ?? null; }),
+                            label: p.label + modeSuffix,
+                            data: getSeriesForParam(p.label),
                             borderColor: c,
                             backgroundColor: c,
                             tension: 0.2,
-                            pointRadius: 3
+                            pointRadius: 3.5
                         });
                     });
-                    document.getElementById('statStability').textContent = 'All Number Parameters';
+                    document.getElementById('statStability').textContent = 'All Number Parameters' + modeSuffix;
                     document.getElementById('statOutSpecCount').textContent = 'Pick 1 parameter to test limits';
                 } else {
                     document.getElementById('specLimitInputs').classList.remove('hidden');
-                    var rawVals = filteredRecords.map(function(r) {
+
+                    var allRawVals = filteredRecords.map(function(r) {
                         var v = (r.parameter_values || {})[selectedParam];
                         return v !== undefined && v !== '' && !isNaN(v) ? Number(v) : null;
                     });
+                    var overallSt = calcStats(allRawVals);
+                    var seriesVals = getSeriesForParam(selectedParam);
 
-                    var st = calcStats(rawVals);
-
-                    var maVals = rawVals.map(function(v, idx, arr) {
+                    var maVals = seriesVals.map(function(v, idx, arr) {
                         if (idx < 2) return null;
                         var slice = [arr[idx - 2], arr[idx - 1], arr[idx]].filter(function(x) { return x !== null; });
                         if (slice.length === 0) return null;
-                        return slice.reduce(function(a, b) { return a + b; }, 0) / slice.length;
+                        return Number((slice.reduce(function(a, b) { return a + b; }, 0) / slice.length).toFixed(3));
                     });
 
                     var lslInput = document.getElementById('inputLSL').value;
                     var uslInput = document.getElementById('inputUSL').value;
-                    var lslVal = lslInput !== '' ? Number(lslInput) : (st.n > 1 ? st.mean - (2 * st.std) : null);
-                    var uslVal = uslInput !== '' ? Number(uslInput) : (st.n > 1 ? st.mean + (2 * st.std) : null);
+                    var lslVal = lslInput !== '' ? Number(lslInput) : (overallSt.n > 1 ? overallSt.mean - (2 * overallSt.std) : null);
+                    var uslVal = uslInput !== '' ? Number(uslInput) : (overallSt.n > 1 ? overallSt.mean + (2 * overallSt.std) : null);
 
                     var outCount = 0;
-                    rawVals.forEach(function(v) {
+                    allRawVals.forEach(function(v) {
                         if (v === null) return;
                         if ((lslVal !== null && v < lslVal) || (uslVal !== null && v > uslVal)) outCount++;
                     });
 
-                    document.getElementById('statStability').textContent = selectedParam + ' (Avg: ' + st.mean.toFixed(2) + ', SD: ' + st.std.toFixed(2) + ')';
-                    document.getElementById('statOutSpecCount').textContent = outCount + ' points outside ' + (lslInput !== '' || uslInput !== '' ? 'Min/Max' : '±2σ limits');
+                    document.getElementById('statStability').textContent = selectedParam + ' (Avg: ' + overallSt.mean.toFixed(2) + ', SD: ' + overallSt.std.toFixed(2) + ')';
+                    document.getElementById('statOutSpecCount').textContent = outCount + ' raw points outside ' + (lslInput !== '' || uslInput !== '' ? 'Min/Max' : '±2σ limits');
 
                     datasets.push({
-                        label: selectedParam + ' (Actual)',
-                        data: rawVals,
+                        label: selectedParam + (trendGroup === 'raw' ? ' (Actual)' : modeSuffix),
+                        data: seriesVals,
                         borderColor: '#18181b',
                         backgroundColor: '#18181b',
-                        pointRadius: 4,
+                        pointRadius: 4.5,
                         borderWidth: 2,
-                        tension: 0.1
+                        tension: 0.15
                     });
 
                     datasets.push({
@@ -1856,10 +1921,10 @@
                         tension: 0.35
                     });
 
-                    if (st.n > 0) {
+                    if (overallSt.n > 0) {
                         datasets.push({
-                            label: 'Average (' + st.mean.toFixed(2) + ')',
-                            data: rawVals.map(function() { return st.mean; }),
+                            label: 'Overall Average (' + overallSt.mean.toFixed(2) + ')',
+                            data: seriesVals.map(function() { return overallSt.mean; }),
                             borderColor: '#10b981',
                             borderDash: [4, 4],
                             borderWidth: 1.5,
@@ -1867,10 +1932,10 @@
                         });
                     }
 
-                    if (uslVal !== null && st.n > 1) {
+                    if (uslVal !== null && overallSt.n > 1) {
                         datasets.push({
                             label: (uslInput !== '' ? 'Max Limit' : '+2σ Upper') + ' (' + uslVal.toFixed(2) + ')',
-                            data: rawVals.map(function() { return uslVal; }),
+                            data: seriesVals.map(function() { return uslVal; }),
                             borderColor: '#ef4444',
                             borderDash: [6, 4],
                             borderWidth: 1.5,
@@ -1878,10 +1943,10 @@
                         });
                     }
 
-                    if (lslVal !== null && st.n > 1) {
+                    if (lslVal !== null && overallSt.n > 1) {
                         datasets.push({
                             label: (lslInput !== '' ? 'Min Limit' : '-2σ Lower') + ' (' + lslVal.toFixed(2) + ')',
-                            data: rawVals.map(function() { return lslVal; }),
+                            data: seriesVals.map(function() { return lslVal; }),
                             borderColor: '#f97316',
                             borderDash: [6, 4],
                             borderWidth: 1.5,
@@ -1891,13 +1956,14 @@
                 }
 
                 var trendMarkers = [];
-                if (filteredRecords.length > 0) {
+                if (bucketKeys.length > 0) {
                     projectActionLogs.forEach(function(act) {
-                        var actStamp = act.date + ' ' + act.time;
-                        var idx = filteredRecords.findIndex(function(r) {
-                            return (r.recorded_date + ' ' + r.recorded_time) >= actStamp;
-                        });
-                        if (idx === -1) idx = filteredRecords.length - 1;
+                        var targetKey = trendGroup === 'raw'
+                            ? (act.date + ' ' + act.time)
+                            : (trendGroup === 'weekly' ? act.weekSortKey : act.date);
+
+                        var idx = bucketKeys.findIndex(function(k) { return k >= targetKey; });
+                        if (idx === -1) idx = bucketKeys.length - 1;
                         trendMarkers.push({
                             num: act.num,
                             title: act.title,
@@ -1910,7 +1976,7 @@
                 var ctx = document.getElementById('trendChart').getContext('2d');
                 trendChartInstance = new Chart(ctx, {
                     type: 'line',
-                    data: { labels: smartTimeLabels, datasets: datasets },
+                    data: { labels: bucketKeys, datasets: datasets },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
@@ -1922,7 +1988,39 @@
                                     maxRotation: 0,
                                     autoSkip: true,
                                     maxTicksLimit: 12,
-                                    font: { size: 11 }
+                                    font: { size: 11 },
+                                    callback: function(val, index, ticks) {
+                                        // Compare current visible tick against previous visible tick!
+                                        var dataIdx = ticks[index] && ticks[index].value !== undefined ? ticks[index].value : index;
+                                        var curr = tickMetaList[dataIdx];
+                                        if (!curr) return '';
+
+                                        var prevDataIdx = index > 0 && ticks[index - 1] ? ticks[index - 1].value : -1;
+                                        var prev = prevDataIdx >= 0 ? tickMetaList[prevDataIdx] : null;
+
+                                        if (trendGroup === 'raw') {
+                                            if (!prev || curr.cw !== prev.cw) {
+                                                // First visible point of a new Calendar Week: show Time + "13 Nov • CW46"
+                                                return [curr.time, curr.dayMonth + ' • ' + curr.cw];
+                                            } else if (curr.date !== prev.date) {
+                                                // First visible point of a new Date (e.g. 14 Nov): show Time + "14 Nov"
+                                                return [curr.time, curr.dayMonth];
+                                            } else {
+                                                // Same date & same week: only show Time ("20:15")
+                                                return curr.time;
+                                            }
+                                        } else if (trendGroup === 'daily') {
+                                            if (!prev || curr.cw !== prev.cw) {
+                                                return [curr.dayMonth, curr.cw];
+                                            }
+                                            return curr.dayMonth;
+                                        } else {
+                                            if (!prev || curr.weekMonthShort !== prev.weekMonthShort) {
+                                                return [curr.cw, curr.weekMonthShort];
+                                            }
+                                            return curr.cw;
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -1934,6 +2032,11 @@
                                         if (!tooltipItems || tooltipItems.length === 0) return '';
                                         var idx = tooltipItems[0].dataIndex;
                                         return fullTooltipTitles[idx] || '';
+                                    },
+                                    footer: function(tooltipItems) {
+                                        if (!tooltipItems || tooltipItems.length === 0) return '';
+                                        var idx = tooltipItems[0].dataIndex;
+                                        return fullTooltipFooters[idx] || '';
                                     }
                                 }
                             },
